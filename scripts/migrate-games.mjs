@@ -8,8 +8,9 @@ await mkdir("public/Games", { recursive: true });
 await mkdir("public/nebula", { recursive: true });
 const games = [];
 for (const file of files) {
-  const content = await readFile(`${source}/Games/${file}`);
-  await copyFile(`${source}/Games/${file}`, `public/Games/${file}`);
+  // Read the Git blob so Windows checkout line-ending conversion cannot alter hashes.
+  const content = execFileSync("git", ["-C", source, "show", `HEAD:Games/${file}`]);
+  await writeFile(`public/Games/${file}`, content);
   const path = `/Games/${encodeURIComponent(file)}`;
   games.push({ id: createHash("sha256").update(file).digest("hex").slice(0, 12), title: file.slice(0, -5).replace(/_/g, ":"), file, path, originalUrl: `https://nebula-hub-2.vercel.app${path}`, categories: [], tags: [], sha256: createHash("sha256").update(content).digest("hex"), launch: "compatibility" });
 }
