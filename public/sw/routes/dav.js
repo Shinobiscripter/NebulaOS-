@@ -229,7 +229,9 @@ async function handleDavRequest({ request, url }) {
 
 for (const method of supportedWebDAVMethods) {
 	workbox.routing.registerRoute(
-		/\/dav/,
+		({ url }) =>
+			url.origin === self.location.origin &&
+			/^\/dav(?:\/|$)/.test(url.pathname),
 		async (event) => {
 			return await handleDavRequest(event);
 		},

@@ -16,3 +16,4 @@ a { color:var(--theme-accent,#8eaaff); }
 
 #launcher-button { background-image:url('/nebula/icon.svg') !important; background-size:32px 32px !important; background-position:center !important; background-repeat:no-repeat !important; border:0 !important; }
 .nebula-boot.hide { transform:none; }
+#launcher-button::after { display:none; }

@@ -243,7 +243,7 @@ class SettingsApp extends App {
 			class={`background ${settingsCSS}`}
 		>
 			<div class="header">
-				<h2>Anura Settings</h2>
+				<h2>NebulaHub Settings</h2>
 			</div>
 
 			<div css={this.state} class="container">
@@ -301,7 +301,7 @@ class SettingsApp extends App {
 								callback={async () => {
 									if (
 										await anura.dialog.confirm(
-											"This will restart Anura. Are you sure?",
+											"This will restart NebulaHub. Are you sure?",
 										)
 									) {
 										anura.settings.set("milestone", "__INVALID");
@@ -320,7 +320,7 @@ class SettingsApp extends App {
 								callback={async () => {
 									if (
 										await anura.dialog.confirm(
-											"This will restart Anura. Are you sure?\nYour data will not be accessible",
+											"This will restart NebulaHub. Are you sure?\nYour data will not be accessible",
 										)
 									) {
 										await (window as any).idbKeyval.set(
@@ -359,7 +359,7 @@ class SettingsApp extends App {
 						</div>
 					</div>
 					<div id="v86" class="v86 settings-category">
-						<h3 class="settings-category-name">Anura x86</h3>
+						<h3 class="settings-category-name">Linux / v86</h3>
 						<div class="settings-group">
 							{this.state.show_x86_install ? (
 								<div>
@@ -367,7 +367,18 @@ class SettingsApp extends App {
 										on:click={async () => {
 											this.state.x86_installing = true;
 											anura.settings.set("x86-image", "alpine");
-											await installx86();
+											try {
+												await installx86();
+											} catch (error) {
+												this.state.x86_installing = false;
+												const tracker = document.getElementById("tracker");
+												if (tracker)
+													tracker.textContent =
+														error instanceof Error
+															? error.message
+															: String(error);
+												return;
+											}
 											anura.settings.set("x86-disabled", false);
 											anura.notifications.add({
 												title: "x86 Subsystem Installed",
@@ -617,17 +628,17 @@ class SettingsApp extends App {
 						</div>
 					</div>
 					<div id="reset" class="settings-category">
-						<h3 class="settings-category-name">Reset Anura</h3>
+						<h3 class="settings-category-name">Reset NebulaHub</h3>
 						<div class="settings-group">
 							<div class="settings-item">
 								<span class="settings-item-name">
-									Reset your Anura install.
+									Reset your NebulaHub install.
 								</span>
 								<button
 									class="matter-button-outlined"
 									on:click={async () => {
 										const confirmation = await anura.dialog.confirm(
-											"Are you sure you want to powerwash Anura? All of your data will be lost.",
+											"Are you sure you want to reset NebulaHub? All of your data will be lost.",
 										);
 										if (confirmation) {
 											try {

@@ -339,7 +339,7 @@ class Taskbar {
 						id="launcher-button"
 						title="NebulaHub launcher"
 						role="button"
-						tabIndex={0}
+						tabindex={0}
 						aria-label="Open launcher"
 						on:keydown={(event: KeyboardEvent) => {
 							if (event.key === "Enter" || event.key === " ") {

@@ -10,6 +10,7 @@ const SLICE_SIZE = 2 ** 17 * 32;
 const BUF_SIZE = 256;
 
 interface FakeFile {
+	loadfile: (file: Blob) => Promise<void>;
 	slice: (start: number, end: number) => Promise<Blob>;
 	save: (emulator?: any) => Promise<void>;
 	delete: () => Promise<void>;
@@ -91,7 +92,7 @@ async function InitV86Hdd(): Promise<FakeFile> {
 			}
 			return new Blob([buf!]);
 		},
-		loadfile: async (f: File) => {
+		loadfile: async (f: Blob) => {
 			const trn = db.transaction("parts", "readwrite").objectStore("parts");
 			trn.put(f.size, "size");
 			fakefile.size = f.size;

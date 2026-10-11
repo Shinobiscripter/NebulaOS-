@@ -1,7 +1,7 @@
 class AboutApp extends App {
 	name = "About NebulaHub";
 	package = "anura.about";
-	icon = "/assets/icons/aboutapp.png";
+	icon = "/nebula/icon.svg";
 
 	page = () => (
 		<div class="aboutapp-container">

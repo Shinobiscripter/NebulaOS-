@@ -30,7 +30,7 @@ function launch(game, inWindow = false) {
     tell(`${game.title} opened in a desktop window. If the game needs persistent storage or fails to load, use Play in a browser tab.`);
   } else {
     // Keep this synchronous with the click so popup blockers can recognize it.
-    window.open(`/play/index.html?id=${encodeURIComponent(game.id)}`, "_blank", "noopener,noreferrer");
+    window.parent.open(`/play/index.html?id=${encodeURIComponent(game.id)}`, "_blank", "noopener,noreferrer");
     tell(`${game.title} requested in a browser tab. Allow popups if it did not open.`);
   }
   played(game);

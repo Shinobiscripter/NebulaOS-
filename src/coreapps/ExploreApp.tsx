@@ -232,21 +232,20 @@ class ExploreApp extends App {
 	welcome = (
 		<div id="body">
 			<div class="head">
-				<img src="/icon.png" alt="AnuraOS Logo" />
-				<h1>Welcome to AnuraOS!</h1>
+				<img src="/nebula/icon.svg" alt="NebulaHub Logo" />
+				<h1>Welcome to NebulaHub!</h1>
 			</div>
-			<h2>What is AnuraOS?</h2>
+			<h2>Your browser desktop</h2>
 			<p>
-				AnuraOS is a desktop environment made for development that runs right in
-				your browser. It features full Linux emulation and a robust app
-				ecosystem.
+				NebulaHub brings your game library into a real browser desktop, powered
+				by AnuraOS from Mercury Workshop. Open Nebula Games from the taskbar,
+				manage files, use the terminal, or install the optional Linux subsystem.
 			</p>
 			<h2>Getting Started</h2>
 			<p>
-				AnuraOS functions just like your average desktop: you can launch apps
-				from the launcher (accessible via the button in the bottom-left, or
-				pressing the Meta key), drag windows around, and pin apps to the
-				taskbar. AnuraOS is visually based off of Google's ChromeOS.
+				NebulaHub functions like a desktop: you can launch apps from the
+				launcher (accessible via the button in the bottom-left, or pressing the
+				Meta key), drag windows around, and pin apps to the taskbar.
 			</p>
 
 			<h2>Get new apps</h2>
@@ -263,8 +262,7 @@ class ExploreApp extends App {
 			</p>
 			<h2>Customize your experience</h2>
 			<p>
-				AnuraOS has robust customization features. You can change the wallpaper
-				and system colors using{" "}
+				You can change the wallpaper and system colors using{" "}
 				<span>
 					<a href="javascript:anura.apps['anura.wallpaper'].open();">
 						<img
@@ -277,8 +275,8 @@ class ExploreApp extends App {
 				.
 			</p>
 			<p>
-				For advanced users, Anura will execute any files in the /usr/init folder
-				as JavaScript code on boot.
+				For advanced users, the OS will execute any files in the /usr/init
+				folder as JavaScript code on boot.
 			</p>
 		</div>
 	);
@@ -327,7 +325,7 @@ class ExploreApp extends App {
 
 	async open(args: string[] = []): Promise<WMWindow | undefined> {
 		const win = anura.wm.create(this, {
-			title: "Explore AnuraOS",
+			title: "Explore NebulaHub",
 			width: `calc(${window.innerHeight * 0.6}px * 16 / 10)`, // manually calculating to prevent wonky behaviour on window resize
 			height: `${window.innerHeight * 0.6}px`,
 		});
