@@ -87,7 +87,7 @@ class Settings {
 		} else {
 			this.cache[prop] = val;
 		}
-		this.save();
+		await this.save();
 	}
 	async save() {
 		console.debug("Saving settings to fs", this.cache);
@@ -105,6 +105,6 @@ class Settings {
 		} else {
 			delete this.cache[prop];
 		}
-		this.save();
+		await this.save();
 	}
 }
