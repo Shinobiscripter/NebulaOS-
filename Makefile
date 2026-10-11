@@ -23,9 +23,8 @@ submodules: .gitmodules
 
 build/bootstrap: package.json server/package.json
 	mkdir -p build/lib
-	npm i
-	cd server; npm i
-	make hooks
+	npm ci
+	cd server; npm ci
 	>build/bootstrap
 
 # Each dependency should have a similar structure to the following:
@@ -149,7 +148,7 @@ apps/libfileview.lib/icons: apps/libfileview.lib/icons.json
 
 ANURA_VERSION = $(shell jq -r '.version' package.json)
 
-bundle: tsc css lint milestone commit build/cache-load.json
+bundle: tsc css milestone commit build/cache-load.json
 	mkdir -p build/artifacts
 	
 watch: FORCE
@@ -189,7 +188,8 @@ static: all
 	cp -r build/* static/
 	cp -r bin static/
 	cp -r apps static/
-	cp -r external/anura-browserjs/packages/chrome/dist static/browser
+	mkdir -p static/browser
+	cp -r external/anura-browserjs/packages/chrome/dist/. static/browser/
 
 server: FORCE
 	cd server; node server.js
