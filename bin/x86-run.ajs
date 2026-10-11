@@ -11,18 +11,18 @@ export async function main(args) {
 
     if (anura.x86 === undefined) {
         println(
-            "\u001b[33mThe Anura x86 subsystem is not enabled. Please enable it in Settings.\u001b[0m",
+            "\u001b[33mThe NebulaHub Linux subsystem is not enabled. Please enable it in Settings.\u001b[0m",
         );
         return;
     }
     if (!anura.x86.ready) {
         println(
-            "\u001b[33mThe Anura x86 subsystem has not yet booted. Please wait for the notification that it has booted and try again.\u001b[0m",
+            "\u001b[33mThe NebulaHub Linux subsystem has not yet booted. Please wait for the notification that it has booted and try again.\u001b[0m",
         );
         return;
     }
     println(
-        "Welcome to the Anura x86 subsystem.\nTo access your Anura files within Linux, use the /root directory.",
+        "Welcome to NebulaHub Linux (Anura/v86).\nTo access your desktop files within Linux, use the /root directory.",
     );
     const pty = await anura.x86.openpty(
         cmd,

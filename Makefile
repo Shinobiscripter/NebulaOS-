@@ -21,7 +21,7 @@ hooks: FORCE
 submodules: .gitmodules
 	git submodule update --recursive
 
-build/bootstrap: package.json server/package.json
+build/bootstrap: package.json package-lock.json server/package.json server/package-lock.json
 	mkdir -p build/lib
 	npm ci
 	cd server; npm ci

@@ -30,5 +30,17 @@ test("optional Linux image installs and boots v86", async ({ page }) => {
 	await page.evaluate(() =>
 		anura.apps["anura.ashell"].open(["--cmd", "/usr/bin/x86-run.ajs"]),
 	);
+	const terminal = page
+		.frameLocator('iframe[src*="ashell.app/term.html"]')
+		.frameLocator("iframe");
+	await expect(terminal.locator("x-screen")).toContainText("#", {
+		timeout: 30000,
+	});
+	await terminal.locator("x-screen").click();
+	await page.keyboard.type("uname -s");
+	await page.keyboard.press("Enter");
+	await expect(
+		terminal.locator("x-row").filter({ hasText: /^Linux\s*$/ }),
+	).toHaveCount(1);
 	await page.screenshot({ path: "test-results/linux.png" });
 });
