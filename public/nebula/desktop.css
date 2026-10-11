@@ -1,0 +1,18 @@
+/* Nebula presentation; upstream layout and window management remain in charge. */
+:root { color-scheme: dark; }
+body { background-color: #070b14; }
+.nebula-boot { background: #070b14 url('/nebula/wallpaper.svg') center/cover; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.nebula-boot img { width:92px; height:92px; }
+.nebula-boot h1 { font:500 30px system-ui,sans-serif; letter-spacing:.03em; margin:22px 0 8px; color:#f3f5fa; }
+.nebula-boot-caption { color:#a6afc4; font:14px system-ui,sans-serif; margin:0 0 32px; }
+.nebula-boot #systemstatus { color:#a6afc4; font:13px system-ui,sans-serif; margin-top:18px; }
+.nebula-boot-orbit { width:22px; height:22px; border:2px solid #30384b; border-top-color:#91aaff; border-radius:50%; animation:nebula-orbit 1.2s linear infinite; }
+@keyframes nebula-orbit { to { transform:rotate(360deg); } }
+.window { border:1px solid var(--theme-border); box-shadow:0 12px 36px #0006; }
+.aboutapp-logo-img { background-image:url('/nebula/icon.svg') !important; background-size:contain; background-repeat:no-repeat; }
+a { color:var(--theme-accent,#8eaaff); }
+:focus-visible { outline:2px solid var(--theme-accent,#8eaaff); outline-offset:3px; }
+@media(prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } }
+
+#launcher-button { background-image:url('/nebula/icon.svg') !important; background-size:32px 32px !important; background-position:center !important; background-repeat:no-repeat !important; border:0 !important; }
+.nebula-boot.hide { transform:none; }

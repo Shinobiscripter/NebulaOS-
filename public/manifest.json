@@ -1,22 +1,25 @@
 {
-	"name": "AnuraOS",
+	"id": "/",
+	"name": "NebulaHub",
+	"short_name": "NebulaHub",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"background_color": "#090d16",
+	"theme_color": "#090d16",
+	"description": "An AnuraOS-powered desktop for games, creativity and exploration.",
 	"icons": [
 		{
-			"src": "pwa_icon.png",
-			"sizes": "16x16 32x32 48x48 72x72 96x96 128x128 256x256 512x512 1024x1024 2048x2048",
+			"src": "/nebula/icon-192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any maskable"
+		},
+		{
+			"src": "/nebula/icon-512.png",
+			"sizes": "512x512",
 			"type": "image/png",
 			"purpose": "any maskable"
 		}
-	],
-	"short_name": "AnuraOS",
-	"start_url": "/",
-	"display_override": [
-		"window-controls-overlay",
-		"standalone",
-		"minimal-ui",
-		"browser"
-	],
-	"display": "standalone",
-	"background_color": "#000",
-	"description": "A webOS and development environment powered by v86"
+	]
 }

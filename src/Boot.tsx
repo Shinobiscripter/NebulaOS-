@@ -41,7 +41,7 @@ channel.addEventListener("message", (msg) => {
             </head>
             <body>
             <div id="wrapper">
-            <h1>AnuraOS is already running in another tab</h1>
+            <h1>NebulaHub is already running in another tab</h1>
             <p>Please close the other tab and reload.</p>
             </div>
             </body>
@@ -91,6 +91,8 @@ let anura: Anura;
 // global
 
 window.addEventListener("load", async () => {
+	splashToRemove = bootsplash;
+	document.body.appendChild(bootsplash);
 	const swShared: any = {
 		test: true,
 	};
@@ -150,6 +152,7 @@ window.addEventListener("load", async () => {
 	swShared.anura = anura;
 	swShared.sh = new anura.fs.Shell();
 	async function initComlink() {
+		if (!navigator.serviceWorker.controller) return;
 		const { port1, port2 } = new MessageChannel();
 
 		const msg = {
@@ -169,6 +172,16 @@ window.addEventListener("load", async () => {
 	navigator.serviceWorker.addEventListener("controllerchange", initComlink);
 
 	await navigator.serviceWorker.register("/anura-sw.js");
+	await navigator.serviceWorker.ready;
+	if (!navigator.serviceWorker.controller) {
+		await new Promise<void>((resolve) =>
+			navigator.serviceWorker.addEventListener(
+				"controllerchange",
+				() => resolve(),
+				{ once: true },
+			),
+		);
+	}
 	initComlink();
 
 	navigator.serviceWorker.addEventListener("message", (event) => {
@@ -199,7 +212,7 @@ window.addEventListener("load", async () => {
 					const tracker_br = document.getElementById("systemstatus-br")!;
 					tracker.style.display = "unset";
 					tracker_br.style.display = "unset";
-					tracker.innerText = "Anura is updating your system...";
+					tracker.innerText = "NebulaHub is updating your system...";
 					try {
 						await new anura.fs.Shell().promises.rm("/anura_files", {
 							recursive: true,
@@ -276,9 +289,9 @@ window.addEventListener("load", async () => {
 
 		if (needsMigration.length > 0) {
 			anura.notifications.add({
-				title: "Anura Update",
+				title: "NebulaHub Update",
 				description:
-					"AnuraOS has been updated to a new version. Users are recommended to change the installation directory of their apps and libraries to /usr/ to ensure consistency with new installations.",
+					"NebulaHub has been updated to a new version. Users are recommended to change the installation directory of their apps and libraries to /usr/ to ensure consistency with new installations.",
 				timeout: "never",
 				buttons: [
 					{
@@ -444,23 +457,8 @@ window.addEventListener("load", async () => {
 		anura.settings.set("handler-migration-complete", true);
 	}
 
-	setTimeout(
-		() => {
-			setTimeout(() => {
-				if (splashToRemove) {
-					splashToRemove.classList.add("hide");
-				}
-			}, 350); // give the taskbar time to init
-			setTimeout(() => {
-				bootsplash.remove();
-				bootsplashMobile.remove();
-				gangstaBootsplash.remove();
-			}, 550);
-			anura.logger.debug("boot completed");
-			document.dispatchEvent(new Event("anura-boot-completed"));
-		},
-		anura.settings.get("oobe-complete") ? 500 : 1500,
-	);
+	anura.logger.debug("boot services ready");
+	document.dispatchEvent(new Event("anura-boot-completed"));
 });
 
 document.addEventListener("anura-boot-completed", async () => {
@@ -469,6 +467,7 @@ document.addEventListener("anura-boot-completed", async () => {
 		document.dispatchEvent(new Event("anura-login-completed"));
 	} else {
 		document.body.appendChild(oobeview.element);
+		bootsplash.remove();
 	}
 });
 
@@ -652,6 +651,10 @@ document.addEventListener("anura-login-completed", async () => {
 	});
 
 	anura.initComplete = true;
+	const status = document.getElementById("systemstatus");
+	if (status) status.textContent = "Ready";
+	splashToRemove?.classList.add("hide");
+	setTimeout(() => splashToRemove?.remove(), 250);
 	AnuradHelpers.setReady("anura.initComplete");
 	taskbar.updateTaskbar();
 	alttab.update();
