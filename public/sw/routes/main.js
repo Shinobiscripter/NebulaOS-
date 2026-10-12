@@ -55,6 +55,13 @@ workbox.routing.registerRoute(
 		} else {
 			try {
 				const fetchResponse = await fetch(event.request);
+				// Static hosts redirect /apps/example.app to its directory index.
+				// Never store that HTML as a file named example.app: it would block
+				// the manifest and every other cached file in the same app directory.
+				const finalPath = new URL(fetchResponse.url).pathname;
+				if (fetchResponse.redirected && finalPath.endsWith("/")) {
+					path = decodeURI(finalPath) + "index.html";
+				}
 				// Complete disk writes before reporting a precache request as successful.
 				// An async Promise executor could lose write failures and hang callers.
 				{
