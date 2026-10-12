@@ -68,6 +68,8 @@ await scan();
 const precache = files
 	.filter(
 		(file) =>
+			!file.path.split("/").some((part) => part.startsWith(".")) &&
+			file.path !== "nebula/build-report.json" &&
 			!/^(x86images\/|Games\/|play\/|artifacts\/)/.test(file.path) &&
 			!/(\.map|\.d\.ts)$/.test(file.path) &&
 			!/^(MILESTONE|COMMIT|config.json|cache-load.json|_headers|_redirects)$/.test(

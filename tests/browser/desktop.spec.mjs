@@ -95,7 +95,7 @@ test("terminal executes commands and browser UI loads", async ({ page }) => {
 	await page.evaluate(() => window.anura.apps["anura.ashell"].open());
 	const terminal = page
 		.frameLocator('iframe[src*="ashell.app/term.html"]')
-		.frameLocator("iframe");
+		.frameLocator("#terminal iframe");
 	await expect(terminal.locator("x-screen")).toBeVisible();
 	await terminal.locator("x-screen").click();
 	await page.keyboard.type("echo NEBULA_TERMINAL_OK");

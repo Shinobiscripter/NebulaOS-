@@ -41,6 +41,10 @@ for (const game of games) await exists(decodeURIComponent(game.path.slice(1)));
 const cache = JSON.parse(await text("cache-load.json"));
 assert.ok(cache.includes("browser/index.html"));
 assert.ok(cache.includes("apps/nebula-games.app/index.html"));
+assert.ok(
+	cache.every((path) => !path.split("/").some((part) => part.startsWith("."))),
+	"Netlify excludes hidden files; do not precache them",
+);
 for (const path of cache) await exists(path.replace(/^\.\//, ""));
 console.log(
 	"Production entry points, 46 game launchers, PWA assets, WASM signatures, app manifests and offline cache paths verified.",

@@ -32,7 +32,7 @@ test("optional Linux image installs and boots v86", async ({ page }) => {
 	);
 	const terminal = page
 		.frameLocator('iframe[src*="ashell.app/term.html"]')
-		.frameLocator("iframe");
+		.frameLocator("#terminal iframe");
 	await expect(terminal.locator("x-screen")).toContainText("#", {
 		timeout: 30000,
 	});
