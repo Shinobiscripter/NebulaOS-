@@ -135,7 +135,8 @@ test("offline cache can reboot the desktop and open Games", async ({
 		}
 	});
 	await context.setOffline(true);
-	await page.reload();
+	const offlineResponse = await page.reload();
+	expect(offlineResponse.status(), await offlineResponse.text()).toBe(200);
 	await page.waitForFunction(() => window.anura?.initComplete);
 	await page.evaluate(() => window.anura.apps["nebula.games"].open());
 	await expect(

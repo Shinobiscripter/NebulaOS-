@@ -110,8 +110,8 @@ window.addEventListener("load", async () => {
 	}
 	try {
 		conf = await (await fetch("/config.json")).json();
-		milestone = await (await fetch("/MILESTONE")).text();
-		commit = await (await fetch("/COMMIT")).text();
+		milestone = (await (await fetch("/MILESTONE")).text()).trim();
+		commit = (await (await fetch("/COMMIT")).text()).trim();
 
 		console.debug("writing config??");
 		await bootStrapFs.promises.writeFile(
@@ -224,6 +224,7 @@ window.addEventListener("load", async () => {
 				}
 				console.debug("invalidated cache");
 				window.location.reload();
+				return;
 			}
 		} else {
 			// Domain is either expired or some non conformant milestone is being delivered (bad extension?)

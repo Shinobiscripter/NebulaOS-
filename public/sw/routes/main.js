@@ -97,6 +97,8 @@ workbox.routing.registerRoute(
 				return new Response(
 					JSON.stringify({
 						error: e.message,
+						path,
+						cacheError: await response.text(),
 						status: 500,
 					}),
 					{
