@@ -27,5 +27,7 @@ Upstream license and credits remain intact.
 
 ## Validation
 
-Pending implementation and production testing. See the final validation report
-for measured results; this log is not a claim of completion.
+Implemented native Nebula Games, restrained desktop branding, real boot lifecycle
+integration, Netlify packaging, offline cache fixes and optional Linux delivery.
+Production build and real browser checks completed. See [VALIDATION.md](VALIDATION.md)
+for measured results, tested scope, build diagnostics and deployment limitations.
