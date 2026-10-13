@@ -8,6 +8,8 @@ Live deployment: **[nebulahub-shinobiscripter.netlify.app](https://nebulahub-shi
 
 ## Desktop features
 
+The custom boot animation draws the Nebula mark, traces an orbital ring and fades into the desktop. Storage, Services, Apps and Desktop indicators follow actual initialization events; no simulated percentage or minimum wait is added. Animations respect reduced-motion preferences and stop when the splash is removed.
+
 The desktop uses a macOS-inspired top menu, centered dock and colored window controls while retaining Anura's actual window manager. Search launches installed apps; Ctrl/Command+K opens it when the desktop has keyboard focus. Windows provides an overview with left/right tiling, and Show Desktop minimizes and restores open windows.
 
 Desktop widgets include a live clock/calendar shortcut, saved quick note, reminders with completion/deletion, and a pausable 25-minute focus timer with a completion notification. Notes, reminders, timer state and widget visibility use the existing OS settings storage. The Widgets menu toggles the panel. Mobile retains the upstream layout. No Apple assets or macOS application compatibility are included.

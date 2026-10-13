@@ -11,10 +11,154 @@ body {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	overflow: hidden;
 }
-.nebula-boot img {
-	width: 92px;
-	height: 92px;
+.nebula-boot-emblem {
+	position: relative;
+	width: 160px;
+	height: 160px;
+	animation: nebula-arrive 850ms ease-out both;
+}
+.nebula-boot-emblem svg {
+	position: relative;
+	overflow: visible;
+	fill: none;
+}
+.nebula-boot-guide {
+	stroke: #c2d2ff18;
+	stroke-width: 1;
+}
+.nebula-boot-monogram {
+	stroke: #e6edff;
+	stroke-width: 7;
+	stroke-linejoin: round;
+	stroke-linecap: round;
+	stroke-dasharray: 1;
+	animation: nebula-draw 1100ms ease-out both;
+}
+.nebula-boot-ring {
+	stroke: #92acff;
+	stroke-width: 2;
+	stroke-dasharray: 1;
+	animation: nebula-draw 1400ms 120ms ease-out both;
+}
+.nebula-boot-halo {
+	position: absolute;
+	inset: 4px;
+	border: 1px solid #899fff30;
+	border-radius: 50%;
+	animation: nebula-signal 2.4s ease-out infinite;
+}
+.nebula-boot-satellite {
+	position: absolute;
+	inset: 9px;
+	animation: nebula-orbit 6s linear infinite;
+}
+.nebula-boot-satellite span {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #b5f5f2;
+	box-shadow: 0 0 12px #8ee9ec88;
+}
+.nebula-boot-stars {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background:
+		radial-gradient(circle at 20% 27%, #dce7ff 0 1px, transparent 2px),
+		radial-gradient(circle at 77% 34%, #8ee9ec 0 1px, transparent 2px),
+		radial-gradient(circle at 68% 74%, #dce7ff 0 1px, transparent 2px),
+		radial-gradient(circle at 31% 66%, #91aaff 0 1px, transparent 2px);
+	animation: nebula-stars 1800ms ease-out both;
+}
+.nebula-boot-stages {
+	list-style: none;
+	display: flex;
+	gap: 24px;
+	margin: 14px 0 0;
+	padding: 0;
+	font: 10px system-ui;
+	letter-spacing: 0.08em;
+	color: #78829a;
+	text-transform: uppercase;
+}
+.nebula-boot-stages li::before {
+	content: "";
+	display: block;
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: #343d52;
+	margin: 0 auto 9px;
+	transition: background 200ms;
+}
+.nebula-boot-stages li.reached {
+	color: #c6d5ff;
+}
+.nebula-boot-stages li.reached::before {
+	background: #a0bbff;
+	box-shadow: 0 0 7px #91aaff66;
+}
+.nebula-boot-stages li[aria-current]::before {
+	background: #a4ebe6;
+}
+@keyframes nebula-draw {
+	from {
+		stroke-dashoffset: 1;
+	}
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+@keyframes nebula-arrive {
+	from {
+		opacity: 0;
+		transform: scale(0.88);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+@keyframes nebula-signal {
+	0% {
+		transform: scale(0.95);
+		opacity: 0;
+	}
+	20% {
+		opacity: 0.7;
+	}
+	100% {
+		transform: scale(1.35);
+		opacity: 0;
+	}
+}
+@keyframes nebula-stars {
+	from {
+		opacity: 0;
+		transform: scale(1.06);
+	}
+	to {
+		opacity: 0.65;
+		transform: scale(1);
+	}
+}
+@keyframes nebula-orbit {
+	to {
+		transform: rotate(360deg);
+	}
+}
+@media (max-width: 480px) {
+	.nebula-boot-stages {
+		gap: 18px;
+	}
+	.nebula-boot-emblem {
+		transform: scale(0.85);
+	}
 }
 .nebula-boot h1 {
 	font:
@@ -29,7 +173,7 @@ body {
 	font:
 		14px system-ui,
 		sans-serif;
-	margin: 0 0 32px;
+	margin: 0 0 18px;
 }
 .nebula-boot #systemstatus {
 	color: #a6afc4;
@@ -37,19 +181,6 @@ body {
 		13px system-ui,
 		sans-serif;
 	margin-top: 18px;
-}
-.nebula-boot-orbit {
-	width: 22px;
-	height: 22px;
-	border: 2px solid #30384b;
-	border-top-color: #91aaff;
-	border-radius: 50%;
-	animation: nebula-orbit 1.2s linear infinite;
-}
-@keyframes nebula-orbit {
-	to {
-		transform: rotate(360deg);
-	}
 }
 .window {
 	border: 1px solid var(--theme-border);
@@ -84,7 +215,10 @@ a {
 	border: 0 !important;
 }
 .nebula-boot.hide {
-	transform: none;
+	transform: scale(1.025);
+	transition:
+		opacity 320ms ease-out,
+		transform 320ms ease-out;
 }
 #launcher-button::after {
 	display: none;

@@ -93,6 +93,7 @@ let anura: Anura;
 window.addEventListener("load", async () => {
 	splashToRemove = bootsplash;
 	document.body.appendChild(bootsplash);
+	setNebulaBootStage(0, "Opening your filesystem…");
 	const swShared: any = {
 		test: true,
 	};
@@ -127,6 +128,7 @@ window.addEventListener("load", async () => {
 	}
 
 	anura = await Anura.new(conf);
+	setNebulaBootStage(1, "Starting system services…");
 	if (bootStrapFs instanceof LocalFS) {
 		anura.settings.cache["bootFromOPFS"] = true;
 	} else {
@@ -473,6 +475,7 @@ document.addEventListener("anura-boot-completed", async () => {
 });
 
 document.addEventListener("anura-login-completed", async () => {
+	setNebulaBootStage(2, "Loading your applications…");
 	AnuradHelpers.setStage("anura.login");
 	const directories = anura.settings.get("directories");
 	anura.ui.theme = Theme.new(anura.settings.get("theme"));
@@ -537,6 +540,7 @@ document.addEventListener("anura-login-completed", async () => {
 	}
 
 	// Initialize static UI components that utilize anura.ui after loading apps, scripts, libs, so that external apps and libraries can apply overrides.
+	setNebulaBootStage(3, "Preparing your workspace…");
 	await quickSettings.init();
 	await calendar.init();
 	await launcher.init();
@@ -658,10 +662,10 @@ document.addEventListener("anura-login-completed", async () => {
 		console.error("Nebula desktop extensions could not load", error);
 	}
 	anura.initComplete = true;
-	const status = document.getElementById("systemstatus");
-	if (status) status.textContent = "Ready";
+	setNebulaBootStage(3, "Ready. Welcome aboard.");
+	if (splashToRemove) splashToRemove.dataset.ready = "true";
 	splashToRemove?.classList.add("hide");
-	setTimeout(() => splashToRemove?.remove(), 250);
+	setTimeout(() => splashToRemove?.remove(), 350);
 	AnuradHelpers.setReady("anura.initComplete");
 	taskbar.updateTaskbar();
 	alttab.update();
