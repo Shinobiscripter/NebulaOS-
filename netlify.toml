@@ -6,6 +6,7 @@
   NODE_VERSION = "24.21.0"
   PNPM_VERSION = "10.12.1"
   NPM_FLAGS = "--no-audit --no-fund"
+  NEBULA_WISP_URL = "wss://nebulahub-browser.onrender.com/wisp/"
 
 # Headers are generated into static/_headers by scripts/package-nebula.mjs.
 # No SPA catch-all: /fs and /service are handled by Anura's service worker.

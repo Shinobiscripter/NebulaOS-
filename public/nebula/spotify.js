@@ -59,7 +59,8 @@ export function installSpotify(os, { widget, make, button, save }) {
 					"No proxy relay is configured. Set a Custom Wisp URL in Settings, then reload the desktop. You can also use the direct player.";
 				return;
 			}
-			status.textContent = "Connecting through the desktop proxy…";
+			status.textContent =
+				"Connecting through the desktop proxy… A sleeping relay can take about a minute to wake.";
 			controller = new AbortController();
 			let timeout;
 			try {
@@ -85,7 +86,7 @@ export function installSpotify(os, { widget, make, button, save }) {
 									"The relay did not respond. Check your Custom Wisp URL.",
 								),
 							);
-						}, 15000);
+						}, 75000);
 					}),
 				]);
 			} catch (error) {

@@ -22,6 +22,7 @@ class Settings {
 		defaultsettings: { [key: string]: any },
 	) {
 		const initial = defaultsettings;
+		const deploymentRelay = initial["wisp-url"];
 
 		if (!initial["i-am-a-true-gangsta"]) {
 			initial["i-am-a-true-gangsta"] = false;
@@ -71,6 +72,19 @@ class Settings {
 			fs.writeFile("/anura_settings.json", JSON.stringify(initial));
 		}
 
+		// Migrate only the unusable same-origin Netlify default, preserving custom relays.
+		const oldNetlifyRelay = `wss://${location.host}/`;
+		if (
+			deploymentRelay &&
+			location.hostname.endsWith(".netlify.app") &&
+			initial["wisp-url"] === oldNetlifyRelay
+		) {
+			initial["wisp-url"] = deploymentRelay;
+			await fs.promises.writeFile(
+				"/anura_settings.json",
+				JSON.stringify(initial),
+			);
+		}
 		return new Settings(fs, initial);
 	}
 

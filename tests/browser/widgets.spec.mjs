@@ -71,6 +71,9 @@ test("Spotify validates links and does not load until requested", async ({
 		.getByRole("textbox", { name: "Spotify link" })
 		.fill("https://open.spotify.com/track/0Lr4kGOYn9l83EjuK6cZFQ");
 	if (new URL(page.url()).hostname.endsWith(".netlify.app")) {
+		await page.evaluate(() =>
+			anura.settings.set("wisp-url", `wss://${location.host}/`),
+		);
 		await card.getByRole("button", { name: "Load through proxy" }).click();
 		await expect(card.getByRole("status")).toContainText("No proxy relay");
 	}

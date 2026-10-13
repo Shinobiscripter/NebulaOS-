@@ -12,6 +12,10 @@ The desktop uses a macOS-inspired top menu, centered dock and colored window con
 
 Desktop widgets include a live clock/calendar shortcut, saved quick note, reminders with completion/deletion, and a pausable 25-minute focus timer with a completion notification. Notes, reminders, timer state and widget visibility use the existing OS settings storage. The Widgets menu toggles the panel. Mobile retains the upstream layout. No Apple assets or macOS application compatibility are included.
 
+Drag each widget by its title, or focus the title and use arrow keys (Shift for one-pixel movement). Each × hides only that widget; **Widgets** restores individual widgets, hides/shows the whole set, or resets positions. Layout and visibility survive refresh and positions are clamped to the viewport.
+
+The Spotify widget accepts Spotify content links and loads on request through the existing Scramjet browser and Wisp relay. It also offers a direct credentialless embed. Hiding it stops the player. Browser widget mode has separate storage and does not overwrite normal browser tabs. Spotify controls login, previews, region availability and encrypted playback; proxying does not grant full-track access. See [Spotify's playback troubleshooting](https://developer.spotify.com/documentation/embeds/tutorials/troubleshooting).
+
 ## Build setup
 
 Use x86-64 Linux or WSL2; upstream does not support native Windows builds.
@@ -87,7 +91,7 @@ The operator supplies Netlify credentials/site selection. CI builds/tests/upload
 
 ### External infrastructure
 
-- **Wisp relay:** Netlify cannot run Anura's long-lived WebSocket service. Set build environment `NEBULA_WISP_URL=wss://your-relay.example/`, or Custom Wisp URL in Settings, for proxied browsing and Linux networking. Local preview supplies a relay. No arbitrary public relay is hard-coded.
+- **Wisp relay:** Netlify cannot run Anura's long-lived WebSocket service. The Netlify configuration uses the owner's existing `wss://nebulahub-browser.onrender.com/wisp/` service. Set build environment `NEBULA_WISP_URL=wss://your-relay.example/` for manual builds, or Custom Wisp URL in Settings, to change it. Local builds without that variable retain the local preview relay. Existing Netlify installations migrate the old broken same-origin default while preserving custom relays. Free Render services can sleep, require a cold start, and have bandwidth limits.
 - **Linux image host:** default redirects proxy `https://anura.pro/x86images/alpine-*` on demand, avoiding upstream's absent browser CORS headers. This keeps the **1 GiB** disk out of every deployment, but installation still consumes about 1 GiB of bandwidth and browser storage. Availability depends on upstream. To self-host matching kernel/initrd/chunks with CORS, set `NEBULA_X86_BASE_URL=https://images.example/x86images/` with a trailing slash. A separate static image host can serve the split chunks; check its current free storage/file/bandwidth allowances.
 - **Games:** launchers fetch code/assets from their original external providers. They are not offline game binaries. Remote removal, URL changes, embedding restrictions and provider failures can break individual titles.
 
@@ -112,6 +116,9 @@ The upstream Docker workflow produces `build/x86images/alpine-boot/` and 50 MiB 
 - `public/play/`: compatibility player. Play opens a separate browser tab; Chromium credentialless frames also allow managed OS windows. Their game storage is temporary; use a tab for persistent saves or incompatible embeds.
 - `scripts/migrate-games.mjs`: repeatable migration from a local NebulaHub-2 checkout. The original library has no curated covers/categories/tags; initials are explicit fallback artwork.
 - `scripts/package-nebula.mjs`: headers, offline inventory, license files, image routes and asset audit.
+- `public/nebula/widgets.js` and `spotify.js`: persistent widget layout and on-demand Spotify player.
+- `scripts/prepare-browser-widget.mjs`: checked build-time adapter for the pinned browser submodule. It adds a Spotify-only compact mode with separate storage; it leaves the submodule commit unchanged. The build copy's browser entry point becomes modified. Review its anchors when updating upstream.
+- `server/relay.mjs` and `render.yaml`: an optional standalone relay deployment, with web-only ports, private-address blocking and an origin allowlist. The current live site reuses the existing `nebulahub-browser` service; this optional service was not created. Origin checks are not authentication against non-browser clients.
 
 The old Ps5 app was a game selector, not an emulator. Its library is migrated. Launcher entries for missing Cine, Spotify, Discord, Android and other app files are not presented as functioning apps. The old Web wrapper is superseded by Anura's browser.
 
