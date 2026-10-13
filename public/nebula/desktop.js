@@ -1,5 +1,5 @@
 import { createWidgets } from "./widgets.js";
-import { installSpotify } from "./spotify.js";
+import { installMusic } from "./music.js";
 // Nebula desktop conveniences use the existing Anura apps, windows and settings.
 export default function installDesktop(os) {
 	if (
@@ -369,13 +369,14 @@ export default function installDesktop(os) {
 	}
 	focus.append(countdown, start, reset);
 	runTimer();
-	installSpotify(os, { widget, make, button, save });
+	installMusic(os, { widget, make, button, save });
 
 	const decorated = new WeakSet();
 	function constrain(win) {
 		const el = win.element;
 		if (el.getBoundingClientRect().top < 34) el.style.top = "34px";
-		if (win.maximized || win.snapped)
+		if (win.maximized) el.style.height = `${innerHeight - 112}px`;
+		else if (win.snapped)
 			el.style.height = `${Math.min(el.offsetHeight, innerHeight - 112)}px`;
 	}
 	function decorate() {

@@ -76,39 +76,3 @@ test("individual widget visibility, pointer and keyboard placement persist", asy
 	const bounds = await note.boundingBox();
 	expect(bounds.x + bounds.width).toBeLessThanOrEqual(800);
 });
-test("Spotify validates links and does not load until requested", async ({
-	page,
-}) => {
-	await page.goto("/");
-	await page.waitForFunction(() => window.anura?.initComplete);
-	const card = page.getByRole("region", {
-		name: "Spotify widget",
-		exact: true,
-	});
-	await expect(card.locator("iframe")).toHaveCount(0);
-	await card
-		.getByRole("textbox", { name: "Spotify link" })
-		.fill("https://example.com/");
-	await card.getByRole("button", { name: "Load through proxy" }).click();
-	await expect(card.getByRole("status")).toContainText(
-		"Paste an open.spotify.com",
-	);
-	await expect(card.locator("iframe")).toHaveCount(0);
-	await card
-		.getByRole("textbox", { name: "Spotify link" })
-		.fill("https://open.spotify.com/track/0Lr4kGOYn9l83EjuK6cZFQ");
-	if (new URL(page.url()).hostname.endsWith(".netlify.app")) {
-		await page.evaluate(() =>
-			anura.settings.set("wisp-url", `wss://${location.host}/`),
-		);
-		await card.getByRole("button", { name: "Load through proxy" }).click();
-		await expect(card.getByRole("status")).toContainText("No proxy relay");
-	}
-	await card.getByRole("button", { name: "Use direct player" }).click();
-	await expect(card.locator("iframe")).toHaveAttribute(
-		"src",
-		"https://open.spotify.com/embed/track/0Lr4kGOYn9l83EjuK6cZFQ",
-	);
-	await card.getByRole("button", { name: "Hide Spotify widget" }).click();
-	await expect(card.locator("iframe")).toHaveCount(0);
-});

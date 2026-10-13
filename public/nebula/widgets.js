@@ -9,6 +9,7 @@ export function createWidgets(
 	document.body.append(layer);
 	let layout = os.settings.get("nebula.desktop.widgetLayout") || {};
 	const cards = new Map();
+	let front = 1;
 	const persist = () =>
 		save("nebula.desktop.widgetLayout", structuredClone(layout));
 	function place(card, point) {
@@ -97,6 +98,11 @@ export function createWidgets(
 	function widget(title, className = "") {
 		const id = title.toLowerCase().replaceAll(" ", "-");
 		const card = make("section", `nebula-widget ${className}`);
+		const raise = () => {
+			card.style.zIndex = String(++front);
+		};
+		card.addEventListener("pointerdown", raise, { capture: true });
+		card.addEventListener("focusin", raise);
 		card.dataset.widget = id;
 		card.dataset.title = title;
 		card.setAttribute("aria-label", `${title} widget`);
