@@ -9,6 +9,8 @@ test("music app and widget share persistent playlists and reject invalid links",
 		page.getByRole("region", { name: "Spotify widget", exact: true }),
 	).toHaveCount(0);
 	await expect(card.locator("iframe")).toHaveCount(0);
+	await card.getByRole("button", { name: "Your library", exact: true }).click();
+	await card.locator("summary").click();
 	await card
 		.getByRole("textbox", { name: "YouTube song link" })
 		.fill("https://example.com/");
@@ -32,8 +34,10 @@ test("music app and widget share persistent playlists and reject invalid links",
 		.toBe(selected);
 	await page.reload();
 	await page.waitForFunction(() => window.anura?.initComplete);
+	await card.getByRole("button", { name: "Your library", exact: true }).click();
 	await expect(card.getByRole("combobox")).toHaveValue(selected);
 	await page.evaluate(() => anura.apps["nebula.music"].open());
+	await app.getByRole("button", { name: "Your library", exact: true }).click();
 	await expect(app.getByRole("combobox")).toHaveValue(selected);
 	await expect(page.locator(".nm-full")).toHaveCount(1);
 	await page.evaluate(() => anura.apps["nebula.music"].open());
@@ -89,6 +93,39 @@ test("live discovery adds actual YouTube metadata to both views", async ({
 						),
 					),
 			{ timeout: 60000 },
+		)
+		.toBe(true);
+	await expect(app.getByRole("slider", { name: "Seek in song" })).toBeEnabled();
+	await app.getByRole("slider", { name: "Seek in song" }).evaluate((input) => {
+		input.value = "60";
+		input.dispatchEvent(new Event("change", { bubbles: true }));
+	});
+	await expect
+		.poll(
+			() =>
+				videoFrame
+					.locator("video")
+					.evaluateAll((elements) =>
+						elements.some((video) => video.currentTime >= 55),
+					),
+			{ timeout: 15000 },
+		)
+		.toBe(true);
+	await app
+		.getByRole("slider", { name: "Volume", exact: true })
+		.evaluate((input) => {
+			input.value = "35";
+			input.dispatchEvent(new Event("input", { bubbles: true }));
+		});
+	await expect
+		.poll(
+			() =>
+				videoFrame
+					.locator("video")
+					.evaluateAll((elements) =>
+						elements.some((video) => Math.abs(video.volume - 0.35) < 0.02),
+					),
+			{ timeout: 10000 },
 		)
 		.toBe(true);
 	await app.getByRole("button", { name: "Pause", exact: true }).click();

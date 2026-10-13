@@ -29,7 +29,9 @@ export function installMusic(os, { widget, make, button, save }) {
 	let searchQuery = "",
 		searchStatus = "",
 		searching = false;
-	let lastTime = 0;
+	let lastTime = 0,
+		duration = 0,
+		volumeLevel = 70;
 	let queue = [],
 		index = -1;
 	const persist = () => save("nebula.music.library", structuredClone(library));
@@ -71,7 +73,11 @@ export function installMusic(os, { widget, make, button, save }) {
 				? `${found.length} results for ${query}`
 				: `No songs found for ${query}. Try another search or paste a song link.`;
 		} catch (error) {
-			if (generation === searchGeneration) searchStatus = error.message;
+			if (generation === searchGeneration)
+				searchStatus =
+					error.name === "AbortError" || error.name === "TimeoutError"
+						? "Search timed out. The free relay may be waking up; please try again."
+						: error.message;
 		} finally {
 			if (generation === searchGeneration) {
 				searching = false;
@@ -108,7 +114,10 @@ export function installMusic(os, { widget, make, button, save }) {
 			queue = [track];
 			index = 0;
 		}
-		if (current?.id !== track.id) lastTime = 0;
+		if (current?.id !== track.id) {
+			lastTime = 0;
+			duration = 0;
+		}
 		current = track;
 		playing = false;
 		setStatus("Loading YouTube player…");
@@ -141,12 +150,15 @@ export function installMusic(os, { widget, make, button, save }) {
 						return;
 					const data = event.data;
 					if (data.event === "time") {
-						time = data.value;
+						time = Number(data.value?.time) || 0;
+						duration = Number(data.value?.duration) || 0;
 						lastTime = time;
+						updateProgress();
 						return;
 					}
 					if (data.event === "ready") {
 						ready = true;
+						send("volume", volumeLevel);
 						send("play");
 					}
 					if (data.event === "state") {
@@ -171,6 +183,8 @@ export function installMusic(os, { widget, make, button, save }) {
 					playVideo: () => send("play"),
 					pauseVideo: () => send("pause"),
 					getCurrentTime: () => time,
+					seekTo: (value) => send("seek", value),
+					setVolume: (value) => send("volume", value),
 					loadVideoById: (value) => send("load", value),
 					destroy: () => {
 						window.removeEventListener("message", receive);
@@ -207,9 +221,23 @@ export function installMusic(os, { widget, make, button, save }) {
 		else if (selected().tracks[0]) play(selected().tracks[0], view);
 		else setStatus("Add a song to your playlist first.");
 	}
-	function render() {
+	function updateProgress() {
+		const format = (n) => {
+			n = Math.max(0, Math.floor(n || 0));
+			return `${Math.floor(n / 60)}:${String(n % 60).padStart(2, "0")}`;
+		};
 		for (const view of views) {
-			view.title.textContent = current?.title || "Your next discovery awaits";
+			view.seek.disabled = !ready || !duration;
+			view.seek.max = String(duration || 100);
+			if (document.activeElement !== view.seek)
+				view.seek.value = String(lastTime);
+			view.time.textContent = `${format(lastTime)} / ${format(duration)}`;
+		}
+	}
+	function render() {
+		updateProgress();
+		for (const view of views) {
+			view.title.textContent = current?.title || "Nothing playing yet";
 			view.artist.textContent = current?.artist || "YouTube • Nebula Music";
 			view.status.textContent = status;
 			view.searchStatus.textContent = searchStatus;
@@ -217,6 +245,29 @@ export function installMusic(os, { widget, make, button, save }) {
 			view.searchButton.textContent = searching ? "Searching" : "Search";
 			view.results.setAttribute("aria-busy", String(searching));
 			view.play.textContent = playing ? "Pause" : "Play";
+			view.play.setAttribute("aria-label", playing ? "Pause" : "Play");
+			view.previous.disabled = index <= 0;
+			view.next.disabled = index < 0 || index >= queue.length - 1;
+			view.cover.src = current
+				? `https://i.ytimg.com/vi/${current.id}/mqdefault.jpg`
+				: "/nebula/music.svg";
+			if (view.playlists)
+				view.playlists.replaceChildren(
+					...library.playlists.map((p) => {
+						const item = button(
+							p.name,
+							() => {
+								library.selected = p.id;
+								persist();
+								view.showLibrary();
+								render();
+							},
+							"nm-playlist-button",
+						);
+						item.setAttribute("aria-pressed", String(p.id === selected().id));
+						return item;
+					}),
+				);
 			view.select.replaceChildren(
 				...library.playlists.map((p) => {
 					const option = make("option", "", p.name);
@@ -271,10 +322,12 @@ export function installMusic(os, { widget, make, button, save }) {
 			}
 		}
 	}
+
 	function createView(root, full) {
-		root.classList.add("nebula-music");
+		root.classList.add("nebula-music", full ? "nm-app" : "nm-widget");
 		const view = {
 			root,
+			full,
 			title: make("h2"),
 			artist: make("p", "nm-muted"),
 			status: make("p", "nm-status"),
@@ -282,9 +335,19 @@ export function installMusic(os, { widget, make, button, save }) {
 			select: make("select"),
 			list: make("div", "nm-library"),
 		};
+		view.title.className = "nm-song-title";
+		view.status.setAttribute("role", "status");
+		view.select.setAttribute("aria-label", "Music playlist");
+		view.select.onchange = () => {
+			library.selected = view.select.value;
+			persist();
+			render();
+		};
 		view.search = make("input");
 		view.search.type = "search";
-		view.search.placeholder = "Search songs or artists";
+		view.search.placeholder = full
+			? "What do you want to listen to?"
+			: "Find a song or artist";
 		view.search.setAttribute("aria-label", "Search music");
 		view.search.value = searchQuery;
 		view.searchButton = button("Search", () => {});
@@ -303,97 +366,72 @@ export function installMusic(os, { widget, make, button, save }) {
 			full ? "nm-results" : "nm-results nm-compact-results",
 		);
 		view.results.setAttribute("aria-label", "Music search results");
+		const discovery = make("section", "nm-discovery");
 		searchForm.onsubmit = (event) => {
 			event.preventDefault();
 			const query = view.search.value.trim().slice(0, 200);
-			if (query) discover(query);
-			else {
+			if (query) {
+				showPanel("search");
+				discover(query);
+			} else {
 				view.searchStatus.textContent = "Enter a song or artist to search.";
 				view.search.focus();
 			}
 		};
-		view.status.setAttribute("role", "status");
-		view.select.setAttribute("aria-label", "Music playlist");
-		view.select.onchange = () => {
-			library.selected = view.select.value;
-			persist();
-			render();
-		};
-		const body = make("div", full ? "nm-app-layout" : "nm-mini-layout");
-		const sidebar = make("section", "nm-sidebar");
-		view.play = button("Play", () => toggle(view));
+		view.cover = make("img", "nm-cover");
+		view.cover.src = "/nebula/music.svg";
+		view.cover.alt = "";
+		const identity = make("div", "nm-identity");
+		identity.append(view.cover);
+		const identityText = make("div");
+		identityText.append(view.title, view.artist);
+		identity.append(identityText);
+		view.previous = button("Previous", () => next(-1), "nm-previous");
+		view.play = button("Play", () => toggle(view), "nm-primary-play");
+		view.next = button("Next", () => next(1), "nm-next");
 		const controls = make("div", "nm-controls");
-		controls.append(
-			button("Previous", () => next(-1)),
-			view.play,
-			button("Next", () => next(1)),
-		);
+		controls.append(view.previous, view.play, view.next);
+		view.seek = make("input", "nm-seek");
+		view.seek.type = "range";
+		view.seek.min = "0";
+		view.seek.max = "100";
+		view.seek.value = "0";
+		view.seek.setAttribute("aria-label", "Seek in song");
+		view.seek.onchange = () => {
+			if (ready) {
+				lastTime = Number(view.seek.value);
+				player.seekTo(lastTime);
+				updateProgress();
+			}
+		};
+		view.time = make("span", "nm-time", "0:00 / 0:00");
+		const progress = make("div", "nm-progress");
+		progress.append(view.seek, view.time);
+		const transport = make("div", "nm-transport");
+		transport.append(controls, progress);
 		const link = make("input");
-		link.placeholder = "Paste a YouTube Music song link";
+		link.placeholder = "YouTube or YouTube Music link";
 		link.setAttribute("aria-label", "YouTube song link");
 		const form = make("form", "nm-link");
 		form.append(
 			link,
 			button("Add song", () => {}),
 		);
+		form.lastChild.type = "submit";
 		form.onsubmit = (event) => {
 			event.preventDefault();
 			addLink(link.value);
 		};
-		form.lastChild.type = "submit";
-		sidebar.append(
-			make(
-				"p",
-				"nm-eyebrow",
-				full ? "NEBULA MUSIC / YOUR ORBIT" : "NEBULA MUSIC",
-			),
-			view.title,
-			view.artist,
-			view.player,
-			controls,
-			view.status,
+		const libraryPanel = make("section", "nm-library-panel");
+		libraryPanel.append(
+			make("h2", "", "Your collection"),
 			view.select,
 			view.list,
-			form,
 		);
-		if (full) {
-			const name = make("input");
-			name.placeholder = "New playlist name";
-			name.setAttribute("aria-label", "New playlist name");
-			sidebar.append(
-				name,
-				button("Create playlist", () => {
-					const value = name.value.trim().slice(0, 80);
-					if (!value) return;
-					const id = crypto.randomUUID();
-					library.playlists.push({ id, name: value, tracks: [] });
-					library.selected = id;
-					name.value = "";
-					persist();
-					render();
-				}),
-			);
-			const main = make("section", "nm-discovery");
-			main.append(
-				make("h1", "", "Signals from deep space"),
-				make(
-					"p",
-					"nm-muted",
-					"Discover music on YouTube. Collect your favorites in one shared library.",
-				),
-			);
-			main.append(searchForm, view.searchStatus, view.results);
-			body.append(sidebar, main);
-		} else {
-			sidebar.append(
-				searchForm,
-				view.searchStatus,
-				view.results,
-				button("Open Music app", () => app.open()),
-			);
-			body.append(sidebar);
-		}
-		const youtube = make("a", "", "Open current song on YouTube");
+		const importDetails = make("details", "nm-import");
+		importDetails.append(make("summary", "", "Add a song link"), form);
+		libraryPanel.append(importDetails);
+		const youtube = make("a", "nm-youtube", "Open on YouTube");
 		youtube.target = "_blank";
 		youtube.rel = "noopener";
 		youtube.href = "https://music.youtube.com/";
@@ -402,12 +440,128 @@ export function installMusic(os, { widget, make, button, save }) {
 				? `https://www.youtube.com/watch?v=${current.id}`
 				: "https://music.youtube.com/";
 		};
-		sidebar.append(youtube);
-		root.append(body);
+		const tabs = make("nav", "nm-tabs");
+		tabs.setAttribute(
+			"aria-label",
+			full ? "Music navigation" : "Widget music panels",
+		);
+		const homeButton = button(full ? "Discover" : "Search", () =>
+			showPanel("search"),
+		);
+		const libraryButton = button("Your library", () => showPanel("library"));
+		tabs.append(homeButton, libraryButton);
+		function showPanel(panel) {
+			discovery.hidden = panel !== "search";
+			libraryPanel.hidden = panel !== "library";
+			homeButton.setAttribute("aria-pressed", String(panel === "search"));
+			libraryButton.setAttribute("aria-pressed", String(panel === "library"));
+		}
+		view.showLibrary = () => showPanel("library");
+		if (full) {
+			const shell = make("div", "nm-shell");
+			const sidebar = make("aside", "nm-sidebar");
+			const brand = make("div", "nm-brand");
+			const mark = make("img");
+			mark.src = "/nebula/music.svg";
+			mark.alt = "";
+			brand.append(
+				mark,
+				make("strong", "", "nebula"),
+				make("span", "", "MUSIC"),
+			);
+			sidebar.append(brand, tabs, make("p", "nm-eyebrow", "YOUR PLAYLISTS"));
+			view.playlists = make("div", "nm-playlists");
+			sidebar.append(view.playlists);
+			const name = make("input");
+			name.placeholder = "Playlist name";
+			name.setAttribute("aria-label", "New playlist name");
+			const createForm = make("form", "nm-create");
+			createForm.append(
+				name,
+				button("Create playlist", () => {}),
+			);
+			createForm.lastChild.type = "submit";
+			createForm.onsubmit = (event) => {
+				event.preventDefault();
+				const value = name.value.trim().slice(0, 80);
+				if (!value) return;
+				const id = crypto.randomUUID();
+				library.playlists.push({ id, name: value, tracks: [] });
+				library.selected = id;
+				name.value = "";
+				persist();
+				showPanel("library");
+				render();
+			};
+			sidebar.append(
+				createForm,
+				make("p", "nm-sidebar-note", "Your music. A little further out."),
+			);
+			const main = make("main", "nm-main");
+			const top = make("header", "nm-topbar");
+			top.append(
+				searchForm,
+				make("span", "nm-source", "YouTube / Free streaming"),
+			);
+			const hero = make("div", "nm-hero");
+			hero.append(
+				make("p", "nm-eyebrow", "NEBULA SESSIONS"),
+				make("h1", "", "Find your frequency."),
+				make("p", "", "A universe of sound, collected by you."),
+			);
+			const shortcuts = make("div", "nm-discover-shortcuts");
+			for (const [label, query] of [
+				["Deep space", "space ambient"],
+				["After dark", "synthwave night"],
+				["Zero gravity", "chill electronic"],
+				["Focus", "instrumental focus"],
+			])
+				shortcuts.append(button(label, () => discover(query)));
+			discovery.append(
+				hero,
+				shortcuts,
+				make("h2", "nm-section-title", "Discover your next favorite"),
+				view.searchStatus,
+				view.results,
+			);
+			main.append(top, discovery, libraryPanel);
+			const rail = make("aside", "nm-listening");
+			rail.append(make("p", "nm-eyebrow", "NOW PLAYING"));
+			const art = make("div", "nm-orbit-art");
+			art.setAttribute("aria-hidden", "true");
+			art.append(make("span", "", "N"));
+			rail.append(art, view.player, view.status, youtube);
+			const footer = make("footer", "nm-bottom-player");
+			const volume = make("input", "nm-volume");
+			volume.type = "range";
+			volume.min = "0";
+			volume.max = "100";
+			volume.value = String(volumeLevel);
+			volume.setAttribute("aria-label", "Volume");
+			volume.oninput = () => {
+				volumeLevel = Number(volume.value);
+				if (ready) player.setVolume(volumeLevel);
+			};
+			footer.append(identity, transport, volume);
+			shell.append(sidebar, main, rail, footer);
+			root.append(shell);
+		} else {
+			const top = make("div", "nm-widget-now");
+			top.append(
+				identity,
+				button("Open Music app", () => app.open(), "nm-expand"),
+			);
+			discovery.append(view.searchStatus, view.results);
+			const panels = make("div", "nm-widget-panels");
+			panels.append(tabs, searchForm, discovery, libraryPanel);
+			root.append(top, view.player, transport, view.status, panels, youtube);
+		}
+		showPanel("search");
 		views.add(view);
 		render();
 		return view;
 	}
+
 	const card = widget("Music", "nebula-music-widget");
 	const mini = createView(card, false);
 	card.addEventListener("widgethide", () => {
@@ -432,6 +586,16 @@ export function installMusic(os, { widget, make, button, save }) {
 				resizable: true,
 			});
 			const root = make("div", "nm-full");
+			Object.assign(win.content.style, {
+				position: "relative",
+				minHeight: "0",
+				overflow: "hidden",
+			});
+			Object.assign(root.style, {
+				position: "absolute",
+				inset: "0",
+				height: "auto",
+			});
 			win.content.append(root);
 			const view = createView(root, true);
 			win.maximize();

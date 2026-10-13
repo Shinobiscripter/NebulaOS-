@@ -28,7 +28,11 @@ window.onYouTubeIframeAPIReady = () => {
 				clearInterval(timer);
 				if (event.data === 1)
 					timer = setInterval(
-						() => send("time", player.getCurrentTime()),
+						() =>
+							send("time", {
+								time: player.getCurrentTime(),
+								duration: player.getDuration(),
+							}),
 						1000,
 					);
 			},
@@ -48,6 +52,10 @@ window.addEventListener("message", (event) => {
 	const { command, value } = event.data;
 	if (command === "play") player.playVideo();
 	if (command === "pause") player.pauseVideo();
+	if (command === "seek" && Number.isFinite(value))
+		player.seekTo(Math.max(0, value), true);
+	if (command === "volume" && Number.isFinite(value))
+		player.setVolume(Math.min(100, Math.max(0, value)));
 	if (command === "load" && /^[\w-]{11}$/.test(value?.videoId || ""))
 		player.loadVideoById(value);
 });
