@@ -74,5 +74,32 @@ test("live discovery adds actual YouTube metadata to both views", async ({
 			{ timeout: 45000 },
 		)
 		.toBe(true);
+	const videoFrame = page
+		.frames()
+		.find((frame) => frame.url().includes("youtube.com/embed/"));
+	await expect
+		.poll(
+			async () =>
+				videoFrame
+					.locator("video")
+					.evaluateAll((elements) =>
+						elements.some(
+							(video) =>
+								!video.paused && video.currentTime > 2 && video.duration > 120,
+						),
+					),
+			{ timeout: 60000 },
+		)
+		.toBe(true);
+	await app.getByRole("button", { name: "Pause", exact: true }).click();
+	await expect
+		.poll(
+			async () =>
+				videoFrame
+					.locator("video")
+					.evaluateAll((elements) => elements.every((video) => video.paused)),
+			{ timeout: 10000 },
+		)
+		.toBe(true);
 	await page.screenshot({ path: "test-results/NebulaHub-music.png" });
 });

@@ -11,7 +11,7 @@ Core validated locally on 11 October 2026; desktop enhancements validated on 12 
 - Binaryen 120, clang 21, OpenJDK 25. Upstream accepts Java 11+ and does not pin the native compiler versions.
 - All recursive submodules initialized at the upstream fork's recorded revisions.
 
-The production `npm run build` command runs `make static`, packaging, three catalog unit tests and static-output verification. It completed with exit code 0. v86 and Scramjet were actually compiled during initial toolchain setup; subsequent production builds reuse their compiled intermediates when unchanged.
+The production `npm run build` command runs `make static`, packaging, five catalog/music unit tests and static-output verification. It completed with exit code 0. v86 and Scramjet were actually compiled during initial toolchain setup; subsequent production builds reuse their compiled intermediates when unchanged.
 
 Output is `static/`, approximately 49.1 MiB. `static/nebula/build-report.json` records exact sizes and build commit. Largest file: `x86images/bzResize` (10,488,224 bytes). No file exceeds 50 MiB. The optional 1 GiB Linux disk is downloaded separately, not bundled.
 
@@ -19,7 +19,7 @@ The upstream browser.js build emits TypeScript declaration-generation diagnostic
 
 ## Automated checks
 
-`npm test`: three tests validate all 46 launcher hashes/URLs, search/favorites/sorting and recent-play ordering.
+`npm test`: five tests validate all 46 launcher hashes/URLs, search/favorites/sorting, recent-play ordering, YouTube link validation and public search-result parsing.
 
 `npx playwright test tests/browser/desktop.spec.mjs`: four Chromium production tests cover:
 
@@ -54,3 +54,12 @@ Boot tests hold the real configuration request to observe the splash, verify SVG
 The fork retains the upstream AGPL license, copyright and third-party credits. About/credits provide a source link. Publish the matching branch/commit alongside any deployed build; deployments of further modifications must include their corresponding source.
 
 Focused upstream changes: boot completion/SW readiness, persistent settings writes, branding and accessibility, safe theme propagation to cross-origin frames, worker route matching/cache write completion, explicit Linux download failures and production build packaging. Native application IDs, filesystem paths, APIs and submodule revisions are preserved.
+
+
+## Nebula Music replacement — 13 October 2026
+
+Production source `8d9ed961722529477ce9aa1796c51d0a533ff992` replaces the Spotify widget and browser adapter with Nebula Music. Published Netlify deploy: `6ace1a67ade0d3a4cefce370`. Full production build, five unit tests, static verification and the main TypeScript check passed. Output: 51,500,768 bytes across 600 files; no file above 50 MiB.
+
+The native maximized app and draggable widget share playlists and a single playback controller. Live public YouTube search returned 20 real results. Local playback inspection confirmed an advancing playhead (11.63 seconds), duration 11,392 seconds, unpaused media and no media error. This is full-length YouTube video playback, not an extracted audio stream or a Spotify preview. Browser checks cover playlist creation/synchronization/persistence, invalid links, real discovery, both-view song metadata, player loading, window shell and widget movement. The relay-default migration check is intentionally skipped on localhost. Game launch testing was stopped at the user's request for this update.
+
+Discovery uses YouTube's public search/oEmbed pages through the existing relay without an API key. It is not an official YouTube Music API and can fail if YouTube changes its page structure, rate-limits or requires consent. Song-link lookup provides an alternative. Playback uses the official YouTube iframe API inside a same-origin credentialless bridge, preserving desktop cross-origin isolation. YouTube controls advertisements, embedding, region restrictions and sign-in. Playlists are saved locally to this OS installation, not to a Google account. Hidden/minimized players pause; changing playback views recreates the visible player near the saved position.
