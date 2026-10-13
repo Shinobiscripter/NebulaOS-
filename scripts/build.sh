@@ -8,6 +8,7 @@ done
 [[ "$(pnpm --version)" == "10.12.1" ]] || { echo 'pnpm 10.12.1 is required by browser.js.' >&2; exit 1; }
 node -e 'if (+process.versions.node.split(".")[0] < 24) process.exit(1)'
 git submodule update --init --recursive
+node scripts/prepare-browser-widget.mjs
 make static
 node scripts/package-nebula.mjs
 node --test tests/*.test.mjs

@@ -1,3 +1,5 @@
+import { createWidgets } from "./widgets.js";
+import { installSpotify } from "./spotify.js";
 // Nebula desktop conveniences use the existing Anura apps, windows and settings.
 export default function installDesktop(os) {
 	if (
@@ -190,11 +192,7 @@ export default function installDesktop(os) {
 	const utilities = make("div", "nebula-menu-utilities");
 	const searchButton = button("Search", spotlight);
 	searchButton.title = "Search apps (Ctrl/⌘ K)";
-	const widgetsButton = button("Widgets", () => {
-		widgets.hidden = !widgets.hidden;
-		widgetsButton.setAttribute("aria-pressed", String(!widgets.hidden));
-		save("nebula.desktop.widgets", !widgets.hidden);
-	});
+	const widgetsButton = button("Widgets", () => widgetManager.menu());
 	utilities.append(searchButton, widgetsButton);
 	bar.append(utilities);
 	// Move the existing live battery/network/clock controls into the menu bar.
@@ -207,17 +205,16 @@ export default function installDesktop(os) {
 		}
 	});
 
-	const widgets = make("aside", "nebula-widgets");
-	widgets.setAttribute("aria-label", "Desktop widgets");
-	widgets.hidden = os.settings.get("nebula.desktop.widgets") === false;
-	widgetsButton.setAttribute("aria-pressed", String(!widgets.hidden));
-	document.body.append(widgets);
-	const widget = (title, className = "") => {
-		const card = make("section", `nebula-widget ${className}`);
-		card.append(make("h2", "", title));
-		widgets.append(card);
-		return card;
-	};
+	const widgetManager = createWidgets(os, {
+		make,
+		button,
+		save,
+		dialog,
+		heading,
+		search,
+		results,
+	});
+	const { widget } = widgetManager;
 	const clock = widget("Today", "nebula-date-widget");
 	const time = make("time", "nebula-widget-time");
 	const date = make("p", "nebula-muted");
@@ -372,6 +369,7 @@ export default function installDesktop(os) {
 	}
 	focus.append(countdown, start, reset);
 	runTimer();
+	installSpotify(os, { widget, make, button, save });
 
 	const decorated = new WeakSet();
 	function constrain(win) {

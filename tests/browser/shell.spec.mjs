@@ -67,8 +67,14 @@ test("desktop menus, widgets, app search and real window overview", async ({
 		.click();
 	await expect(gameWindow).toBeVisible();
 	await menu.getByRole("button", { name: "Widgets", exact: true }).click();
+	await dialog
+		.getByRole("button", { name: "Hide all widgets", exact: true })
+		.click();
 	await expect(widgets).toBeHidden();
-	await menu.getByRole("button", { name: "Widgets", exact: true }).click();
+	await dialog
+		.getByRole("button", { name: "Show all widgets", exact: true })
+		.click();
+	await dialog.getByRole("button", { name: "Close", exact: true }).click();
 	await expect(widgets).toBeVisible();
 	await gameWindow
 		.getByRole("button", { name: "Close Nebula Games", exact: true })
