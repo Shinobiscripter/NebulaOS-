@@ -6,8 +6,6 @@ The Nebula layer adds a space theme, boot UI tied to real initialization, a nati
 
 Live deployment: **[nebulahub-shinobiscripter.netlify.app](https://nebulahub-shinobiscripter.netlify.app)**. This site was uploaded from the tested production output; Git pushes do not automatically deploy it. The Netlify badge is disabled in site settings so it does not overlay application windows.
 
-## Build
-
 ## Desktop features
 
 The desktop uses a macOS-inspired top menu, centered dock and colored window controls while retaining Anura's actual window manager. Search launches installed apps; Ctrl/Command+K opens it when the desktop has keyboard focus. Windows provides an overview with left/right tiling, and Show Desktop minimizes and restores open windows.

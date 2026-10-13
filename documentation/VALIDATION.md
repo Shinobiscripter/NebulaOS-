@@ -36,6 +36,8 @@ The upstream browser.js build emits TypeScript declaration-generation diagnostic
 
 `tests/browser/shell.spec.mjs` additionally verifies the desktop menu, calendar and quick settings, persistent notes/reminders, timer controls, application search, actual window tiling, Show Desktop/Restore Windows, widget visibility and window close without uncaught page errors. The five local desktop/core checks passed after the desktop update. The Linux installation test predates this presentation-only update; it was not repeated for the new dock/widgets.
 
+Production commit `7526ee4` was published on 12 October 2026, Netlify deploy `6acd941b965cbdaae986f916`. All six live checks (desktop, online games and desktop shell) passed in 1.1 minutes against the public URL. The full Linux production build, catalog unit tests and static verification also passed. The desktop screenshot in the deliverables was captured from this live deployment after boot completed.
+
 - Chromium tested; Firefox/Safari/mobile, physical Chromebook performance, actual PWA installation UI and gamepad input were not tested.
 - Browser proxy UI and local Wisp service are present. Production relay operation needs the operator's endpoint and separate verification.
 - Published to https://nebulahub-shinobiscripter.netlify.app using the Netlify CLI. Live desktop, isolation, WASM, terminal and representative game checks were run. Linux kernel and disk-chunk proxy HEAD requests returned HTTP 200 with the expected sizes; the full 1 GiB install/boot test was local. The cloud build pipeline and sustained proxy bandwidth limits were not certified.
