@@ -1,6 +1,6 @@
 # Validation and deployment limits
 
-Validated locally on 11 October 2026. Tests exercise the actual Anura-derived production site, not mocked desktop screens.
+Core validated locally on 11 October 2026; desktop enhancements validated on 12 October 2026. Tests exercise the actual Anura-derived production site, not mocked desktop screens.
 
 ## Build environment
 
@@ -13,7 +13,7 @@ Validated locally on 11 October 2026. Tests exercise the actual Anura-derived pr
 
 The production `npm run build` command runs `make static`, packaging, three catalog unit tests and static-output verification. It completed with exit code 0. v86 and Scramjet were actually compiled during initial toolchain setup; subsequent production builds reuse their compiled intermediates when unchanged.
 
-Output is `static/`, approximately 49.1 MiB in 592 files. `static/nebula/build-report.json` records exact sizes and build commit. Largest file: `x86images/bzResize` (10,488,224 bytes). No file exceeds 50 MiB. The optional 1 GiB Linux disk is downloaded separately, not bundled.
+Output is `static/`, approximately 49.1 MiB. `static/nebula/build-report.json` records exact sizes and build commit. Largest file: `x86images/bzResize` (10,488,224 bytes). No file exceeds 50 MiB. The optional 1 GiB Linux disk is downloaded separately, not bundled.
 
 The upstream browser.js build emits TypeScript declaration-generation diagnostics in its Scramjet core. Its runtime build completes; the main OS `npm run check` passes. Those dependency declaration diagnostics are not claimed to be fixed. Do not use the generated upstream types as evidence of a clean declaration build.
 
@@ -34,9 +34,11 @@ The upstream browser.js build emits TypeScript declaration-generation diagnostic
 
 ## Scope of evidence
 
+`tests/browser/shell.spec.mjs` additionally verifies the desktop menu, calendar and quick settings, persistent notes/reminders, timer controls, application search, actual window tiling, Show Desktop/Restore Windows, widget visibility and window close without uncaught page errors. The five local desktop/core checks passed after the desktop update. The Linux installation test predates this presentation-only update; it was not repeated for the new dock/widgets.
+
 - Chromium tested; Firefox/Safari/mobile, physical Chromebook performance, actual PWA installation UI and gamepad input were not tested.
 - Browser proxy UI and local Wisp service are present. Production relay operation needs the operator's endpoint and separate verification.
-- Netlify configuration and equivalent local response headers were tested. No Netlify account deployment was performed; provider build-image availability, proxy bandwidth/time limits and account quotas must be checked on the selected site.
+- Published to https://nebulahub-shinobiscripter.netlify.app using the Netlify CLI. Live desktop, isolation, WASM, terminal and representative game checks were run. Linux kernel and disk-chunk proxy HEAD requests returned HTTP 200 with the expected sizes; the full 1 GiB install/boot test was local. The cloud build pipeline and sustained proxy bandwidth limits were not certified.
 - Only two representative games were loaded. All 46 original launcher files and URLs are preserved; external content can change or disappear. The source had no curated categories, tags or covers, so none were fabricated.
 - Offline support caches the OS and catalog, not third-party game downloads. Enable it in Settings before disconnecting. Games in credentialless windows have temporary storage; separate tabs are the default for persistent saves.
 - Compatible dependency updates reduced the root npm audit findings from 29 to 11. Remaining findings are in inherited build/watch/CLI dependency chains (including Workbox CLI, PostCSS CLI, temporary-file helpers and serialization). No automatic major-version downgrade/forced migration was applied. The static Netlify site does not execute those Node CLI packages; this is not a claim that all upstream dependencies or remote games are security-audited.

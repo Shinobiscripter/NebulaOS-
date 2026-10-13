@@ -4,7 +4,17 @@ A browser desktop powered by **[AnuraOS](https://github.com/MercuryWorkshop/anur
 
 The Nebula layer adds a space theme, boot UI tied to real initialization, a native Games app and Netlify packaging. Internal `anura.*` APIs, package IDs, storage names and worker paths remain compatible.
 
+Live deployment: **[nebulahub-shinobiscripter.netlify.app](https://nebulahub-shinobiscripter.netlify.app)**. This site was uploaded from the tested production output; Git pushes do not automatically deploy it. The Netlify badge is disabled in site settings so it does not overlay application windows.
+
 ## Build
+
+## Desktop features
+
+The desktop uses a macOS-inspired top menu, centered dock and colored window controls while retaining Anura's actual window manager. Search launches installed apps; Ctrl/Command+K opens it when the desktop has keyboard focus. Windows provides an overview with left/right tiling, and Show Desktop minimizes and restores open windows.
+
+Desktop widgets include a live clock/calendar shortcut, saved quick note, reminders with completion/deletion, and a pausable 25-minute focus timer with a completion notification. Notes, reminders, timer state and widget visibility use the existing OS settings storage. The Widgets menu toggles the panel. Mobile retains the upstream layout. No Apple assets or macOS application compatibility are included.
+
+## Build setup
 
 Use x86-64 Linux or WSL2; upstream does not support native Windows builds.
 

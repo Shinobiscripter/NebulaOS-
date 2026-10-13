@@ -651,6 +651,12 @@ document.addEventListener("anura-login-completed", async () => {
 		}
 	});
 
+	try {
+		const desktopModule = "/nebula/desktop.js";
+		(await import(desktopModule)).default(anura);
+	} catch (error) {
+		console.error("Nebula desktop extensions could not load", error);
+	}
 	anura.initComplete = true;
 	const status = document.getElementById("systemstatus");
 	if (status) status.textContent = "Ready";
