@@ -1,4 +1,31 @@
 import { test, expect } from "@playwright/test";
+test("Netlify upgrades its old relay default and preserves custom relay settings", async ({
+	page,
+}) => {
+	test.skip(
+		!process.env.NEBULA_BASE_URL?.includes(".netlify.app"),
+		"Production migration",
+	);
+	await page.goto("/");
+	await page.waitForFunction(() => window.anura?.initComplete);
+	const expected = await page.evaluate(() => anura.settings.get("wisp-url"));
+	expect(expected).toBe("wss://nebulahub-browser.onrender.com/wisp/");
+	await page.evaluate(() =>
+		anura.settings.set("wisp-url", `wss://${location.host}/`),
+	);
+	await page.reload();
+	await page.waitForFunction(() => window.anura?.initComplete);
+	expect(await page.evaluate(() => anura.settings.get("wisp-url"))).toBe(
+		expected,
+	);
+	const custom = expected.replace(".com/", ".com:443/");
+	await page.evaluate((url) => anura.settings.set("wisp-url", url), custom);
+	await page.reload();
+	await page.waitForFunction(() => window.anura?.initComplete);
+	expect(await page.evaluate(() => anura.settings.get("wisp-url"))).toBe(
+		custom,
+	);
+});
 test("individual widget visibility, pointer and keyboard placement persist", async ({
 	page,
 }) => {

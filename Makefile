@@ -183,6 +183,7 @@ build/cache-load.json: FORCE
 	(find apps/ -type f && cd build/ && find lib/ -type f && find libs/ -type f && find assets/ -type f && find bundle.css -type f && cd ../public/ && find . -type f)| grep -v -e node_modules -e \.map -e \.d\.ts -e "/\." -e "workbox/" | jq -Rnc '[inputs]' > build/cache-load.json
 	
 static: all
+	node scripts/clean-static.mjs
 	mkdir -p static/
 	cp -r public/* static/
 	cp -r build/* static/

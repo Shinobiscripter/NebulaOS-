@@ -41,6 +41,8 @@ test("Spotify renders and plays a preview through the real proxy", async ({
 	await expect(
 		spotify.getByRole("button", { name: "Play", exact: true }),
 	).toBeVisible({ timeout: 30000 });
+	// Spotify renders a server-side Play button before its player is hydrated.
+	await spotify.waitForLoadState("networkidle", { timeout: 30000 });
 	await spotify.getByRole("button", { name: "Play", exact: true }).click();
 	await expect
 		.poll(
