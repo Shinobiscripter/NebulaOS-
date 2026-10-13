@@ -4,7 +4,7 @@ A browser desktop powered by **[AnuraOS](https://github.com/MercuryWorkshop/anur
 
 The Nebula layer adds a space theme, boot UI tied to real initialization, a native Games app and Netlify packaging. Internal `anura.*` APIs, package IDs, storage names and worker paths remain compatible.
 
-Live deployment: **[nebulahub-shinobiscripter.netlify.app](https://nebulahub-shinobiscripter.netlify.app)**. This site was uploaded from the tested production output; Git pushes do not automatically deploy it. The Netlify badge is disabled in site settings so it does not overlay application windows.
+Live deployment: **[nebulahub-nebulasoftwares.netlify.app](https://nebulahub-nebulasoftwares.netlify.app)**. This site was uploaded from the tested production output; Git pushes do not automatically deploy it. The Netlify badge is disabled in site settings so it does not overlay application windows.
 
 ## Desktop features
 
@@ -16,7 +16,7 @@ Desktop widgets include a live clock/calendar shortcut, saved quick note, remind
 
 Drag each widget by its title, or focus the title and use arrow keys (Shift for one-pixel movement). Each × hides only that widget; **Widgets** restores individual widgets, hides/shows the whole set, or resets positions. Layout and visibility survive refresh and positions are clamped to the viewport.
 
-Nebula Music replaces Spotify with a full-screen native app and a draggable Music widget. Both share saved playlists, song metadata and one playback queue. Open Music to automatically discover space/ambient music, search songs/artists, or paste a `music.youtube.com` / YouTube song link. Search and metadata use public YouTube pages through the existing relay, without an API key; this unofficial discovery parser can break if YouTube changes its pages or blocks the relay. Playback uses the official visible YouTube embedded player, with full-length videos where permitted. Ads, region restrictions, sign-in and embedding availability remain controlled by YouTube. No Premium subscription, audio extraction or download service is provided. Hide/minimize pauses the active player; switching playback views resumes near the current position. Saved playlists are local to this OS installation, not synced to a Google account.
+Nebula Music replaces Spotify with a full-screen native app and a draggable Music widget. The rebuilt app uses library navigation, a central discovery browser, a visible YouTube listening pane and a bottom transport with seek/volume. The widget has its own compact Search/Library tabs and row-based results. Search is shared between both views. Both share saved playlists, song metadata and one playback queue. Open Music to automatically discover space/ambient music, search songs/artists, or paste a `music.youtube.com` / YouTube song link. Search and metadata use public YouTube pages through the existing relay, without an API key; this unofficial discovery parser can break if YouTube changes its pages or blocks the relay. Playback uses the official visible YouTube embedded player, with full-length videos where permitted. Ads, region restrictions, sign-in and embedding availability remain controlled by YouTube. No Premium subscription, audio extraction or download service is provided. Hide/minimize pauses the active player; switching playback views resumes near the current position. Saved playlists are local to this OS installation, not synced to a Google account.
 
 ## Build setup
 
