@@ -169,3 +169,32 @@
 		border-bottom: 1px solid #243049;
 	}
 }
+.nm-compact-results {
+	display: block;
+	max-height: 300px;
+	overflow: auto;
+	margin-top: 8px;
+}
+.nm-compact-results .nm-result {
+	padding: 10px 0;
+}
+.nm-compact-results .nm-result img {
+	width: 84px;
+	height: 48px;
+	float: left;
+	margin: 0 10px 6px 0;
+}
+.nm-compact-results .nm-result h3 {
+	margin-top: 0;
+}
+.nm-compact-results .nm-result p {
+	clear: both;
+}
+.nm-search-status {
+	font-size: 12px;
+	color: #afc7e8;
+}
+.nebula-music button:disabled {
+	opacity: 0.6;
+	cursor: wait;
+}

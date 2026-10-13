@@ -26,6 +26,9 @@ export function installMusic(os, { widget, make, button, save }) {
 	let status = "Search for music or add a YouTube Music song link.",
 		results = [],
 		searchGeneration = 0;
+	let searchQuery = "",
+		searchStatus = "",
+		searching = false;
 	let lastTime = 0;
 	let queue = [],
 		index = -1;
@@ -48,7 +51,13 @@ export function installMusic(os, { widget, make, button, save }) {
 	}
 	async function discover(query) {
 		const generation = ++searchGeneration;
-		setStatus("Searching YouTube… The free relay may need a minute to wake.");
+		searchQuery = query;
+		searching = true;
+		results = [];
+		searchStatus =
+			"Searching YouTube… The free relay may need a minute to wake.";
+		for (const view of views) view.search.value = query;
+		render();
 		try {
 			const html = await (
 				await remote(
@@ -58,13 +67,16 @@ export function installMusic(os, { widget, make, button, save }) {
 			const found = searchTracks(html);
 			if (generation !== searchGeneration) return;
 			results = found;
-			setStatus(
-				found.length
-					? `${found.length} results from YouTube`
-					: "No songs found. Try another search or paste a song link.",
-			);
+			searchStatus = found.length
+				? `${found.length} results for ${query}`
+				: `No songs found for ${query}. Try another search or paste a song link.`;
 		} catch (error) {
-			if (generation === searchGeneration) setStatus(error.message);
+			if (generation === searchGeneration) searchStatus = error.message;
+		} finally {
+			if (generation === searchGeneration) {
+				searching = false;
+				render();
+			}
 		}
 	}
 	async function addLink(value) {
@@ -200,6 +212,10 @@ export function installMusic(os, { widget, make, button, save }) {
 			view.title.textContent = current?.title || "Your next discovery awaits";
 			view.artist.textContent = current?.artist || "YouTube • Nebula Music";
 			view.status.textContent = status;
+			view.searchStatus.textContent = searchStatus;
+			view.searchButton.disabled = searching;
+			view.searchButton.textContent = searching ? "Searching" : "Search";
+			view.results.setAttribute("aria-busy", String(searching));
 			view.play.textContent = playing ? "Pause" : "Play";
 			view.select.replaceChildren(
 				...library.playlists.map((p) => {
@@ -230,10 +246,11 @@ export function installMusic(os, { widget, make, button, save }) {
 					make(
 						"p",
 						"nm-muted",
-						"No songs yet. Add a link or discover music in the app.",
+						"No songs yet. Search below or add a song link.",
 					),
 				);
-			if (view.results) {
+			if (view.renderedResults !== results) {
+				view.renderedResults = results;
 				view.results.replaceChildren(
 					...results.map((track) => {
 						const row = make("article", "nm-result");
@@ -264,6 +281,36 @@ export function installMusic(os, { widget, make, button, save }) {
 			player: make("div", "nm-player"),
 			select: make("select"),
 			list: make("div", "nm-library"),
+		};
+		view.search = make("input");
+		view.search.type = "search";
+		view.search.placeholder = "Search songs or artists";
+		view.search.setAttribute("aria-label", "Search music");
+		view.search.value = searchQuery;
+		view.searchButton = button("Search", () => {});
+		view.searchButton.type = "submit";
+		const searchForm = make("form", "nm-search");
+		searchForm.setAttribute("role", "search");
+		searchForm.setAttribute(
+			"aria-label",
+			full ? "App music search" : "Widget music search",
+		);
+		searchForm.append(view.search, view.searchButton);
+		view.searchStatus = make("p", "nm-search-status");
+		view.searchStatus.setAttribute("aria-live", "polite");
+		view.results = make(
+			"div",
+			full ? "nm-results" : "nm-results nm-compact-results",
+		);
+		view.results.setAttribute("aria-label", "Music search results");
+		searchForm.onsubmit = (event) => {
+			event.preventDefault();
+			const query = view.search.value.trim().slice(0, 200);
+			if (query) discover(query);
+			else {
+				view.searchStatus.textContent = "Enter a song or artist to search.";
+				view.search.focus();
+			}
 		};
 		view.status.setAttribute("role", "status");
 		view.select.setAttribute("aria-label", "Music playlist");
@@ -335,25 +382,15 @@ export function installMusic(os, { widget, make, button, save }) {
 					"Discover music on YouTube. Collect your favorites in one shared library.",
 				),
 			);
-			const search = make("input");
-			search.type = "search";
-			search.placeholder = "Songs, artists, albums…";
-			search.setAttribute("aria-label", "Search music");
-			const searchForm = make("form", "nm-search");
-			searchForm.append(
-				search,
-				button("Search", () => {}),
-			);
-			searchForm.lastChild.type = "submit";
-			searchForm.onsubmit = (event) => {
-				event.preventDefault();
-				if (search.value.trim()) discover(search.value.trim());
-			};
-			view.results = make("div", "nm-results");
-			main.append(searchForm, view.results);
+			main.append(searchForm, view.searchStatus, view.results);
 			body.append(sidebar, main);
 		} else {
-			sidebar.append(button("Open Music app", () => app.open()));
+			sidebar.append(
+				searchForm,
+				view.searchStatus,
+				view.results,
+				button("Open Music app", () => app.open()),
+			);
 			body.append(sidebar);
 		}
 		const youtube = make("a", "", "Open current song on YouTube");
