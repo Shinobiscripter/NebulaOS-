@@ -51,7 +51,8 @@ export function safeAccountURL(value) {
 	return url.href;
 }
 export function normalizeAccount(input) {
-	const service = SERVICES[input.service];
+	const service =
+		input && Object.hasOwn(SERVICES, input.service) && SERVICES[input.service];
 	if (!service) throw Error("Choose a supported service.");
 	const label = String(input.label || "")
 			.trim()
@@ -69,6 +70,63 @@ export function normalizeAccount(input) {
 		favorite: !!input.favorite,
 		lastOpened: Number(input.lastOpened) || 0,
 	};
+}
+export function exportHub(accounts) {
+	return JSON.stringify(
+		{
+			format: "nebulahub-account-center",
+			version: 1,
+			accounts: accounts.map((account) => {
+				const { id, ...profile } = normalizeAccount(account);
+				return profile;
+			}),
+		},
+		null,
+		2,
+	);
+}
+export function importHub(text, existing) {
+	if (text.length > 1024 * 1024)
+		throw Error("This .hub file is too large (maximum 1 MB).");
+	let data;
+	try {
+		data = JSON.parse(text);
+	} catch {
+		throw Error("This is not a valid .hub file.");
+	}
+	if (
+		data?.format !== "nebulahub-account-center" ||
+		data.version !== 1 ||
+		!Array.isArray(data.accounts)
+	)
+		throw Error("Choose a supported Account Center .hub file (version 1).");
+	if (data.accounts.length > 1000)
+		throw Error("A .hub file can contain up to 1,000 profiles.");
+	// Validate the entire file before changing storage; never import credentials or IDs.
+	const incoming = data.accounts.map((account) => {
+		if (
+			!account ||
+			typeof account !== "object" ||
+			typeof account.label !== "string" ||
+			(account.handle !== undefined && typeof account.handle !== "string")
+		)
+			throw Error("The .hub file contains an invalid profile.");
+		return normalizeAccount({ ...account, id: crypto.randomUUID() });
+	});
+	const rows = [...existing];
+	let skipped = 0;
+	for (const account of incoming) {
+		if (
+			rows.some(
+				(row) =>
+					row.service === account.service &&
+					row.label.toLowerCase() === account.label.toLowerCase(),
+			)
+		) {
+			skipped++;
+		} else rows.push(account);
+	}
+	return { rows, added: rows.length - existing.length, skipped };
 }
 const el = (tag, text, props = {}) =>
 	Object.assign(document.createElement(tag), {
@@ -179,6 +237,57 @@ export function installAccountCenter(os) {
 				list = el("div", null, { className: "nac-list" }),
 				status = el("p", null, { className: "nac-status" });
 			status.setAttribute("role", "status");
+			const transfer = el("div", null, { className: "nac-transfer" });
+			const file = input("Import .hub file", {
+				type: "file",
+				accept: ".hub",
+				hidden: true,
+			});
+			file.onchange = async () => {
+				const selected = file.files[0];
+				if (!selected) return;
+				try {
+					if (selected.size > 1024 * 1024)
+						throw Error("This .hub file is too large (maximum 1 MB).");
+					const text = await selected.text();
+					const result = importHub(text, read());
+					store(result.rows);
+					filter = "all";
+					query = search.value = "";
+					render();
+					status.textContent = `Imported ${result.added} profiles. ${result.skipped} duplicate labels skipped; existing profiles kept. Sign in again on each service in this browser.`;
+				} catch (error) {
+					status.textContent = `Import failed: ${error.message}`;
+				} finally {
+					file.value = "";
+				}
+			};
+			transfer.append(
+				button("Export .hub", () => {
+					try {
+						const blob = new Blob([exportHub(read())], {
+							type: "application/json",
+						});
+						const url = URL.createObjectURL(blob);
+						const link = el("a", null, {
+							href: url,
+							download: "NebulaHub-accounts.hub",
+						});
+						link.click();
+						setTimeout(() => URL.revokeObjectURL(url), 30000);
+						status.textContent =
+							"Exported saved profiles. Import this .hub file in Account Center in your other browser.";
+					} catch (error) {
+						status.textContent = error.message;
+					}
+				}),
+				button("Import .hub", () => file.click()),
+				file,
+				el(
+					"small",
+					"Transfer names, links and favorites. No passwords or login sessions. Existing profiles are kept. The file is readable text; keep it private.",
+				),
+			);
 			const undoButton = button("Undo removal", () => {
 				if (!undo) return;
 				const rows = read();
@@ -407,6 +516,7 @@ export function installAccountCenter(os) {
 			content.append(
 				header,
 				description,
+				transfer,
 				search,
 				count,
 				editor,

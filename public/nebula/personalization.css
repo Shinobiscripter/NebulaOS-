@@ -765,3 +765,14 @@ body.nebula-motion-reduced > footer {
 	outline: 2px solid #a6baff;
 	outline-offset: 3px;
 }
+.nac-transfer {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 16px 0;
+}
+.nac-transfer small {
+	flex-basis: 100%;
+	color: #b7bfd3;
+	line-height: 1.5;
+}
