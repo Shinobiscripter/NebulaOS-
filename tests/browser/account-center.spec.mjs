@@ -81,7 +81,6 @@ test("motion respects system preference and native Reduce motion setting", async
 	await expect(page.locator("body")).toHaveClass(/nebula-motion(\s|$)/);
 	await page.evaluate(async () => {
 		await anura.settings.set("disable-animation", true);
-		window.dispatchEvent(new Event("nebula:motion"));
 	});
 	await expect(page.locator("body")).toHaveClass(/nebula-motion-reduced/);
 });

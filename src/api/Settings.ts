@@ -101,6 +101,9 @@ class Settings {
 		} else {
 			this.cache[prop] = val;
 		}
+		// Keep desktop motion in sync with Settings and Quick Settings alike.
+		if (prop === "disable-animation")
+			window.dispatchEvent(new Event("nebula:motion"));
 		await this.save();
 	}
 	async save() {
