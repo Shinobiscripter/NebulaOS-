@@ -6,8 +6,10 @@ import { installAccounts } from "./accounts.js";
 import { installWallpapers } from "./wallpapers.js";
 import { installAccountCenter } from "./account-center.js";
 import { installMotion } from "./motion.js";
+import { showAccountNotice } from "./startup-notice.js";
 // Nebula desktop conveniences use the existing Anura apps, windows and settings.
 export default function installDesktop(os) {
+	showAccountNotice();
 	installAccounts(os);
 	installWallpapers(os);
 	installAccountCenter(os);

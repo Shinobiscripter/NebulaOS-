@@ -731,3 +731,37 @@ body.nebula-motion-reduced > footer {
 		transition: none !important;
 	}
 }
+/* A startup reminder; dismissal is deliberately not saved. */
+.nebula-account-notice {
+	position: fixed;
+	right: max(20px, env(safe-area-inset-right));
+	bottom: max(90px, env(safe-area-inset-bottom));
+	z-index: 100000;
+	box-sizing: border-box;
+	width: min(380px, calc(100vw - 40px));
+	padding: 18px;
+	border: 1px solid #ffffff26;
+	border-radius: 12px;
+	background: #121521;
+	color: #f1f3ff;
+	box-shadow: 0 12px 40px #0008;
+	font:
+		14px/1.5 system-ui,
+		sans-serif;
+}
+.nebula-account-notice p {
+	margin: 0 0 12px;
+}
+.nebula-account-notice button {
+	border: 1px solid #ffffff30;
+	border-radius: 6px;
+	padding: 7px 14px;
+	background: #282e48;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+.nebula-account-notice button:focus-visible {
+	outline: 2px solid #a6baff;
+	outline-offset: 3px;
+}
