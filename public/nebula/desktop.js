@@ -1,5 +1,7 @@
 import { createWidgets } from "./widgets.js";
 import { installMusic } from "./music.js";
+import { installWindowLayout } from "./window-layout.js";
+import { installEnvironments } from "./environments.js";
 // Nebula desktop conveniences use the existing Anura apps, windows and settings.
 export default function installDesktop(os) {
 	if (
@@ -370,13 +372,23 @@ export default function installDesktop(os) {
 	focus.append(countdown, start, reset);
 	runTimer();
 	installMusic(os, { widget, make, button, save });
+	installWindowLayout({ windows, make, button, bar });
+	installEnvironments(os, {
+		windows,
+		make,
+		button,
+		save,
+		bar,
+		spotlight,
+		overview,
+	});
 
 	const decorated = new WeakSet();
 	function constrain(win) {
 		const el = win.element;
+		if (win.maximized) return;
 		if (el.getBoundingClientRect().top < 34) el.style.top = "34px";
-		if (win.maximized) el.style.height = `${innerHeight - 112}px`;
-		else if (win.snapped)
+		if (win.snapped)
 			el.style.height = `${Math.min(el.offsetHeight, innerHeight - 112)}px`;
 	}
 	function decorate() {

@@ -5,7 +5,14 @@ export function createWidgets(
 ) {
 	const layer = make("aside", "nebula-widgets");
 	layer.setAttribute("aria-label", "Desktop widgets");
-	layer.hidden = os.settings.get("nebula.desktop.widgets") === false;
+	const visibilitySetting = () =>
+		os.settings.get("nebula.desktop.environment") === "flow"
+			? "nebula.flow.widgets"
+			: "nebula.desktop.widgets";
+	layer.hidden =
+		os.settings.get("nebula.desktop.environment") === "flow"
+			? os.settings.get(visibilitySetting()) !== true
+			: os.settings.get(visibilitySetting()) === false;
 	document.body.append(layer);
 	let layout = os.settings.get("nebula.desktop.widgetLayout") || {};
 	const cards = new Map();
@@ -68,7 +75,7 @@ export function createWidgets(
 			check.checked = !card.hidden;
 			check.onchange = () => {
 				layer.hidden = false;
-				save("nebula.desktop.widgets", true);
+				save(visibilitySetting(), true);
 				visibility(id, check.checked);
 			};
 			label.append(check, document.createTextNode(card.dataset.title));
@@ -77,7 +84,7 @@ export function createWidgets(
 		results.append(
 			button(layer.hidden ? "Show all widgets" : "Hide all widgets", () => {
 				layer.hidden = !layer.hidden;
-				save("nebula.desktop.widgets", !layer.hidden);
+				save(visibilitySetting(), !layer.hidden);
 				for (const card of cards.values())
 					card.dispatchEvent(
 						new Event(layer.hidden ? "widgethide" : "widgetshow"),

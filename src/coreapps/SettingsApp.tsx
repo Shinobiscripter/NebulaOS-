@@ -295,6 +295,24 @@ class SettingsApp extends App {
 					<div id="general" class="general settings-category">
 						<h3 class="settings-category-name">General</h3>
 						<div class="settings-group">
+							<label class="settings-item">
+								<span>Desktop environment</span>
+								<select aria-label="Desktop environment" value={anura.settings.get("nebula.desktop.environment") || "orbit"} on:change={async (event: any) => {
+									await anura.settings.set("nebula.desktop.environment", event.target.value);
+									window.dispatchEvent(new Event("nebula:environment"));
+								}}>
+									<option value="orbit">Orbit — classic Nebula desktop</option>
+									<option value="flow">Flow — Hyprland-inspired desktop</option>
+								</select>
+							</label>
+							<label class="settings-item">
+								<span>Use environment wallpaper</span>
+								<input type="checkbox" aria-label="Use environment wallpaper" checked={anura.settings.get("nebula.desktop.environmentWallpaper") !== false} on:change={async (event: any) => {
+									await anura.settings.set("nebula.desktop.environmentWallpaper", event.target.checked);
+									window.dispatchEvent(new Event("nebula:environment"));
+								}} />
+							</label>
+							<p>Flow adds four workspaces, a dashboard, scratchpad and window tiling. Ctrl+Alt+1–4 switches workspaces; add Shift to move a window. Ctrl+Alt+T tiles, Ctrl+Alt+D opens the dashboard. Disable its wallpaper to use your own.</p>
 							<SettingSwitch
 								title="Allow offline use"
 								setting="use-sw-cache"

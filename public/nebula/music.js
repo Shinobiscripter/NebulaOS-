@@ -619,6 +619,9 @@ export function installMusic(os, { widget, make, button, save }) {
 				attributeFilter: ["style"],
 			});
 			win.addEventListener("close", () => observer.disconnect());
+			win.element.addEventListener("nebula:visibility", (event) => {
+				if (!event.detail && owner === view) pause();
+			});
 			if (!results.length) discover("space ambient");
 		},
 	};
