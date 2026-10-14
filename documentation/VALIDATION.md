@@ -90,3 +90,15 @@ Account Center checks cover localStorage persistence, favorites, rename, search,
 Visual screenshots cover the lock screen, wallpaper picker and Account Center. Browser tests caught and resolved SVG image decoding, while visual review caught inherited dock positioning on the wallpaper pagination. Existing shell and fullscreen tests passed with the new motion layer; system reduced motion and the stored native setting disable effects. Settings logging no longer prints entire preference values or wallpaper previews.
 
 Details, account security boundaries, source references and provider-session limitations are in `documentation/PERSONALIZATION.md`. Local filesystem namespaces are organization boundaries, not encryption; website cookies can remain shared at browser-origin scope. AGPL source and upstream attribution remain available.
+
+## Horizon, lock controls, wallpaper integration and discovery — 14 October 2026
+
+Production source `7f6fe7b`, Netlify deploy `6ad007e21ae8d6863eec1d77`, live at https://nebulahub-shinobiscripter.netlify.app/. Full production build, TypeScript and all 11 unit tests passed; static/PWA/WASM verification passed. Deployment archive refreshed.
+
+Nine browser checks passed on the live release: fullscreen/dock and Flow environments; Horizon drag-to-desktop, repositioning, refresh persistence, opening native apps and removing shortcuts; music discovery UI and shared playlist additions; no-account lock/return; password visibility, wrong-password rejection, account switching and pre-boot authentication; custom keybindings; wallpaper image and accent persistence; app/widget playlist persistence. Two optional online checks were skipped in that suite. Discovery UI's deterministic test supplies fixture YouTube metadata; separate, unmocked live checks returned eight tracks in each of the three new sections.
+
+The optional live music test was then run separately and passed: YouTube metadata, shared playlist addition, actual playback (duration over two minutes), seeking to 60 seconds, volume set to 35 via the player API and pause. The initial volume assertion read YouTube's internal video element and failed despite successful playback/seeking; the test now checks the public player API for the requested volume. No production player changes were required. New discovery sections are search-based recommendations, not official popularity charts. Free relay availability and YouTube embedding restrictions remain external limitations.
+
+Visual checks covered Horizon Start/shortcuts, music covers and shelves, the wallpaper picker and the lock screen. The Settings environment selector now correctly restores its selected option after reload. Horizon widgets are opt-in to avoid covering desktop shortcuts. Individual games and Linux disk installation were not retested for this release.
+
+The preceding `.hub` transfer release (`45759ef`, deploy `6acf6ce0ca8bb5ae2da82f4c`) passed local and live cross-browser-context download/import, duplicate handling, invalid-file rejection and reload persistence. Files contain saved profile metadata only, not login sessions or credentials.

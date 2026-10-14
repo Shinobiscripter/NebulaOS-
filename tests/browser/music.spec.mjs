@@ -53,19 +53,24 @@ test("live discovery adds actual YouTube metadata to both views", async ({
 	await page.evaluate(() => anura.apps["nebula.music"].open());
 	const app = page.locator(".nm-full"),
 		card = page.getByRole("region", { name: "Music widget", exact: true });
-	await expect(app.locator(".nm-result").first()).toBeVisible({
+	await expect(
+		app.locator('.nm-shelf[aria-label="Deep space"] .nm-shelf-card').first(),
+	).toBeVisible({
 		timeout: 85000,
 	});
-	const title = await app.locator(".nm-result h3").first().innerText();
+	const title = await app
+		.locator('.nm-shelf[aria-label="Deep space"] .nm-shelf-card h3')
+		.first()
+		.innerText();
 	await app
-		.locator(".nm-result")
+		.locator('.nm-shelf[aria-label="Deep space"] .nm-shelf-card')
 		.first()
 		.getByRole("button", { name: "Add to playlist" })
 		.click();
 	await expect(card.locator(".nm-library")).toContainText(title);
 	await expect(app.locator(".nm-library")).toContainText(title);
 	await app
-		.locator(".nm-result")
+		.locator('.nm-shelf[aria-label="Deep space"] .nm-shelf-card')
 		.first()
 		.getByRole("button", { name: "Play", exact: true })
 		.click();
@@ -120,11 +125,10 @@ test("live discovery adds actual YouTube metadata to both views", async ({
 	await expect
 		.poll(
 			() =>
-				videoFrame
-					.locator("video")
-					.evaluateAll((elements) =>
-						elements.some((video) => Math.abs(video.volume - 0.35) < 0.02),
-					),
+				page
+					.frames()
+					.find((frame) => frame.url().includes("music-player.html"))
+					.evaluate(() => player.getVolume() === 35),
 			{ timeout: 10000 },
 		)
 		.toBe(true);
