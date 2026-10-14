@@ -365,3 +365,369 @@ body.nebula-env-flow .aliceWMwin:focus-within {
 		min-height: 205px;
 	}
 }
+.nebula-account-center {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	grid-template-columns: 205px 1fr;
+	min-height: 0;
+	background: #0d141e;
+	color: #e6edf7;
+	font-family: inherit;
+	user-select: text;
+}
+.nebula-account-center aside {
+	padding: 28px 20px;
+	background: #101b29;
+	border-right: 1px solid #7188a522;
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+.nac-eyebrow {
+	font-size: 9px;
+	letter-spacing: 0.22em;
+	color: var(--theme-accent);
+}
+.nebula-account-center aside h2 {
+	font-size: 29px;
+	font-weight: 400;
+	line-height: 1.2;
+	white-space: pre-line;
+	margin: 0;
+}
+.nebula-account-center p {
+	font-size: 12px;
+	color: #a5b5c9;
+	line-height: 1.7;
+	margin: 0 0 14px;
+}
+.nebula-account-center aside nav {
+	display: grid;
+	gap: 6px;
+	margin-top: 15px;
+}
+.nebula-account-center .nac-sidebar-note {
+	margin-top: auto;
+	font-size: 11px;
+}
+.nebula-account-center main {
+	padding: 26px;
+	overflow: auto;
+	min-width: 0;
+}
+.nebula-account-center header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 12px;
+}
+.nebula-account-center h1 {
+	font-size: 24px;
+	font-weight: 400;
+	margin: 0;
+}
+.nebula-account-center button,
+.nebula-account-center input,
+.nebula-account-center select {
+	font: inherit;
+	font-size: 12px;
+	color: #e6edf7;
+	background: #1b293b;
+	border: 1px solid #7188a540;
+	border-radius: 5px;
+	padding: 9px 12px;
+}
+.nebula-account-center button {
+	cursor: pointer;
+}
+.nebula-account-center button:hover {
+	background: #263a52;
+	border-color: var(--theme-accent);
+}
+.nebula-account-center button[aria-current="page"] {
+	border-color: var(--theme-accent);
+	color: var(--theme-accent);
+	background: color-mix(in srgb, var(--theme-accent) 10%, #142030);
+}
+.nebula-account-center :focus-visible {
+	outline: 2px solid var(--theme-accent);
+	outline-offset: 3px;
+}
+.nebula-account-center input[type="search"] {
+	width: 100%;
+	box-sizing: border-box;
+	margin: 10px 0 16px;
+}
+.nac-list {
+	display: grid;
+	gap: 0;
+}
+.nac-account {
+	display: grid;
+	grid-template-columns: 42px 1fr;
+	gap: 14px;
+	align-items: center;
+	padding: 18px 0;
+	border-top: 1px solid #7589a22b;
+}
+.nac-service-icon {
+	width: 42px;
+	height: 42px;
+	display: grid;
+	place-items: center;
+	font-size: 12px;
+	font-weight: 600;
+	border-radius: 10px;
+	background: color-mix(in srgb, var(--service-color) 12%, #121f30);
+	color: var(--service-color);
+	border: 1px solid color-mix(in srgb, var(--service-color) 30%, transparent);
+}
+.nac-identity {
+	display: grid;
+	gap: 5px;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.nac-identity strong {
+	font-size: 14px;
+	font-weight: 500;
+}
+.nac-identity span {
+	font-size: 12px;
+	color: #bccbdf;
+}
+.nac-identity small {
+	font-size: 10px;
+	color: #8399b3;
+}
+.nac-account-actions {
+	grid-column: 2;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+.nac-account-actions button {
+	padding: 6px 10px;
+	font-size: 11px;
+}
+.nac-account-actions button:first-child {
+	background: var(--theme-accent);
+	color: #101722;
+	border-color: transparent;
+}
+.nac-empty {
+	text-align: center;
+	padding: 48px 18px;
+}
+.nac-empty > div {
+	font-size: 56px;
+	color: var(--theme-accent);
+	font-weight: 200;
+}
+.nac-empty h2 {
+	font-size: 20px;
+	font-weight: 400;
+}
+.nac-editor {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+	margin-bottom: 24px;
+	padding: 18px;
+	background: #142031;
+	border: 1px solid #7188a540;
+	border-radius: 7px;
+}
+.nac-editor h2,
+.nac-editor p {
+	grid-column: 1/-1;
+	font-size: 13px;
+	margin: 0;
+}
+.nac-editor input {
+	min-width: 0;
+}
+.nebula-account-center [hidden] {
+	display: none !important;
+}
+.nac-footnote {
+	font-size: 10px !important;
+	border-top: 1px solid #7589a22b;
+	padding-top: 18px;
+	margin-top: 18px !important;
+}
+@container (max-width:600px) {
+	.nebula-account-center {
+		grid-template-columns: 1fr;
+	}
+	.nebula-account-center aside {
+		display: none;
+	}
+}
+@media (max-width: 650px) {
+	.nebula-account-center {
+		grid-template-columns: 1fr;
+	}
+	.nebula-account-center aside {
+		display: none;
+	}
+	.nebula-account-center main {
+		padding: 16px;
+	}
+}
+/* Motion stays below 220ms for native window lifecycle timers. */
+body.nebula-motion {
+	--nebula-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+body.nebula-motion .aliceWMwin {
+	transition:
+		opacity 180ms var(--nebula-ease),
+		transform 180ms var(--nebula-ease),
+		box-shadow 180ms ease;
+}
+body.nebula-motion .aliceWMwin.maxtransition {
+	transition:
+		width 190ms var(--nebula-ease),
+		height 190ms var(--nebula-ease),
+		top 190ms var(--nebula-ease),
+		left 190ms var(--nebula-ease),
+		border-radius 190ms ease;
+}
+body.nebula-motion .aliceWMwin.opacity0 {
+	transform: translateY(12px) scale(0.97);
+}
+body.nebula-motion .nebula-menubar,
+body.nebula-motion > footer {
+	transition:
+		transform 220ms var(--nebula-ease),
+		opacity 180ms ease;
+}
+body.nebula-motion .nebula-widget:not(.dragging) {
+	transition:
+		box-shadow 200ms ease,
+		border-color 200ms ease,
+		opacity 200ms ease;
+}
+body.nebula-motion
+	:is(
+		.nebula-menubar,
+		.nebula-account-center,
+		.nebula-preferences,
+		.nebula-wallpaper-picker,
+		.nebula-flow-dashboard,
+		.nebula-flow-notes
+	)
+	button {
+	transition:
+		background-color 150ms ease,
+		border-color 150ms ease,
+		color 150ms ease,
+		transform 160ms var(--nebula-ease);
+}
+body.nebula-motion
+	:is(
+		.nebula-menubar,
+		.nebula-account-center,
+		.nebula-preferences,
+		.nebula-flow-dashboard,
+		.nebula-flow-notes
+	)
+	button:active {
+	transform: scale(0.96);
+}
+body.nebula-motion
+	:is(
+		.nebula-preferences,
+		.nebula-wallpaper-picker,
+		.nebula-flow-dashboard,
+		.nebula-dialog
+	)[open] {
+	animation: nebula-panel-enter 240ms var(--nebula-ease) both;
+}
+body.nebula-motion .nebula-flow-notes:not([hidden]) {
+	animation: nebula-sidebar-enter 260ms var(--nebula-ease) both;
+}
+body.nebula-motion .nac-account {
+	animation: nebula-row-enter 220ms var(--nebula-ease) both;
+}
+body.nebula-motion .nac-editor:not([hidden]) {
+	animation: nebula-row-enter 200ms var(--nebula-ease) both;
+}
+body.nebula-motion .nebula-wallpaper-card {
+	transition:
+		transform 220ms var(--nebula-ease),
+		filter 220ms ease;
+}
+body.nebula-motion .nebula-wallpaper-card:hover {
+	filter: brightness(1.07);
+}
+.nebula-wallpaper-fade {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	background-repeat: no-repeat;
+}
+@keyframes nebula-panel-enter {
+	from {
+		opacity: 0;
+		transform: translateY(15px) scale(0.985);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+@keyframes nebula-sidebar-enter {
+	from {
+		opacity: 0;
+		transform: translateX(22px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+@keyframes nebula-row-enter {
+	from {
+		opacity: 0;
+		transform: translateY(7px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+body.nebula-motion-reduced
+	:is(
+		.aliceWMwin,
+		.nebula-menubar,
+		.nebula-widget,
+		.nebula-preferences,
+		.nebula-wallpaper-picker,
+		.nebula-flow-dashboard,
+		.nebula-flow-notes,
+		.nebula-account-center,
+		.nebula-lock
+	),
+body.nebula-motion-reduced
+	:is(
+		.nebula-preferences,
+		.nebula-wallpaper-picker,
+		.nebula-account-center,
+		.nebula-lock
+	)
+	*,
+body.nebula-motion-reduced > footer {
+	animation: none !important;
+	transition: none !important;
+	scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+	.nebula-lock * {
+		animation: none !important;
+		transition: none !important;
+	}
+}

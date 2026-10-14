@@ -376,6 +376,16 @@ class SettingsApp extends App {
 									Lock screen
 								</button>
 							</div>
+							<div class="settings-item">
+								<span>Online account profiles</span>
+								<button
+									on:click={() =>
+										window.dispatchEvent(new Event("nebula:account-center"))
+									}
+								>
+									Account Center
+								</button>
+							</div>
 							<SettingSwitch
 								title="Allow offline use"
 								setting="use-sw-cache"
@@ -422,6 +432,9 @@ class SettingsApp extends App {
 							<SettingSwitch
 								title="Reduce motion"
 								setting="disable-animation"
+								callback={() =>
+									window.dispatchEvent(new Event("nebula:motion"))
+								}
 							/>
 							<SettingSwitch
 								title="Window Edge Clamping"

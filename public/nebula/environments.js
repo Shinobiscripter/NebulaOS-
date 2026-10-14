@@ -89,6 +89,7 @@ export function installEnvironments(
 			"nebula.games",
 			"anura.fsapp",
 			"anura.settings",
+			"nebula.accounts",
 		]) {
 			const app = os.apps[id];
 			if (app)
@@ -203,8 +204,15 @@ export function installEnvironments(
 		notify();
 	}
 	function switchWorkspace(number) {
+		const previous = active;
 		active = Math.max(1, Math.min(4, number || 1));
 		update();
+		if (active !== previous)
+			window.dispatchEvent(
+				new CustomEvent("nebula:workspace-motion", {
+					detail: active > previous ? 1 : -1,
+				}),
+			);
 	}
 	async function tile() {
 		if (tiling) return;
