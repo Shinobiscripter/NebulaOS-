@@ -278,11 +278,11 @@ export function installEnvironments(
 	window.addEventListener("nebula:environment", apply);
 	window.addEventListener("keydown", (event) => {
 		if (environment !== "flow" || !event.ctrlKey || !event.altKey) return;
-		if (/^[1-4]$/.test(event.key)) {
+		if (/^Digit[1-4]$/.test(event.code)) {
 			event.preventDefault();
-			if (event.shiftKey && focused)
-				assignments.set(focused, Number(event.key));
-			switchWorkspace(Number(event.key));
+			const target = Number(event.code.slice(-1));
+			if (event.shiftKey && focused) assignments.set(focused, target);
+			switchWorkspace(target);
 		}
 		if (event.code === "KeyT") {
 			event.preventDefault();

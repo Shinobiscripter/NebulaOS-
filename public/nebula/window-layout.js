@@ -1,7 +1,8 @@
 // Native Anura windows remain in charge; this layer supplies desktop work-area bounds.
 export function installWindowLayout({ windows, make, button, bar }) {
 	const observed = new WeakSet(),
-		closing = new WeakSet();
+		closing = new WeakSet(),
+		restoring = new WeakSet();
 	let queued = false;
 	const dock = document.querySelector("body > footer");
 	const bottom = button(
@@ -30,6 +31,16 @@ export function installWindowLayout({ windows, make, button, bar }) {
 			requestAnimationFrame(sync);
 		}
 	}
+	document.addEventListener(
+		"pointermove",
+		(event) => {
+			if (event.clientY < innerHeight - 95)
+				document.body.classList.remove("nebula-dock-reveal");
+			if (event.clientY > 48)
+				document.body.classList.remove("nebula-menu-reveal");
+		},
+		{ passive: true },
+	);
 	function sync() {
 		queued = false;
 		let fullscreen = false;
@@ -50,13 +61,19 @@ export function installWindowLayout({ windows, make, button, bar }) {
 					"focus",
 				])
 					win.addEventListener(event, schedule);
+				win.addEventListener("unmaximize", () => restoring.add(win));
+				win.addEventListener("maximize", () => restoring.delete(win));
+				win.addEventListener("resize", () => {
+					if (!win.maximized) restoring.delete(win);
+				});
 				win.addEventListener("close", () => {
 					closing.add(win);
 					observer.disconnect();
 					schedule();
 				});
 			}
-			const maximized = !!win.maximized && !closing.has(win);
+			const maximized =
+				!!win.maximized && !closing.has(win) && !restoring.has(win);
 			if (el.classList.contains("nebula-maximized") !== maximized)
 				el.classList.toggle("nebula-maximized", maximized);
 			if (maximized) {

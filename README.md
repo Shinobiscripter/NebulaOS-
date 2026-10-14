@@ -18,6 +18,8 @@ Drag each widget by its title, or focus the title and use arrow keys (Shift for 
 
 Nebula Music replaces Spotify with a full-screen native app and a draggable Music widget. The rebuilt app uses library navigation, a central discovery browser, a visible YouTube listening pane and a bottom transport with seek/volume. The widget has its own compact Search/Library tabs and row-based results. Search is shared between both views. Both share saved playlists, song metadata and one playback queue. Open Music to automatically discover space/ambient music, search songs/artists, or paste a `music.youtube.com` / YouTube song link. Search and metadata use public YouTube pages through the existing relay, without an API key; this unofficial discovery parser can break if YouTube changes its pages or blocks the relay. Playback uses the official visible YouTube embedded player, with full-length videos where permitted. Ads, region restrictions, sign-in and embedding availability remain controlled by YouTube. No Premium subscription, audio extraction or download service is provided. Hide/minimize pauses the active player; switching playback views resumes near the current position. Saved playlists are local to this OS installation, not synced to a Google account.
 
+Choose **Settings → General → Desktop environment → Flow** for the Hyprland-inspired desktop: four workspaces, a saved scratchpad, central dashboard, tiling and an illustrated space wallpaper. Orbit keeps the classic layout. Maximized apps now fill the viewport and automatically retract the dock; reveal it at the bottom edge. See [Flow controls and design notes](documentation/FLOW.md).
+
 ## Build setup
 
 Use x86-64 Linux or WSL2; upstream does not support native Windows builds.
@@ -147,3 +149,4 @@ Review conflicts in Boot, Settings/OOBE, worker routes, PWA metadata, Makefile a
 This OS is an AGPL-3.0-only derivative. [LICENSE](LICENSE), [CREDITS.md](CREDITS.md), third-party notices and Mercury Workshop attribution are preserved. About NebulaHub links to credits and this fork's source. Publish the complete corresponding source, changes and build scripts for the version you serve over a network. Keep the visible source link pointed at that version when moving or modifying the project.
 
 Games and remote assets retain their own licenses/ownership. The OS license does not relicense them or grant game redistribution rights. Original launcher notices remain intact. Review individual game rights before public distribution. See the [GNU AGPLv3 text](https://www.gnu.org/licenses/agpl-3.0.html).
+

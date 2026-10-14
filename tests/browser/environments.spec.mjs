@@ -42,7 +42,13 @@ test("maximized app fills viewport and dock retracts, reveals, and restores", as
 		.toBe(720);
 	await page.evaluate(() => anura.apps["nebula.music"].windows[0].minimize());
 	await expect(page.locator("body")).not.toHaveClass(/nebula-fullscreen/);
+	await expect(win).toBeHidden();
 	await page.evaluate(() => anura.apps["nebula.music"].windows[0].unminimize());
+	await expect(page.locator("body")).toHaveClass(/nebula-fullscreen/);
+	await page.evaluate(() => anura.apps["nebula.music"].windows[0].unmaximize());
+	await expect(page.locator("body")).not.toHaveClass(/nebula-fullscreen/);
+	await expect(page.locator(".aliceWMwin.nebula-maximized")).toHaveCount(0);
+	await page.evaluate(() => anura.apps["nebula.music"].windows[0].maximize());
 	await expect(page.locator("body")).toHaveClass(/nebula-fullscreen/);
 	await page.evaluate(() => anura.apps["nebula.music"].windows[0].close());
 	await expect(page.locator("body")).not.toHaveClass(/nebula-fullscreen/);
