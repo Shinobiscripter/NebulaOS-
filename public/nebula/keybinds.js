@@ -29,7 +29,7 @@ export function bindingError(value, bindings, action) {
 	if (!/^(Ctrl|Alt|Meta)\+/.test(value))
 		return "Include Ctrl, Alt or Meta in the shortcut.";
 	if (
-		/^(Ctrl|Meta)\+(Key[WTRNL]|Digit[0-9]|Tab)$/.test(value) ||
+		/^(Ctrl|Meta)\+(Shift\+)?(Key[WTRNLQ]|Digit[0-9]|Tab|Delete)$/.test(value) ||
 		value === "Alt+F4" ||
 		value === "Alt+Tab" ||
 		value === "Ctrl+Alt+Delete"
