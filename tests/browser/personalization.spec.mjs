@@ -54,6 +54,18 @@ test("local accounts preserve existing files, lock before boot, and isolate new 
 		false,
 	);
 	await page
+		.getByRole("button", { name: "Show password", exact: true })
+		.click();
+	await expect(
+		page.getByRole("textbox", { name: "Password", exact: true }),
+	).toHaveAttribute("type", "text");
+	await page
+		.getByRole("button", { name: "Hide password", exact: true })
+		.click();
+	await expect(
+		page.getByRole("textbox", { name: "Password", exact: true }),
+	).toHaveAttribute("type", "password");
+	await page
 		.getByRole("textbox", { name: "Password", exact: true })
 		.fill("wrong-password");
 	await page.getByRole("button", { name: "Unlock", exact: true }).click();

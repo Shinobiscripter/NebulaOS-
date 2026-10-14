@@ -146,7 +146,11 @@ export function installWallpapers(os) {
 	window.addEventListener("nebula:environment", sync);
 	sync();
 	window.addEventListener("nebula:wallpapers", () => open());
+	// Keep the upstream wallpaper API and package identity; all entry points use the new picker.
+	os.apps["anura.wallpaper"].name = "Nebula Wallpapers";
+	os.apps["anura.wallpaper"].open = async () => open();
 	async function open() {
+		if (document.querySelector(".nebula-wallpaper-picker[open]")) return;
 		const dialog = element("dialog", null, {
 			className: "nebula-wallpaper-picker",
 		});

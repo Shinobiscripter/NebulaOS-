@@ -85,6 +85,17 @@ export async function lockScreen(os, boot = false) {
 	tick();
 	const timer = setInterval(tick, 30000);
 	const form = el("form", null, { className: "nebula-unlock-form" });
+	const animate = (target, frames, duration = 320) => {
+		if (
+			matchMedia("(prefers-reduced-motion: reduce)").matches ||
+			document.body.classList.contains("nebula-motion-reduced") ||
+			os?.settings.get("disable-animation")
+		)
+			return Promise.resolve();
+		return target
+			.animate(frames, { duration, easing: "cubic-bezier(.2,.8,.2,1)" })
+			.finished.catch(() => {});
+	};
 	const select = el("select");
 	select.setAttribute("aria-label", "Local account");
 	for (const a of accounts)
@@ -99,6 +110,17 @@ export async function lockScreen(os, boot = false) {
 	const password = field("Password", "password"),
 		status = el("p", null, { className: "nebula-form-status" });
 	status.setAttribute("role", "status");
+	const caps = el("small", "Caps Lock is on", { hidden: true });
+	password.addEventListener("keyup", (event) => {
+		caps.hidden = !event.getModifierState("CapsLock");
+	});
+	const reveal = button("Show password", () => {
+		password.type = password.type === "password" ? "text" : "password";
+		reveal.textContent =
+			password.type === "password" ? "Show password" : "Hide password";
+		reveal.setAttribute("aria-pressed", String(password.type === "text"));
+	});
+	reveal.setAttribute("aria-pressed", "false");
 	const submit = el(
 		"button",
 		accounts.length ? "Unlock" : "Return to desktop",
@@ -112,6 +134,10 @@ export async function lockScreen(os, boot = false) {
 			`url(${JSON.stringify(wallpaper)})`,
 		);
 		password.value = "";
+		password.type = "password";
+		reveal.textContent = "Show password";
+		reveal.setAttribute("aria-pressed", "false");
+		caps.hidden = true;
 		status.textContent = "";
 		if (!boot && a && a.id !== profileId()) {
 			submit.textContent = "Switch account";
@@ -122,21 +148,54 @@ export async function lockScreen(os, boot = false) {
 			password.hidden = !accounts.length;
 			password.required = !!accounts.length;
 		}
+		reveal.hidden = password.hidden;
 	};
-	select.onchange = update;
+	select.onchange = () => {
+		update();
+		animate(form, [
+			{ opacity: 0.4, transform: "translateY(8px)" },
+			{ opacity: 1, transform: "none" },
+		]);
+	};
 	update();
-	if (accounts.length) form.append(select, password);
+	if (accounts.length) form.append(select, password, reveal, caps);
 	form.append(submit, status);
+	const connection = el("span", null, { className: "nebula-lock-connection" });
+	const network = () => {
+		connection.textContent = navigator.onLine
+			? "Online · Local session"
+			: "Offline · Local unlock available";
+	};
+	network();
+	window.addEventListener("online", network);
+	window.addEventListener("offline", network);
 	dialog.append(
 		el("span", "NEBULAHUB / LOCAL SESSION", { className: "nebula-lock-brand" }),
 		time,
 		date,
 		form,
-		el("p", "Your space, waiting for you.", { className: "nebula-lock-foot" }),
+		connection,
+		el(
+			"p",
+			accounts.length
+				? "Your space, waiting for you."
+				: "No password set. Add a local account in Settings to protect this screen.",
+			{ className: "nebula-lock-foot" },
+		),
 	);
 	dialog.addEventListener("cancel", (e) => e.preventDefault());
 	document.body.append(dialog);
 	dialog.showModal();
+	animate(dialog, [{ opacity: 0 }, { opacity: 1 }], 400);
+	animate(
+		form,
+		[
+			{ opacity: 0, transform: "translateY(20px)" },
+			{ opacity: 1, transform: "none" },
+		],
+		450,
+	);
+	if (!password.hidden) password.focus();
 	const swallow = (e) => {
 		if (!dialog.contains(e.target)) {
 			e.preventDefault();
@@ -156,6 +215,8 @@ export async function lockScreen(os, boot = false) {
 				return;
 			}
 			submit.disabled = true;
+			select.disabled = true;
+			status.textContent = "Unlocking your space…";
 			try {
 				if (
 					account &&
@@ -164,6 +225,12 @@ export async function lockScreen(os, boot = false) {
 					failures++;
 					password.value = "";
 					status.textContent = "Incorrect password. Try again.";
+					animate(form, [
+						{ transform: "translateX(0)" },
+						{ transform: "translateX(-9px)" },
+						{ transform: "translateX(9px)" },
+						{ transform: "translateX(0)" },
+					]);
 					await new Promise((r) =>
 						setTimeout(r, Math.min(5000, failures * 700)),
 					);
@@ -175,6 +242,16 @@ export async function lockScreen(os, boot = false) {
 					localStorage.setItem("nebula.account.selected", account.id);
 				}
 				clearInterval(timer);
+				await animate(
+					dialog,
+					[
+						{ opacity: 1, transform: "scale(1)" },
+						{ opacity: 0, transform: "scale(1.025)" },
+					],
+					260,
+				);
+				window.removeEventListener("online", network);
+				window.removeEventListener("offline", network);
 				dialog.close();
 				dialog.remove();
 				document.body.classList.remove("nebula-locked");
@@ -185,6 +262,7 @@ export async function lockScreen(os, boot = false) {
 				status.textContent = `Could not unlock: ${error.message}`;
 			} finally {
 				submit.disabled = false;
+				select.disabled = false;
 			}
 		};
 	});
@@ -196,8 +274,6 @@ export function rememberLockWallpaper(url) {
 		account.wallpaper = url;
 		try {
 			write(accounts);
-			if (id === profileId() && os.settings.get("nebula.wallpaper.lockPreview"))
-				rememberLockWallpaper(os.settings.get("nebula.wallpaper.lockPreview"));
 		} catch {
 			/* Wallpaper preview is optional if storage is full. */
 		}
@@ -271,7 +347,12 @@ function openAccounts(os) {
 			if (password.value !== confirm.value)
 				throw Error("Passwords do not match.");
 			const id = accounts.length ? crypto.randomUUID() : "default";
-			accounts.push({ id, name: clean, ...(await credential(password.value)) });
+			accounts.push({
+				id,
+				name: clean,
+				...(await credential(password.value)),
+				wallpaper: os.settings.get("nebula.wallpaper.lockPreview"),
+			});
 			write(accounts);
 			status.textContent =
 				id === profileId()

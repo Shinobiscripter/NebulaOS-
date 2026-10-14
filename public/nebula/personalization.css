@@ -776,3 +776,42 @@ body.nebula-motion-reduced > footer {
 	color: #b7bfd3;
 	line-height: 1.5;
 }
+.nebula-lock-connection {
+	position: absolute;
+	right: 36px;
+	top: 36px;
+	font: 12px system-ui;
+	color: #d5e2f3;
+}
+.nebula-lock-foot {
+	max-width: 85vw;
+	text-align: center;
+}
+.nebula-unlock-form [hidden] {
+	display: none !important;
+}
+.nebula-unlock-form button[aria-pressed] {
+	background: transparent;
+	color: #c4d9f5;
+	padding: 4px;
+	font-size: 12px;
+}
+.nebula-unlock-form :focus-visible {
+	outline: 2px solid #bfdaff;
+	outline-offset: 3px;
+}
+.nebula-unlock-form button:disabled {
+	opacity: 0.55;
+	cursor: wait;
+}
+@media (max-width: 600px) {
+	.nebula-lock-brand {
+		top: 24px;
+		left: 20px;
+	}
+	.nebula-lock-connection {
+		top: 50px;
+		left: 20px;
+		right: auto;
+	}
+}

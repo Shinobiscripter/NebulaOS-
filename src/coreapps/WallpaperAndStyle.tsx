@@ -4,7 +4,7 @@ type WallpaperObject = {
 };
 
 class WallpaperAndStyle extends App {
-	name = "Wallpaper & Style";
+	name = "Nebula Wallpapers";
 	package = "anura.wallpaper";
 	icon = "/assets/icons/wallpaper.png";
 
