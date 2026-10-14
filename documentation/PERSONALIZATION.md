@@ -46,3 +46,13 @@ Animations use short easing transitions for window opening/closing/maximizing, d
 Use **Export .hub** in Account Center to download `NebulaHub-accounts.hub`. Open NebulaHub in another browser, open Account Center and choose **Import .hub**. Names, usernames/email labels, service links, favorites and last-opened times transfer into the current local profile. Existing profiles are preserved; matching service/label pairs are skipped. Imports are validated before any data is saved.
 
 The versioned JSON file is readable text and should be kept private. It does not transfer passwords, cookies, service login sessions, local desktop accounts or desktop files. Sign in on each service again in the destination browser. Files are processed locally, with a 1 MB / 1,000-profile import limit.
+
+### Horizon desktop and updated lock screen
+Choose **Settings → General → Desktop environment → Horizon** for a Windows-inspired Nebula taskbar and Start menu. Drag apps from Start onto the desktop, or use their **+** button. Drag shortcuts to reposition them; double-click or press Enter to launch. Arrow keys move a focused shortcut, and Delete removes only the shortcut. Positions are saved per local desktop account. Orbit and Flow remain available.
+
+The lock screen supports password visibility, Caps Lock feedback, online/offline status, account switching, and entrance/unlock/error animations. Reduced-motion preferences suppress those animations. Password checking still happens before the desktop boots. A desktop with no local account explicitly says it has no password.
+
+**Nebula Wallpapers** replaces the old Wallpaper & Style app interface in all environments. Its existing upstream package and wallpaper API remain intact; launcher, Settings, Horizon and Flow use the same repository-aware picker, local image import, palette and automatic accent matching.
+
+### Music discovery
+The full Music app loads **Popular picks**, **Fresh signals** and **Deep space** from YouTube search when opened, with section refresh and error feedback. These are YouTube selections, not official popularity charts or personalized rankings. Discovery results are reused for the desktop session. **Recently played** records tracks only after the player reports playback and persists per local account. Discovery tracks can be played or added to the existing playlist shared with the widget. YouTube embedding restrictions and free relay availability still apply.

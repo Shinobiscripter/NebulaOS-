@@ -17,6 +17,97 @@ export function installMusic(os, { widget, make, button, save }) {
 		library.playlists.find((p) => p.id === library.selected) ||
 		library.playlists[0];
 	const views = new Set();
+	const shelves = [
+		{ title: "Popular picks", query: "popular songs official music video" },
+		{
+			title: "Fresh signals",
+			query: "new music releases official music video",
+		},
+		{ title: "Deep space", query: "space ambient chill electronic music" },
+	].map((shelf) => ({
+		...shelf,
+		tracks: [],
+		loading: false,
+		loaded: false,
+		error: "",
+	}));
+	let recent = os.settings.get("nebula.music.recent") || [];
+	if (!Array.isArray(recent)) recent = [];
+	async function loadShelf(shelf) {
+		if (shelf.loading) return;
+		shelf.loading = true;
+		shelf.error = "";
+		paintShelves();
+		try {
+			const response = await remote(
+				`https://www.youtube.com/results?search_query=${encodeURIComponent(shelf.query)}&sp=EgIQAQ%3D%3D`,
+			);
+			shelf.tracks = searchTracks(await response.text()).slice(0, 8);
+			if (!shelf.tracks.length)
+				throw Error("No songs returned. Try refreshing this section.");
+			shelf.loaded = true;
+		} catch (error) {
+			shelf.error = error.message;
+		} finally {
+			shelf.loading = false;
+			paintShelves();
+		}
+	}
+	function paintShelves() {
+		for (const view of views) {
+			if (!view.shelves) continue;
+			view.shelves.replaceChildren();
+			for (const shelf of [
+				{ title: "Recently played", tracks: recent, recent: true },
+				...shelves,
+			]) {
+				const section = make("section", "nm-shelf");
+				section.setAttribute("aria-label", shelf.title);
+				const head = make("div", "nm-shelf-heading");
+				head.append(make("h2", "", shelf.title));
+				if (!shelf.recent) {
+					const refresh = button(shelf.loading ? "Loading…" : "Refresh", () =>
+						loadShelf(shelf),
+					);
+					refresh.disabled = shelf.loading;
+					refresh.setAttribute("aria-label", `Refresh ${shelf.title}`);
+					head.append(refresh);
+				}
+				section.append(head);
+				if (shelf.loading || shelf.error || !shelf.tracks.length)
+					section.append(
+						make(
+							"p",
+							"nm-muted",
+							shelf.error ||
+								(shelf.loading
+									? "Finding songs on YouTube… The relay may need a moment."
+									: shelf.recent
+										? "Songs you play will appear here."
+										: "Discover songs from YouTube."),
+						),
+					);
+				const row = make("div", "nm-shelf-row");
+				for (const track of shelf.tracks) {
+					const card = make("article", "nm-shelf-card");
+					const cover = make("img");
+					cover.src = `https://i.ytimg.com/vi/${track.id}/mqdefault.jpg`;
+					cover.alt = "";
+					cover.loading = "lazy";
+					card.append(
+						cover,
+						make("h3", "", track.title),
+						make("p", "nm-muted", track.artist),
+						button("Play", () => play(track, view, shelf.tracks)),
+						button("Add to playlist", () => add(track)),
+					);
+					row.append(card);
+				}
+				section.append(row);
+				view.shelves.append(section);
+			}
+		}
+	}
 	let current = null,
 		player = null,
 		owner = null,
@@ -163,6 +254,14 @@ export function installMusic(os, { widget, make, button, save }) {
 					}
 					if (data.event === "state") {
 						playing = data.value === 1;
+						if (playing && current && recent[0]?.id !== current.id) {
+							recent = [
+								{ ...current },
+								...recent.filter((track) => track.id !== current.id),
+							].slice(0, 12);
+							save("nebula.music.recent", structuredClone(recent));
+							paintShelves();
+						}
 						if (data.value === 0) next(1);
 						else
 							setStatus(
@@ -524,6 +623,15 @@ export function installMusic(os, { widget, make, button, save }) {
 				view.searchStatus,
 				view.results,
 			);
+			view.shelves = make("div", "nm-shelves");
+			discovery.append(
+				make(
+					"p",
+					"nm-muted",
+					"Explore YouTube selections — not an official chart or personalized ranking.",
+				),
+				view.shelves,
+			);
 			main.append(top, discovery, libraryPanel);
 			const rail = make("aside", "nm-listening");
 			rail.append(make("p", "nm-eyebrow", "NOW PLAYING"));
@@ -558,6 +666,7 @@ export function installMusic(os, { widget, make, button, save }) {
 		}
 		showPanel("search");
 		views.add(view);
+		paintShelves();
 		render();
 		return view;
 	}
@@ -622,7 +731,9 @@ export function installMusic(os, { widget, make, button, save }) {
 			win.element.addEventListener("nebula:visibility", (event) => {
 				if (!event.detail && owner === view) pause();
 			});
-			if (!results.length) discover("space ambient");
+			// Fetch only when the full app is opened; keep results for this desktop session.
+			for (const shelf of shelves)
+				if (!shelf.loaded && !shelf.loading) loadShelf(shelf);
 		},
 	};
 	os.registerApp(app);

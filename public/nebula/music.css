@@ -783,3 +783,65 @@
 		transition: none !important;
 	}
 }
+.nm-shelf {
+	margin-top: 26px;
+}
+.nm-shelf-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+.nm-shelf-heading h2 {
+	font-size: 20px;
+	font-weight: 600;
+}
+.nm-shelf-heading button {
+	font-size: 11px;
+	padding: 5px 10px;
+}
+.nm-shelf-row {
+	display: flex;
+	gap: 12px;
+	overflow-x: auto;
+	scroll-snap-type: x proximity;
+	padding: 4px 2px 14px;
+}
+.nm-shelf-card {
+	flex: 0 0 175px;
+	min-width: 0;
+	background: #121c2c;
+	border: 1px solid #a6bfff12;
+	border-radius: 8px;
+	padding: 10px;
+	scroll-snap-align: start;
+}
+.nm-shelf-card img {
+	width: 100%;
+	aspect-ratio: 16/10;
+	object-fit: cover;
+	border-radius: 4px;
+}
+.nm-shelf-card h3 {
+	font-size: 13px;
+	line-height: 1.5;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	min-height: 39px;
+	margin: 8px 0;
+}
+.nm-shelf-card p {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	font-size: 11px;
+	margin-bottom: 10px;
+}
+.nm-shelf-card button {
+	font-size: 11px;
+	padding: 5px 8px;
+	margin: 2px;
+}
