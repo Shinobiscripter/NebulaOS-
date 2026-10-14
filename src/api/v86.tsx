@@ -21,7 +21,10 @@ interface FakeFile {
 async function InitV86Hdd(): Promise<FakeFile> {
 	// all right! time to explain what goes on here
 
-	const request = indexedDB.open("image", 2);
+	const profile = (window as any).nebulaProfileId;
+	const imageDatabase =
+		profile && profile !== "default" ? `nebula-image-${profile}` : "image";
+	const request = indexedDB.open(imageDatabase, 2);
 	request.onupgradeneeded = (event: any) => {
 		const db: IDBDatabase = event.target.result;
 
@@ -116,7 +119,7 @@ async function InitV86Hdd(): Promise<FakeFile> {
 		},
 		delete: async () => {
 			db.close();
-			indexedDB.deleteDatabase("image");
+			indexedDB.deleteDatabase(imageDatabase);
 			window.location.reload();
 		},
 		// when a "file" is loaded with v86, it keeps around a "block_cache" so it can write on top of the drive in ram

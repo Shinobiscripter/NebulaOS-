@@ -91,6 +91,8 @@ let anura: Anura;
 // global
 
 window.addEventListener("load", async () => {
+	const accountModule = "/nebula/accounts.js";
+	await (await import(accountModule)).prepareSession();
 	splashToRemove = bootsplash;
 	document.body.appendChild(bootsplash);
 	setNebulaBootStage(0, "Opening your filesystem…");
@@ -105,6 +107,13 @@ window.addEventListener("load", async () => {
 
 	let conf, milestone, commit;
 	let bootStrapFs = Filer.fs;
+	if ((window as any).nebulaProfileId !== "default") {
+		bootStrapFs = new Filer.FileSystem({
+			provider: new Filer.FileSystem.providers.IndexedDB(
+				`nebula-profile-${(window as any).nebulaProfileId}`,
+			),
+		});
+	}
 
 	if (await (window as any).idbKeyval.get("bootFromOPFS")) {
 		bootStrapFs = (await LocalFS.newRootOPFS()) as any;

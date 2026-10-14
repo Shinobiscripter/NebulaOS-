@@ -1,4 +1,5 @@
 // Original browser-native implementation inspired by the user's Ilyamiro/Serpantinum clip.
+import { installKeybinds } from "./keybinds.js";
 export function installEnvironments(
 	os,
 	{ windows, make, button, save, bar, spotlight, overview },
@@ -105,7 +106,7 @@ export function installEnvironments(
 			}),
 			button("Wallpaper & style", () => {
 				dashboard.close();
-				os.apps["anura.wallpaper"].open();
+				window.dispatchEvent(new Event("nebula:wallpapers"));
 			}),
 		);
 		const notifications = make("section", "nebula-dashboard-notifications");
@@ -141,6 +142,12 @@ export function installEnvironments(
 		button("Tile", () => tile()),
 		button("Float", () => float()),
 		button("Apps", spotlight),
+		button("Wallpapers", () =>
+			window.dispatchEvent(new Event("nebula:wallpapers")),
+		),
+		button("Lock", () =>
+			window.dispatchEvent(new Event("nebula:lock-request")),
+		),
 	);
 	bar.append(workspaces, clock, actions);
 	document.body.append(notes, dashboard);
@@ -276,22 +283,29 @@ export function installEnvironments(
 	setInterval(tick, 30000);
 	new MutationObserver(update).observe(document.body, { childList: true });
 	window.addEventListener("nebula:environment", apply);
-	window.addEventListener("keydown", (event) => {
-		if (environment !== "flow" || !event.ctrlKey || !event.altKey) return;
-		if (/^Digit[1-4]$/.test(event.code)) {
-			event.preventDefault();
-			const target = Number(event.code.slice(-1));
-			if (event.shiftKey && focused) assignments.set(focused, target);
-			switchWorkspace(target);
-		}
-		if (event.code === "KeyT") {
-			event.preventDefault();
-			tile();
-		}
-		if (event.code === "KeyD") {
-			event.preventDefault();
-			clock.click();
-		}
+	installKeybinds(os, {
+		...Object.fromEntries(
+			[1, 2, 3, 4].flatMap((n) => [
+				[`workspace${n}`, () => switchWorkspace(n)],
+				[
+					`move${n}`,
+					() => {
+						if (focused) assignments.set(focused, n);
+						switchWorkspace(n);
+					},
+				],
+			]),
+		),
+		tile,
+		float,
+		dashboard: () => clock.click(),
+		apps: spotlight,
+		notes: () => {
+			notes.hidden = !notes.hidden;
+			if (!notes.hidden) note.focus();
+		},
+		wallpaper: () => window.dispatchEvent(new Event("nebula:wallpapers")),
+		lock: () => window.dispatchEvent(new Event("nebula:lock-request")),
 	});
 	apply();
 }

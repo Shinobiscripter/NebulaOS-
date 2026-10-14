@@ -56,7 +56,12 @@ class Anura {
 		let fsProvider = new FilerAFSProvider(
 			new Filer.FileSystem({
 				name: "anura-mainContext",
-				provider: new Filer.FileSystem.providers.IndexedDB(),
+				provider: new Filer.FileSystem.providers.IndexedDB(
+					(window as any).nebulaProfileId &&
+						(window as any).nebulaProfileId !== "default"
+						? `nebula-profile-${(window as any).nebulaProfileId}`
+						: undefined,
+				),
 			}),
 		);
 		if (await (window as any).idbKeyval.get("bootFromOPFS")) {

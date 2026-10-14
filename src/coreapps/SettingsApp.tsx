@@ -297,22 +297,85 @@ class SettingsApp extends App {
 						<div class="settings-group">
 							<label class="settings-item">
 								<span>Desktop environment</span>
-								<select aria-label="Desktop environment" value={anura.settings.get("nebula.desktop.environment") || "orbit"} on:change={async (event: any) => {
-									await anura.settings.set("nebula.desktop.environment", event.target.value);
-									window.dispatchEvent(new Event("nebula:environment"));
-								}}>
+								<select
+									aria-label="Desktop environment"
+									value={
+										anura.settings.get("nebula.desktop.environment") || "orbit"
+									}
+									on:change={async (event: any) => {
+										await anura.settings.set(
+											"nebula.desktop.environment",
+											event.target.value,
+										);
+										window.dispatchEvent(new Event("nebula:environment"));
+									}}
+								>
 									<option value="orbit">Orbit — classic Nebula desktop</option>
 									<option value="flow">Flow — Hyprland-inspired desktop</option>
 								</select>
 							</label>
 							<label class="settings-item">
 								<span>Use environment wallpaper</span>
-								<input type="checkbox" aria-label="Use environment wallpaper" checked={anura.settings.get("nebula.desktop.environmentWallpaper") !== false} on:change={async (event: any) => {
-									await anura.settings.set("nebula.desktop.environmentWallpaper", event.target.checked);
-									window.dispatchEvent(new Event("nebula:environment"));
-								}} />
+								<input
+									type="checkbox"
+									aria-label="Use environment wallpaper"
+									checked={
+										anura.settings.get(
+											"nebula.desktop.environmentWallpaper",
+										) !== false
+									}
+									on:change={async (event: any) => {
+										await anura.settings.set(
+											"nebula.desktop.environmentWallpaper",
+											event.target.checked,
+										);
+										window.dispatchEvent(new Event("nebula:environment"));
+									}}
+								/>
 							</label>
-							<p>Flow adds four workspaces, a dashboard, scratchpad and window tiling. Ctrl+Alt+1–4 switches workspaces; add Shift to move a window. Ctrl+Alt+T tiles, Ctrl+Alt+D opens the dashboard. Disable its wallpaper to use your own.</p>
+							<p>
+								Flow adds four workspaces, a dashboard, scratchpad and window
+								tiling. Ctrl+Alt+1–4 switches workspaces; add Shift to move a
+								window. Ctrl+Alt+T tiles, Ctrl+Alt+D opens the dashboard.
+								Disable its wallpaper to use your own.
+							</p>
+							<div class="settings-item">
+								<span>Personalization</span>
+								<button
+									on:click={() =>
+										window.dispatchEvent(new Event("nebula:wallpapers"))
+									}
+								>
+									Wallpaper switcher
+								</button>
+							</div>
+							<div class="settings-item">
+								<span>Flow keyboard controls</span>
+								<button
+									on:click={() =>
+										window.dispatchEvent(new Event("nebula:keybinds"))
+									}
+								>
+									Customize shortcuts
+								</button>
+							</div>
+							<div class="settings-item">
+								<span>Local accounts</span>
+								<button
+									on:click={() =>
+										window.dispatchEvent(new Event("nebula:accounts"))
+									}
+								>
+									Manage accounts
+								</button>
+								<button
+									on:click={() =>
+										window.dispatchEvent(new Event("nebula:lock-request"))
+									}
+								>
+									Lock screen
+								</button>
+							</div>
 							<SettingSwitch
 								title="Allow offline use"
 								setting="use-sw-cache"

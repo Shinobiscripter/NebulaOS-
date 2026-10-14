@@ -95,7 +95,7 @@ class Settings {
 		return prop in this.cache;
 	}
 	async set(prop: string, val: any, subprop?: string) {
-		console.debug("Setting " + prop + " to " + val);
+		console.debug("Updating setting " + prop);
 		if (subprop) {
 			this.cache[prop][subprop] = val;
 		} else {
@@ -104,7 +104,7 @@ class Settings {
 		await this.save();
 	}
 	async save() {
-		console.debug("Saving settings to fs", this.cache);
+		console.debug("Saving settings to fs");
 		await this.fs.promises.writeFile(
 			"/anura_settings.json",
 			JSON.stringify(this.cache),

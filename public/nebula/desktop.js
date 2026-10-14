@@ -2,8 +2,12 @@ import { createWidgets } from "./widgets.js";
 import { installMusic } from "./music.js";
 import { installWindowLayout } from "./window-layout.js";
 import { installEnvironments } from "./environments.js";
+import { installAccounts } from "./accounts.js";
+import { installWallpapers } from "./wallpapers.js";
 // Nebula desktop conveniences use the existing Anura apps, windows and settings.
 export default function installDesktop(os) {
+	installAccounts(os);
+	installWallpapers(os);
 	if (
 		document.getElementById("nebula-menubar") ||
 		os.platform.type === "mobile"

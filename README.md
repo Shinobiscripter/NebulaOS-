@@ -20,6 +20,8 @@ Nebula Music replaces Spotify with a full-screen native app and a draggable Musi
 
 Choose **Settings → General → Desktop environment → Flow** for the Hyprland-inspired desktop: four workspaces, a saved scratchpad, central dashboard, tiling and an illustrated space wallpaper. Orbit keeps the classic layout. Maximized apps now fill the viewport and automatically retract the dock; reveal it at the bottom edge. See [Flow controls and design notes](documentation/FLOW.md).
 
+The new lock screen and local account setup are in **Settings → General → Manage accounts**. The same section opens customizable Flow shortcuts and the wallpaper switcher, including public GitHub collections, local imports and automatic wallpaper accent matching. See [personalization and local account details](documentation/PERSONALIZATION.md).
+
 ## Build setup
 
 Use x86-64 Linux or WSL2; upstream does not support native Windows builds.
@@ -149,5 +151,6 @@ Review conflicts in Boot, Settings/OOBE, worker routes, PWA metadata, Makefile a
 This OS is an AGPL-3.0-only derivative. [LICENSE](LICENSE), [CREDITS.md](CREDITS.md), third-party notices and Mercury Workshop attribution are preserved. About NebulaHub links to credits and this fork's source. Publish the complete corresponding source, changes and build scripts for the version you serve over a network. Keep the visible source link pointed at that version when moving or modifying the project.
 
 Games and remote assets retain their own licenses/ownership. The OS license does not relicense them or grant game redistribution rights. Original launcher notices remain intact. Review individual game rights before public distribution. See the [GNU AGPLv3 text](https://www.gnu.org/licenses/agpl-3.0.html).
+
 
 
