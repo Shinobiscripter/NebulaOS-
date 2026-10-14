@@ -8,11 +8,14 @@ export function createWidgets(
 	const visibilitySetting = () =>
 		os.settings.get("nebula.desktop.environment") === "flow"
 			? "nebula.flow.widgets"
-			: "nebula.desktop.widgets";
-	layer.hidden =
-		os.settings.get("nebula.desktop.environment") === "flow"
-			? os.settings.get(visibilitySetting()) !== true
-			: os.settings.get(visibilitySetting()) === false;
+			: os.settings.get("nebula.desktop.environment") === "horizon"
+				? "nebula.horizon.widgets"
+				: "nebula.desktop.widgets";
+	layer.hidden = ["flow", "horizon"].includes(
+		os.settings.get("nebula.desktop.environment"),
+	)
+		? os.settings.get(visibilitySetting()) !== true
+		: os.settings.get(visibilitySetting()) === false;
 	document.body.append(layer);
 	let layout = os.settings.get("nebula.desktop.widgetLayout") || {};
 	const cards = new Map();

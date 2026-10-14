@@ -259,17 +259,24 @@ export function installEnvironments(
 		notify();
 	}
 	function apply() {
-		environment =
-			os.settings.get("nebula.desktop.environment") === "flow"
-				? "flow"
-				: "orbit";
+		environment = ["flow", "horizon"].includes(
+			os.settings.get("nebula.desktop.environment"),
+		)
+			? os.settings.get("nebula.desktop.environment")
+			: "orbit";
 		document.body.classList.toggle("nebula-env-flow", environment === "flow");
+		document.body.classList.toggle(
+			"nebula-env-horizon",
+			environment === "horizon",
+		);
 		const widgets = document.querySelector(".nebula-widgets");
 		if (widgets)
 			widgets.hidden =
 				environment === "flow"
 					? os.settings.get("nebula.flow.widgets") !== true
-					: os.settings.get("nebula.desktop.widgets") === false;
+					: environment === "horizon"
+						? os.settings.get("nebula.horizon.widgets") !== true
+						: os.settings.get("nebula.desktop.widgets") === false;
 		document.body.classList.toggle(
 			"nebula-flow-landscape",
 			environment === "flow" &&

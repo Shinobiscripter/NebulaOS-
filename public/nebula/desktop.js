@@ -7,6 +7,7 @@ import { installWallpapers } from "./wallpapers.js";
 import { installAccountCenter } from "./account-center.js";
 import { installMotion } from "./motion.js";
 import { showAccountNotice } from "./startup-notice.js";
+import { installHorizon } from "./horizon.js";
 // Nebula desktop conveniences use the existing Anura apps, windows and settings.
 export default function installDesktop(os) {
 	showAccountNotice();
@@ -50,6 +51,7 @@ export default function installDesktop(os) {
 			...new Set(Object.values(os.apps).flatMap((app) => app.windows || [])),
 		].filter((win) => win.element?.isConnected);
 	const open = (id) => os.apps[id]?.open();
+	installHorizon(os, { make, button, save });
 	const bar = make("nav", "nebula-menubar");
 	bar.id = "nebula-menubar";
 	bar.setAttribute("aria-label", "Desktop menu");

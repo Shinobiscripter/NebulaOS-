@@ -310,8 +310,34 @@ class SettingsApp extends App {
 										window.dispatchEvent(new Event("nebula:environment"));
 									}}
 								>
-									<option value="orbit">Orbit — classic Nebula desktop</option>
-									<option value="flow">Flow — Hyprland-inspired desktop</option>
+									<option
+										value="orbit"
+										selected={
+											!anura.settings.get("nebula.desktop.environment") ||
+											anura.settings.get("nebula.desktop.environment") ===
+												"orbit"
+										}
+									>
+										Orbit — classic Nebula desktop
+									</option>
+									<option
+										value="flow"
+										selected={
+											anura.settings.get("nebula.desktop.environment") ===
+											"flow"
+										}
+									>
+										Flow — Hyprland-inspired desktop
+									</option>
+									<option
+										value="horizon"
+										selected={
+											anura.settings.get("nebula.desktop.environment") ===
+											"horizon"
+										}
+									>
+										Horizon — taskbar and desktop shortcuts
+									</option>
 								</select>
 							</label>
 							<label class="settings-item">
