@@ -4,7 +4,7 @@ A browser desktop powered by **[AnuraOS](https://github.com/MercuryWorkshop/anur
 
 The Nebula layer adds a space theme, boot UI tied to real initialization, a native Games app and Netlify packaging. Internal `anura.*` APIs, package IDs, storage names and worker paths remain compatible.
 
-Live deployment: **[nebulahub-nebulasoftwares.netlify.app](https://nebulahub-nebulasoftwares.netlify.app)**. This site was uploaded from the tested production output; Git pushes do not automatically deploy it. The Netlify badge is disabled in site settings so it does not overlay application windows.
+Live deployment: **[nebulahub-shinobiscripter.netlify.app](https://nebulahub-shinobiscripter.netlify.app)**. This site was uploaded from the tested production output; Git pushes do not automatically deploy it. The Netlify badge is disabled in site settings so it does not overlay application windows.
 
 ## Desktop features
 
@@ -149,4 +149,5 @@ Review conflicts in Boot, Settings/OOBE, worker routes, PWA metadata, Makefile a
 This OS is an AGPL-3.0-only derivative. [LICENSE](LICENSE), [CREDITS.md](CREDITS.md), third-party notices and Mercury Workshop attribution are preserved. About NebulaHub links to credits and this fork's source. Publish the complete corresponding source, changes and build scripts for the version you serve over a network. Keep the visible source link pointed at that version when moving or modifying the project.
 
 Games and remote assets retain their own licenses/ownership. The OS license does not relicense them or grant game redistribution rights. Original launcher notices remain intact. Review individual game rights before public distribution. See the [GNU AGPLv3 text](https://www.gnu.org/licenses/agpl-3.0.html).
+
 
