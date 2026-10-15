@@ -56,3 +56,7 @@ The lock screen supports password visibility, Caps Lock feedback, online/offline
 
 ### Music discovery
 The full Music app loads **Popular picks**, **Fresh signals** and **Deep space** from YouTube search when opened, with section refresh and error feedback. These are YouTube selections, not official popularity charts or personalized rankings. Discovery results are reused for the desktop session. **Recently played** records tracks only after the player reports playback and persists per local account. Discovery tracks can be played or added to the existing playlist shared with the widget. YouTube embedding restrictions and free relay availability still apply.
+
+## NebulaCraft Launcher
+
+`public/nebula/minecraft.js` registers `nebula.minecraft`, embedding the standalone https://nebulacraft-shinobiscripter.netlify.app/ launcher. Its only game is the supplied repository's Eaglercraft 1.20.4-labeled build. Hosting source/build instructions and upstream limitations are in https://github.com/Shinobiscripter/minecraft/tree/nebula/launcher-1-20-4. The large game files are hosted separately and load only when Play is pressed. Browser privacy rules can partition embedded worlds from standalone worlds; use the game's world export/import tools. Account Center `.hub` files do not transfer game saves.

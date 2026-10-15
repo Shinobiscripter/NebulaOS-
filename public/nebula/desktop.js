@@ -8,12 +8,14 @@ import { installAccountCenter } from "./account-center.js";
 import { installMotion } from "./motion.js";
 import { showAccountNotice } from "./startup-notice.js";
 import { installHorizon } from "./horizon.js";
+import { installMinecraft } from "./minecraft.js";
 // Nebula desktop conveniences use the existing Anura apps, windows and settings.
 export default function installDesktop(os) {
 	showAccountNotice();
 	installAccounts(os);
 	installWallpapers(os);
 	installAccountCenter(os);
+	installMinecraft(os);
 	if (
 		document.getElementById("nebula-menubar") ||
 		os.platform.type === "mobile"
