@@ -9,6 +9,7 @@ import { installMotion } from "./motion.js";
 import { showAccountNotice } from "./startup-notice.js";
 import { installHorizon } from "./horizon.js";
 import { installMinecraft } from "./minecraft.js";
+import { installAI } from "./ai.js";
 import { installGameMode } from "./game-mode.js";
 // Nebula desktop conveniences use the existing Anura apps, windows and settings.
 export default function installDesktop(os) {
@@ -17,6 +18,7 @@ export default function installDesktop(os) {
 	installWallpapers(os);
 	installAccountCenter(os);
 	installMinecraft(os);
+	installAI(os);
 	installGameMode(os);
 	if (
 		document.getElementById("nebula-menubar") ||

@@ -2,6 +2,9 @@
   command = "bash scripts/netlify-build.sh"
   publish = "static"
 
+[functions]
+  directory = "netlify/functions"
+
 [build.environment]
   NODE_VERSION = "24.21.0"
   PNPM_VERSION = "10.12.1"

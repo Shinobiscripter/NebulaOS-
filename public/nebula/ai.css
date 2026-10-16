@@ -1,0 +1,153 @@
+.nebula-ai {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	background: #141722;
+	color: #eeeef7;
+	font: 14px system-ui;
+}
+.nebula-ai * {
+	box-sizing: border-box;
+}
+.nebula-ai button,
+.nebula-ai select,
+.nebula-ai textarea {
+	font: inherit;
+	color: inherit;
+	background: #242839;
+	border: 1px solid #3d4259;
+	border-radius: 8px;
+	padding: 10px;
+}
+.nebula-ai button {
+	cursor: pointer;
+}
+.nebula-ai button:hover {
+	background: #353b52;
+}
+.nebula-ai button:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+.nebula-ai aside {
+	width: 220px;
+	flex-shrink: 0;
+	background: #0e111a;
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+.nebula-ai aside h2 {
+	font-size: 17px;
+	margin: 6px 0;
+}
+.nebula-ai .history {
+	overflow: auto;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.nebula-ai .history button {
+	text-align: left;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	background: transparent;
+	border: 0;
+}
+.nebula-ai main {
+	min-width: 0;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+.nebula-ai header {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	padding: 15px;
+	border-bottom: 1px solid #292e40;
+}
+.nebula-ai select {
+	max-width: 100%;
+	flex: 1;
+}
+.nebula-ai .messages {
+	flex: 1;
+	overflow: auto;
+	padding: 28px max(20px, calc((100% - 760px) / 2));
+	scroll-behavior: smooth;
+}
+.nebula-ai article {
+	margin: 0 0 28px;
+	line-height: 1.65;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+.nebula-ai article.user {
+	background: #292e43;
+	padding: 15px;
+	border-radius: 14px;
+	margin-left: 12%;
+}
+.nebula-ai article strong {
+	display: block;
+	color: #bdb2fa;
+	font-size: 12px;
+	margin-bottom: 9px;
+}
+.nebula-ai .welcome {
+	text-align: center;
+	margin: 14vh 0;
+	color: #c6c1e6;
+	font-size: 27px;
+}
+.nebula-ai form {
+	padding: 12px 24px 18px;
+}
+.nebula-ai .compose {
+	display: flex;
+	gap: 8px;
+	align-items: end;
+}
+.nebula-ai textarea {
+	flex: 1;
+	resize: vertical;
+	min-height: 68px;
+	max-height: 200px;
+	background: #202536;
+}
+.nebula-ai .notice {
+	font-size: 11px;
+	line-height: 1.5;
+	color: #a4a9bd;
+	margin: 8px 0 0;
+}
+.nebula-ai .status {
+	min-height: 20px;
+	color: #bcb3ed;
+	font-size: 12px;
+	margin-bottom: 8px;
+}
+@media (max-width: 650px) {
+	.nebula-ai aside {
+		width: 140px;
+		padding: 8px;
+	}
+	.nebula-ai header {
+		padding: 8px;
+	}
+	.nebula-ai form {
+		padding: 10px;
+	}
+	.nebula-ai .messages {
+		padding: 18px;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.nebula-ai .messages {
+		scroll-behavior: auto;
+	}
+}

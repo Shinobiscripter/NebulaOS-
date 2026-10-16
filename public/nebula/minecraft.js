@@ -44,7 +44,7 @@ export function installMinecraft(os) {
 				alignItems: "center",
 			});
 			const hint = document.createElement("span");
-			hint.textContent = "NebulaCraft · Eaglercraft 1.20.4";
+			hint.textContent = "NebulaCraft · Java, Classic & Pocket editions";
 			hint.style.flex = "1";
 			const external = document.createElement("a");
 			external.textContent = "Open standalone website ↗";

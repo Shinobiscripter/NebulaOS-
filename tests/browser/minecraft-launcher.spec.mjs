@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-test("NebulaCraft native launcher exposes only 1.20.4 and starts the separately hosted game", async ({
+test("NebulaCraft native launcher exposes eleven editions and starts the separately hosted game", async ({
 	page,
 }) => {
 	await page.goto("/");
@@ -10,7 +10,7 @@ test("NebulaCraft native launcher exposes only 1.20.4 and starts the separately 
 	await expect(
 		launcher.getByRole("button", { name: "PLAY", exact: true }),
 	).toBeVisible({ timeout: 30000 });
-	await expect(launcher.locator(".edition")).toHaveCount(1);
+	await expect(launcher.locator("#version-picker option")).toHaveCount(11);
 	await expect(launcher.locator(".edition")).toContainText("1.20.4");
 	await launcher
 		.getByRole("button", { name: "Installation details", exact: true })
