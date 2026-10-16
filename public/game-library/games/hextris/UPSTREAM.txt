@@ -1,0 +1,3 @@
+https://github.com/Hextris/hextris
+Commit: 3f4847dc8fd7dab3d1c87e6324b9159d92fbd396
+Nebula distribution: removed remote ads/analytics, obsolete score upload and remote font; retained local gameplay and credits.

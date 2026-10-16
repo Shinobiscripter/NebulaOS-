@@ -25,6 +25,10 @@ export function installHorizon(os, { make, button, save }) {
 	);
 	const actions = make("div", "nh-actions");
 	actions.append(
+		button("Game Mode", () => {
+			menu.hidden = true;
+			os.apps["nebula.gamemode"].open();
+		}),
 		button("Settings", () => {
 			menu.hidden = true;
 			os.apps["anura.settings"].open();

@@ -51,3 +51,8 @@
   - UI design inspiration - [Google ChromeOS](https://www.google.com/chromebook/chrome-os/)
   - Various icons - [papirus icon theme](https://github.com/PapirusDevelopmentTeam/papirus-icon-theme)
   - Various assets - [Google ChromeOS](https://www.google.com/chromebook/chrome-os/)
+# Game Mode additions
+
+NebulaGames catalog and package sources: https://github.com/Shinobiscripter/NebulaGames
+2048 by Gabriele Cirulli (MIT) and Hextris by its contributors (GPL-3.0-or-later) retain their complete source, licenses and upstream revision records in `public/game-library/games/`. Online catalog links do not transfer ownership or imply affiliation. Nova, Deck and Pulse use original Nebula artwork, code and synthesized sounds; PlayStation, Steam and Xbox remain their owners' trademarks.
+

@@ -42,6 +42,7 @@ for (const path of [
 	"/service/*",
 	"/anura-sw.js",
 	"/sw/*",
+	"/game-library/*",
 ])
 	headers += `\n${path}\n  Cross-Origin-Embedder-Policy: require-corp\n`;
 headers += `\n/*.wasm\n  Content-Type: application/wasm\n\n/anura-sw.js\n  Cache-Control: no-cache\n  Service-Worker-Allowed: /\n\n/config.json\n  Cache-Control: no-cache\n\n/MILESTONE\n  Cache-Control: no-cache\n`;
@@ -70,7 +71,7 @@ const precache = files
 		(file) =>
 			!file.path.split("/").some((part) => part.startsWith(".")) &&
 			file.path !== "nebula/build-report.json" &&
-			!/^(x86images\/|Games\/|play\/|artifacts\/)/.test(file.path) &&
+			!/^(x86images\/|Games\/|play\/|artifacts\/|game-library\/games\/)/.test(file.path) &&
 			!/(\.map|\.d\.ts)$/.test(file.path) &&
 			!/^(MILESTONE|COMMIT|config.json|cache-load.json|_headers|_redirects)$/.test(
 				file.path,

@@ -289,6 +289,9 @@ class ExploreApp extends App {
 	page = async () => (
 		<div class={this.css}>
 			<div id="sidebar">
+				<button on:click={() => anura.apps["nebula.gamemode"]?.open()}>
+					Game Mode
+				</button>
 				<div
 					on:click={() => {
 						this.state.screen = this.welcome;
