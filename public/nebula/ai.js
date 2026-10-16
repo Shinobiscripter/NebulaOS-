@@ -179,6 +179,10 @@ export function installAI(os) {
 						}),
 					});
 					if (!r.ok) {
+						if (r.status === 429)
+							throw Error(
+								"The free service is busy. Wait a minute or try another free model.",
+							);
 						const data = await r.json();
 						throw Error(data.error || "Request failed");
 					}

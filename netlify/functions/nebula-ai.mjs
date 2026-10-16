@@ -32,9 +32,13 @@ export function isFree(model) {
 	return (
 		!!model?.id?.endsWith(":free") &&
 		["prompt", "completion"].every(
-			(k) => model.pricing?.[k] !== undefined && Number(model.pricing[k]) === 0,
+			(k) => model.pricing?.[k] != null && Number(model.pricing[k]) === 0,
 		) &&
-		Object.values(model.pricing || {}).every((v) => Number(v) === 0)
+		Object.values(model.pricing || {}).every(
+			(v) =>
+				(typeof v === "number" || (typeof v === "string" && v.trim() !== "")) &&
+				Number(v) === 0,
+		)
 	);
 }
 let cached,
@@ -48,6 +52,10 @@ async function catalog() {
 	const data = await r.json();
 	cached = personas.filter((p) =>
 		data.data.some((m) => m.id === p.id && isFree(m)),
+	);
+	// Start with the lightweight model; other roles remain an explicit choice.
+	cached.sort(
+		(a, b) => Number(b.name === "Comet") - Number(a.name === "Comet"),
 	);
 	expires = Date.now() + 60000;
 	return cached;

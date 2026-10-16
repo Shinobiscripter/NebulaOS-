@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 test("Nebula AI streams, saves history and offers four free roles", async ({
 	page,
 }) => {
-	await page.route("**/api/nebula-ai", async (route) => {
+	await page.context().route("**/api/nebula-ai", async (route) => {
 		if (route.request().method() === "GET")
 			return route.fulfill({
 				json: {
