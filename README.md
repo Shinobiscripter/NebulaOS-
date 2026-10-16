@@ -8,6 +8,10 @@ Live deployment: **[nebulahub-shinobiscripter.netlify.app](https://nebulahub-shi
 
 ## Desktop features
 
+**Game Mode** is available from Files, Explore and every desktop environment's launcher. Nova reproduces the PS5 home layout, Deck the Steam Deck Gaming Mode layout, and Pulse the Xbox Series dashboard layout, using Nebula's shared library, store, settings and configurable performance overlay. The catalog contains 49 games: two downloadable packages and 47 online launchers. See [Game Mode](documentation/GAME-MODE.md) for controls, downloads, offline behavior, licensing and performance-measurement limits. Catalog source: [NebulaGames](https://github.com/Shinobiscripter/NebulaGames).
+
+**NebulaCraft Launcher** is also available as a native app and at [its standalone website](https://nebulacraft-shinobiscripter.netlify.app/). It runs the supplied repository's 1.20.4-labeled EaglercraftZ build; upstream asset/version caveats are documented in the standalone launcher.
+
 The custom boot animation draws the Nebula mark, traces an orbital ring and fades into the desktop. Storage, Services, Apps and Desktop indicators follow actual initialization events; no simulated percentage or minimum wait is added. Animations respect reduced-motion preferences and stop when the splash is removed.
 
 The desktop uses a macOS-inspired top menu, centered dock and colored window controls while retaining Anura's actual window manager. Search launches installed apps; Ctrl/Command+K opens it when the desktop has keyboard focus. Windows provides an overview with left/right tiling, and Show Desktop minimizes and restores open windows.

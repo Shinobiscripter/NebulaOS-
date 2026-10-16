@@ -4,11 +4,13 @@ Open **Game Mode** from Files, Explore, the desktop menu, Horizon Start, or the 
 
 Choose a presentation in Game Mode → Settings:
 
-- **Nova**: cinematic horizontal rail inspired by modern PlayStation menus.
-- **Deck**: compact sidebar and portrait library inspired by Steam Deck.
-- **Pulse**: broad, squared dashboard tiles inspired by Xbox.
+- **Nova**: PS5-shaped Games / Media header, compact top game rail, enlarged selection, game backdrop, lower-left launch area and bottom Control Center.
+- **Deck**: Steam Deck Gaming Mode's expanding landscape selection among portrait covers, top status strip, bottom controller legend and sliding main / quick-settings menus.
+- **Pulse**: Xbox Series dashboard's centered quick-access icons, low recent-game row, green selection border, dashboard panels and left guide.
 
-These are original Nebula interfaces, with original synthesized navigation sounds, not console firmware or copied console assets. Sounds are opt-in. Animations respect reduced-motion preferences and the OS animation setting.
+The layouts reproduce the consoles' visible structure using Nebula's working library and services. Synthesized navigation sounds are enabled by default and can be muted per mode. Focus growth, carousel movement, backdrop transitions, detail transitions and sliding panels respect reduced-motion preferences and the OS animation setting. No console firmware, console-network authentication, friends service or commercial game compatibility is provided.
+
+Visual references: [PS5 UI introduction](https://blog.playstation.com/2020/10/15/first-look-playstation-5s-next-generation-user-experience/), [Steam Deck software](https://www.steamdeck.com/en/software), [Xbox Series Home](https://news.xbox.com/en-us/2023/07/26/welcome-to-your-new-xbox-home/). Console brands belong to their respective owners; the interface uses Nebula branding, original vector artwork and synthesized audio.
 
 ## Library and store
 

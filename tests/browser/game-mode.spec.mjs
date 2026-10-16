@@ -112,6 +112,7 @@ test("three modes share a persistent library, settings and real downloaded gamep
 	);
 	await page.evaluate(() => anura.apps["nebula.gamemode"].open());
 	await expect(root).toHaveAttribute("data-mode", "pulse");
+	await root.getByRole("button", { name: "2048", exact: true }).click();
 	await expect(
 		root.getByRole("button", { name: "Play", exact: true }),
 	).toBeVisible();
