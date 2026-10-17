@@ -53,6 +53,33 @@ export function applyThemeDocument(doc, config, enabled) {
 	root.classList.toggle("nebula-import-theme", Boolean(enabled));
 }
 export function installImportTheme(os) {
+	// Also cover existing installed copies predating the opt-in child bridge.
+	const syncOwnedFrame = (frame) => {
+		if (!(frame instanceof HTMLIFrameElement)) return;
+		try {
+			const url = new URL(frame.src, location.href);
+			if (
+				url.origin !== location.origin ||
+				!/\/(nebula-games|fsapp)\.app\/index\.html$/.test(url.pathname)
+			)
+				return;
+			const doc = frame.contentDocument;
+			if (!doc?.head || !doc.body) return;
+			doc.body.classList.add("nebula-owned-app");
+			applyThemeDocument(
+				doc,
+				os.settings.get(THEME_KEY) || {},
+				os.settings.get(THEME_ON),
+			);
+		} catch {
+			/* A sandboxed or cross-origin app retains its own presentation. */
+		}
+	};
+	document.addEventListener(
+		"load",
+		(event) => syncOwnedFrame(event.target),
+		true,
+	);
 	const refresh = () => {
 		applyThemeDocument(
 			document,
@@ -60,6 +87,7 @@ export function installImportTheme(os) {
 			os.settings.get(THEME_ON),
 		);
 		window.dispatchEvent(new Event("nebula:theme"));
+		document.querySelectorAll("iframe").forEach(syncOwnedFrame);
 	};
 	window.addEventListener("nebula:environment", refresh);
 	refresh();

@@ -75,6 +75,21 @@ test("Repository preview, opt-in script cosmetics, full app theme and restore", 
 		"border-radius",
 		"24px",
 	);
+	await page.evaluate(() => anura.apps["nebula.music"].open());
+	await expect(page.locator(".nebula-music.nm-full")).toHaveCSS(
+		"background-color",
+		"rgb(21, 32, 48)",
+	);
+	await page.evaluate(() => anura.apps["nebula.games"].open());
+	const games = page.frameLocator('iframe[src*="nebula-games.app/index.html"]');
+	await expect(games.locator("html")).toHaveClass(/nebula-import-theme/);
+	await expect(games.locator("body")).toHaveCSS(
+		"background-color",
+		"rgb(21, 32, 48)",
+	);
+	await page.evaluate(() => anura.apps["anura.fsapp"].open());
+	const fileFrame = page.frameLocator('iframe[src*="fsapp.app/index.html"]');
+	await expect(fileFrame.locator("html")).toHaveClass(/nebula-import-theme/);
 	await page.screenshot({ path: "../../outputs/Repository-theme.png" });
 	await page.reload();
 	await page.waitForFunction(() => window.anura?.initComplete);
