@@ -26,6 +26,7 @@ export function installMinecraft(os) {
 				minHeight: "0",
 			});
 			const root = document.createElement("div");
+			root.className = "nebula-craft-chrome";
 			Object.assign(root.style, {
 				position: "absolute",
 				inset: "0",
@@ -34,6 +35,7 @@ export function installMinecraft(os) {
 				background: "#141620",
 			});
 			const bar = document.createElement("div");
+			bar.className = "nebula-craft-chrome";
 			Object.assign(bar.style, {
 				padding: "8px 14px",
 				font: "12px system-ui",
