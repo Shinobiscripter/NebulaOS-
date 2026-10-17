@@ -1,9 +1,11 @@
 // Original browser-native implementation inspired by the user's Ilyamiro/Serpantinum clip.
 import { installKeybinds } from "./keybinds.js";
+import { installHyprland } from "./hyprland.js";
 export function installEnvironments(
 	os,
 	{ windows, make, button, save, bar, spotlight, overview },
 ) {
+	installHyprland(os);
 	const css = make("link");
 	css.rel = "stylesheet";
 	css.href = "/nebula/environments.css";
@@ -146,6 +148,9 @@ export function installEnvironments(
 		button("Wallpapers", () =>
 			window.dispatchEvent(new Event("nebula:wallpapers")),
 		),
+		button("Import config", () =>
+			window.dispatchEvent(new Event("nebula:hyprland")),
+		),
 		button("Lock", () =>
 			window.dispatchEvent(new Event("nebula:lock-request")),
 		),
@@ -165,6 +170,7 @@ export function installEnvironments(
 					const target = assignments.get(win);
 					if (environment === "flow" && target !== active)
 						switchWorkspace(target);
+					update();
 				});
 				win.addEventListener("close", () => {
 					assignments.delete(win);
@@ -172,6 +178,7 @@ export function installEnvironments(
 					setTimeout(update, 400);
 				});
 			}
+			win.element.dataset.nebulaFocused = String(win === focused);
 			const hidden = environment === "flow" && assignments.get(win) !== active;
 			if (win.element.hidden !== hidden) {
 				win.element.hidden = hidden;
@@ -223,17 +230,19 @@ export function installEnvironments(
 			);
 			const columns = Math.ceil(Math.sqrt(list.length));
 			const rows = Math.ceil(list.length / columns);
-			const gap = 12,
+			const imported = os.settings.get("nebula.flow.importStyle") || {};
+			const gap = imported.inner ?? 12,
+				outer = imported.outer ?? 12,
 				top = 52,
-				width = (innerWidth - gap * (columns + 1)) / columns,
-				height = (innerHeight - top - gap * (rows + 1)) / rows;
+				width = (innerWidth - outer * 2 - gap * (columns - 1)) / columns,
+				height = (innerHeight - top - outer * 2 - gap * (rows - 1)) / rows;
 			for (const [i, win] of list.entries()) {
 				if (!originals.has(win))
 					originals.set(win, win.oldstyle || win.element.getAttribute("style"));
 				if (win.maximized || win.snapped) await win.unmaximize();
 				Object.assign(win.element.style, {
-					left: `${gap + (i % columns) * (width + gap)}px`,
-					top: `${top + gap + Math.floor(i / columns) * (height + gap)}px`,
+					left: `${outer + (i % columns) * (width + gap)}px`,
+					top: `${top + outer + Math.floor(i / columns) * (height + gap)}px`,
 					width: `${width}px`,
 					height: `${height}px`,
 				});
@@ -311,6 +320,8 @@ export function installEnvironments(
 				],
 			]),
 		),
+		close: () => focused?.element.isConnected && focused.close(),
+		fullscreen: () => focused?.element.isConnected && focused.togglemaximize(),
 		tile,
 		float,
 		dashboard: () => clock.click(),

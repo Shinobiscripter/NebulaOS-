@@ -161,3 +161,5 @@ Games and remote assets retain their own licenses/ownership. The OS license does
 
 
 Nebula AI provides free-only general, thinking, coding and fast chat models. See [setup and privacy](documentation/NEBULA-AI.md). NebulaCraft now offers all eleven builds from the Minecraft repository.
+
+Flow supports importing compatible Hyprland dotfiles. See [the importer guide](documentation/HYPRLAND-IMPORT.md) for supported settings and limitations.

@@ -5,6 +5,8 @@ export const DEFAULT_BINDINGS = Object.freeze({
 			[`move${n}`, `Ctrl+Alt+Shift+Digit${n}`],
 		]),
 	),
+	close: "",
+	fullscreen: "",
 	tile: "Ctrl+Alt+KeyT",
 	float: "Ctrl+Alt+KeyF",
 	dashboard: "Ctrl+Alt+KeyD",
@@ -29,7 +31,9 @@ export function bindingError(value, bindings, action) {
 	if (!/^(Ctrl|Alt|Meta)\+/.test(value))
 		return "Include Ctrl, Alt or Meta in the shortcut.";
 	if (
-		/^(Ctrl|Meta)\+(Shift\+)?(Key[WTRNLQ]|Digit[0-9]|Tab|Delete)$/.test(value) ||
+		/^(Ctrl|Meta)\+(Shift\+)?(Key[WTRNLQ]|Digit[0-9]|Tab|Delete)$/.test(
+			value,
+		) ||
 		value === "Alt+F4" ||
 		value === "Alt+Tab" ||
 		value === "Ctrl+Alt+Delete"
@@ -52,6 +56,8 @@ export function installKeybinds(os, actions) {
 			: id.startsWith("move")
 				? `Move window to ${id.slice(-1)}`
 				: {
+						close: "Close focused window",
+						fullscreen: "Fullscreen focused window",
 						tile: "Tile windows",
 						float: "Restore floating windows",
 						dashboard: "Dashboard",
