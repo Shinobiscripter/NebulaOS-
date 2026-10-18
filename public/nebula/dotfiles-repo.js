@@ -73,7 +73,7 @@ export async function scanRepository(
 	);
 	const candidates = all.filter(
 		(f) =>
-			/(?:\.(conf|lua|css|rasi|toml|ini|json|jsonc|sh|bash|zsh|md|txt|yaml|yml)|\/(?:config|install|setup))$/i.test(
+			/(?:\.(conf|lua|css|rasi|toml|ini|json|jsonc|sh|bash|zsh|md|txt|yaml|yml)|(?:^|\/)(?:config|install|setup))$/i.test(
 				f.path,
 			) && !/(^|\/)(node_modules|vendor|\.git)\//.test(f.path),
 	);

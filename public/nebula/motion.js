@@ -1,3 +1,4 @@
+import { animateFlow, animationSpec } from "./flow-layout.js";
 // Short event-driven animations; no permanent animation loop or per-frame layout polling.
 export function installMotion(os, { windows }) {
 	const media = matchMedia("(prefers-reduced-motion: reduce)");
@@ -21,12 +22,12 @@ export function installMotion(os, { windows }) {
 			seen.add(win);
 			let entrance;
 			if (enabled())
-				entrance = win.element.animate(
-					[
-						{ opacity: 0, transform: "translateY(14px) scale(.98)" },
-						{ opacity: 1, transform: "translateY(0) scale(1)" },
-					],
-					{ duration: 190, easing: "cubic-bezier(.16,1,.3,1)" },
+				entrance = animateFlow(
+					win.element,
+					os.settings.get("nebula.desktop.environment") === "flow"
+						? os.settings.get("nebula.flow.importStyle") || {}
+						: {},
+					"windowsIn",
 				);
 			win.addEventListener("close", () => entrance?.cancel());
 		}
@@ -42,7 +43,10 @@ export function installMotion(os, { windows }) {
 					{ opacity: 0.3, transform: `translateX(${event.detail * 20}px)` },
 					{ opacity: 1, transform: "translateX(0)" },
 				],
-				{ duration: 220, easing: "cubic-bezier(.16,1,.3,1)" },
+				animationSpec(
+					os.settings.get("nebula.flow.importStyle") || {},
+					"workspaces",
+				),
 			);
 		}
 	});

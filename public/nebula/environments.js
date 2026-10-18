@@ -1,3 +1,4 @@
+import { layoutRects, animationSpec } from "./flow-layout.js";
 // Original browser-native implementation inspired by the user's Ilyamiro/Serpantinum clip.
 import { installKeybinds } from "./keybinds.js";
 import { installHyprland } from "./hyprland.js";
@@ -13,7 +14,9 @@ export function installEnvironments(
 	let environment = "orbit",
 		active = 1,
 		focused = null,
-		tiling = false;
+		tiling = false,
+		autoFloating = false,
+		tileRequest = 0;
 	const assignments = new Map(),
 		originals = new Map();
 	const workspaces = make("nav", "nebula-workspaces");
@@ -142,7 +145,10 @@ export function installEnvironments(
 			notes.hidden = !notes.hidden;
 			if (!notes.hidden) note.focus();
 		}),
-		button("Tile", () => tile()),
+		button("Tile", () => {
+			autoFloating = false;
+			tile();
+		}),
 		button("Float", () => float()),
 		button("Apps", spotlight),
 		button("Wallpapers", () =>
@@ -172,6 +178,8 @@ export function installEnvironments(
 						switchWorkspace(target);
 					update();
 				});
+				win.addEventListener("maximize", () => setTimeout(update, 0));
+				win.addEventListener("unmaximize", () => setTimeout(update, 0));
 				win.addEventListener("close", () => {
 					assignments.delete(win);
 					originals.delete(win);
@@ -208,6 +216,14 @@ export function installEnvironments(
 			tab.dataset.occupied = String(count > 0);
 			workspaces.append(tab);
 		}
+		if (
+			environment === "flow" &&
+			os.settings.get("nebula.flow.importStyle")?.layout &&
+			!autoFloating
+		) {
+			cancelAnimationFrame(tileRequest);
+			tileRequest = requestAnimationFrame(() => tile());
+		}
 		notify();
 	}
 	function switchWorkspace(number) {
@@ -226,23 +242,29 @@ export function installEnvironments(
 		tiling = true;
 		try {
 			const list = windows().filter(
-				(win) => !win.element.hidden && win.element.style.display !== "none",
+				(win) =>
+					!win.element.hidden &&
+					win.element.style.display !== "none" &&
+					!win.maximized,
 			);
-			const columns = Math.ceil(Math.sqrt(list.length));
-			const rows = Math.ceil(list.length / columns);
 			const imported = os.settings.get("nebula.flow.importStyle") || {};
-			const gap = imported.inner ?? 12,
-				outer = imported.outer ?? 12,
-				top = 52,
-				width = (innerWidth - outer * 2 - gap * (columns - 1)) / columns,
-				height = (innerHeight - top - outer * 2 - gap * (rows - 1)) / rows;
+			const rects = layoutRects(list.length, innerWidth, innerHeight, imported);
 			for (const [i, win] of list.entries()) {
 				if (!originals.has(win))
 					originals.set(win, win.oldstyle || win.element.getAttribute("style"));
-				if (win.maximized || win.snapped) await win.unmaximize();
+				if (win.snapped) await win.unmaximize();
+				const { x, y, width, height } = rects[i];
+				const motion = animationSpec(imported, "windowsMove");
+				const reduced =
+					matchMedia("(prefers-reduced-motion: reduce)").matches ||
+					os.settings.get("disable-animation") ||
+					os.settings.get("nebula.motion") === "reduced";
+				win.element.style.transition = reduced
+					? "none"
+					: `left ${motion.duration}ms ${motion.easing}, top ${motion.duration}ms ${motion.easing}, width ${motion.duration}ms ${motion.easing}, height ${motion.duration}ms ${motion.easing}`;
 				Object.assign(win.element.style, {
-					left: `${outer + (i % columns) * (width + gap)}px`,
-					top: `${top + outer + Math.floor(i / columns) * (height + gap)}px`,
+					left: `${x}px`,
+					top: `${y}px`,
 					width: `${width}px`,
 					height: `${height}px`,
 				});
@@ -258,6 +280,8 @@ export function installEnvironments(
 		}
 	}
 	function float() {
+		autoFloating = true;
+		cancelAnimationFrame(tileRequest);
 		for (const [win, style] of originals) {
 			if (win.element.isConnected) {
 				win.element.setAttribute("style", style || "");
@@ -268,6 +292,7 @@ export function installEnvironments(
 		notify();
 	}
 	function apply() {
+		autoFloating = false;
 		environment = ["flow", "horizon"].includes(
 			os.settings.get("nebula.desktop.environment"),
 		)
@@ -307,6 +332,9 @@ export function installEnvironments(
 	setInterval(tick, 30000);
 	new MutationObserver(update).observe(document.body, { childList: true });
 	window.addEventListener("nebula:environment", apply);
+	window.addEventListener("resize", update);
+	window.addEventListener("nebula:compat-launcher", spotlight);
+	window.addEventListener("nebula:compat-dashboard", () => clock.click());
 	installKeybinds(os, {
 		...Object.fromEntries(
 			[1, 2, 3, 4].flatMap((n) => [
@@ -320,9 +348,15 @@ export function installEnvironments(
 				],
 			]),
 		),
+		terminal: () => os.apps["anura.ashell"].open(),
+		files: () => os.apps["anura.fsapp"].open(),
+		browser: () => os.apps["anura.browser"].open(),
 		close: () => focused?.element.isConnected && focused.close(),
 		fullscreen: () => focused?.element.isConnected && focused.togglemaximize(),
-		tile,
+		tile: () => {
+			autoFloating = false;
+			tile();
+		},
 		float,
 		dashboard: () => clock.click(),
 		apps: spotlight,

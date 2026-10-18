@@ -5,6 +5,9 @@ export const DEFAULT_BINDINGS = Object.freeze({
 			[`move${n}`, `Ctrl+Alt+Shift+Digit${n}`],
 		]),
 	),
+	terminal: "",
+	files: "",
+	browser: "",
 	close: "",
 	fullscreen: "",
 	tile: "Ctrl+Alt+KeyT",
@@ -56,6 +59,9 @@ export function installKeybinds(os, actions) {
 			: id.startsWith("move")
 				? `Move window to ${id.slice(-1)}`
 				: {
+						terminal: "Terminal adapter",
+						files: "Files adapter",
+						browser: "Browser adapter",
 						close: "Close focused window",
 						fullscreen: "Fullscreen focused window",
 						tile: "Tile windows",

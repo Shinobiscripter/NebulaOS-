@@ -1,3 +1,9 @@
+import { compileInstaller } from "./compat-installer.js";
+import {
+	installCompatRuntime,
+	saveCompatInstallation,
+} from "./compat-runtime.js";
+import { renderFlowPreview } from "./flow-preview.js";
 import {
 	scanRepository,
 	analyzeDotfiles,
@@ -8,6 +14,8 @@ import { parseHyprland, resolveUpload, LIMITS } from "./hyprland-parser.js";
 const STYLE = "nebula.flow.importStyle",
 	BACKUP = "nebula.flow.importBackup";
 const keys = [
+	"nebula.compat.bridges",
+	"nebula.compat.installation",
 	THEME_KEY,
 	THEME_ON,
 	STYLE,
@@ -24,6 +32,7 @@ const el = (tag, text) => {
 };
 export function installHyprland(os) {
 	installImportTheme(os);
+	installCompatRuntime(os);
 	const style = el("style");
 	style.textContent = `body.nebula-desktop.nebula-env-flow .aliceWMwin:not(.nebula-maximized) { border-width:var(--hypr-border,1px); border-color:var(--hypr-accent,#90b6a570); border-radius:var(--hypr-rounding,9px);  }
   body.nebula-desktop.nebula-env-flow .aliceWMwin[data-nebula-focused="false"]:not(.nebula-maximized) { border-color:var(--hypr-inactive,var(--hypr-accent,#90b6a570)); }
@@ -34,7 +43,7 @@ export function installHyprland(os) {
   .nebula-hypr-import select,.nebula-hypr-import input { display:block; max-width:100%; margin:12px 0; }
   .nebula-hypr-import pre { white-space:pre-wrap; overflow-wrap:anywhere; font:12px/1.6 monospace; max-height:240px; overflow:auto; background:#080d18; padding:12px; }
   .nebula-hypr-sample { padding:20px; background:#080d18; margin:16px 0; display:flex; gap:12px; }
-  .nebula-hypr-sample div { flex:1; padding:18px; background:#1a2030; min-width:0; }`;
+  `;
 	document.head.append(style);
 	const refresh = () => {
 		const config = os.settings.get(STYLE) || {};
@@ -84,10 +93,27 @@ export function installHyprland(os) {
 		infer.id = "hypr-script-inferences";
 		const inferLabel = el(
 			"label",
-			"Include candidate cosmetic commands from installers (review below)",
+			"Include candidate cosmetic commands and translated installer operations (review below)",
 		);
 		inferLabel.htmlFor = infer.id;
 		const scriptReport = el("pre");
+		const adapterButtons = el("div");
+		function drawAdapters() {
+			adapterButtons.replaceChildren();
+			for (const name of window.nebulaCompat.list()) {
+				const b = el("button", `Open ${name} adapter`);
+				b.onclick = () => {
+					try {
+						window.nebulaCompat.run(name);
+						dialog.close();
+					} catch (error) {
+						status.textContent = error.message;
+					}
+				};
+				adapterButtons.append(b);
+			}
+		}
+		drawAdapters();
 		const wallpaperSelect = el("select");
 		wallpaperSelect.setAttribute("aria-label", "Repository wallpaper");
 		wallpaperSelect.hidden = true;
@@ -168,9 +194,13 @@ export function installHyprland(os) {
 			apply.disabled = value || !plan || (!plan.applied.length && !wallpaper);
 			undo.disabled = value || !os.settings.get(BACKUP);
 		};
+		let previewView = null,
+			previewURL = null,
+			previewRevision = 0;
 		function preview() {
+			const compiled = compileInstaller(allTexts);
 			plan = parseHyprland(
-				configs,
+				{ ...configs, ...(infer.checked ? compiled.aliases : {}) },
 				select.value,
 				os.settings.get("nebula.flow.keybinds"),
 			);
@@ -187,6 +217,12 @@ export function installHyprland(os) {
 				);
 				plan.warnings.push(...translated.warnings);
 			}
+			plan.bridges = infer.checked ? compiled.bridges : [];
+			plan.aliases = infer.checked ? compiled.aliases : {};
+			if (infer.checked) {
+				plan.applied.push(...compiled.report);
+				plan.warnings.push(...compiled.rejected);
+			}
 			const selectedPalette = analysis.palettes.find(
 				(p) => p.path === palette.value,
 			);
@@ -198,7 +234,9 @@ export function installHyprland(os) {
 			if (selectedPalette) plan.applied.push(...selectedPalette.evidence);
 			plan.warnings.push(...scanNotes, ...analysis.warnings);
 			scriptReport.textContent =
-				analysis.commands.join("\n\n") ||
+				[...compiled.report, ...compiled.rejected, ...analysis.commands].join(
+					"\n\n",
+				) ||
 				"No recognized install commands found. Unresolved script lines appear below.";
 			wallpaper =
 				plan.wallpaper && resolveUpload(images, plan.wallpaper, select.value);
@@ -211,19 +249,35 @@ export function installHyprland(os) {
 				plan.applied.join("\n") || "No compatible settings found.";
 			warnings.textContent =
 				plan.warnings.join("\n") || "No unsupported options found.";
-			sample.replaceChildren();
 			sample.hidden = false;
-			sample.style.gap = `${plan.style.inner ?? 12}px`;
-			for (const title of ["Nebula Games", "Files"]) {
-				const card = el("div", title);
-				card.style.border = `${plan.style.border ?? 1}px solid ${plan.style.accent || "#a7d4c4"}`;
-				card.style.borderRadius = `${plan.style.rounding ?? 9}px`;
-				card.style.opacity = plan.style.opacity ?? 1;
-				card.style.background =
-					plan.theme.surface || plan.theme.background || "#1a2030";
-				card.style.color = plan.theme.foreground || "#f3f5fa";
-				sample.append(card);
+			previewView?.destroy();
+			if (previewURL) URL.revokeObjectURL(previewURL);
+			previewURL = null;
+			previewView = renderFlowPreview(sample, plan);
+			const token = ++previewRevision;
+			if (wallpaper) {
+				const source = images[wallpaper];
+				Promise.resolve(
+					source.url
+						? limitedFetch(
+								source.url,
+								12 * 1024 * 1024,
+								AbortSignal.timeout(20000),
+							)
+						: source,
+				)
+					.then((blob) => {
+						if (token !== previewRevision || !dialog.isConnected) return;
+						previewURL = URL.createObjectURL(blob);
+						previewView.setWallpaper(previewURL);
+					})
+					.catch(() => {
+						if (token === previewRevision)
+							status.textContent =
+								"Wallpaper preview could not load. Other settings remain available.";
+					});
 			}
+
 			status.textContent = `${plan.applied.length} translated settings · ${plan.warnings.length} compatibility notes. Applying switches to Flow. Meta/Super shortcuts may be intercepted by your device.`;
 			disable(false);
 		}
@@ -370,6 +424,7 @@ export function installHyprland(os) {
 			window.dispatchEvent(new Event("nebula:environment"));
 			window.dispatchEvent(new Event("nebula:wallpaper-changed"));
 			syncSwitch();
+			drawAdapters();
 		}
 		apply.onclick = async () => {
 			if (busy || !plan) return;
@@ -380,6 +435,7 @@ export function installHyprland(os) {
 			try {
 				// Persist the rollback before any mutation, including wallpaper installation.
 				await os.settings.set(BACKUP, snapshot);
+				await saveCompatInstallation(os, plan.aliases, plan.bridges);
 				if (wallpaper) {
 					const source = images[wallpaper];
 					const image = source.url
@@ -421,6 +477,13 @@ export function installHyprland(os) {
 					await os.settings.set("nebula.desktop.environmentWallpaper", false);
 					os.apps["anura.wallpaper"].setWallpaper(`/fs${path}`);
 				}
+				await os.settings.set("nebula.compat.bridges", [
+					...new Set([
+						...(os.settings.get("nebula.compat.bridges") || []),
+						...plan.bridges,
+					]),
+				]);
+				drawAdapters();
 				await os.settings.set(THEME_KEY, plan.theme);
 				await os.settings.set(STYLE, {
 					...(os.settings.get(STYLE) || {}),
@@ -466,7 +529,16 @@ export function installHyprland(os) {
 		dialog.addEventListener("cancel", (event) => {
 			if (busy) event.preventDefault();
 		});
-		dialog.addEventListener("close", () => dialog.remove(), { once: true });
+		dialog.addEventListener(
+			"close",
+			() => {
+				previewRevision++;
+				previewView?.destroy();
+				if (previewURL) URL.revokeObjectURL(previewURL);
+				dialog.remove();
+			},
+			{ once: true },
+		);
 		dialog.append(
 			el("label", "Public GitHub repository"),
 			repo,
@@ -487,10 +559,16 @@ export function installHyprland(os) {
 				"p",
 				"The full theme switch uses your last applied import. Apply this preview to update its palette. Embedded websites and games keep their own UI.",
 			),
-			el("h3", "Installer analysis (never executed)"),
+			el("h3", "Translated installer / compatibility report"),
 			scriptReport,
+			adapterButtons,
+			el("h3", "Interactive desktop preview"),
+			el(
+				"p",
+				"Uses Flow�s real layout and entrance-animation engine. Preview windows are isolated; unsupported Linux behavior is not simulated.",
+			),
 			sample,
-			el("h3", "Compatibility preview"),
+			el("h3", "Changes to apply"),
 			report,
 			el("h3", "Skipped or adapted"),
 			warnings,

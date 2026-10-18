@@ -112,8 +112,75 @@ export function parseHyprland(files, entry, existing = DEFAULT_BINDINGS) {
 				else warn(at, `Include not found or ambiguous: ${value}`);
 				continue;
 			}
+			if (full === "general:layout") {
+				if (["master", "dwindle", "grid"].includes(value)) {
+					result.style.layout = value;
+					result.applied.push(`Flow layout: ${value}`);
+				} else warn(at, "Unsupported layout.");
+				continue;
+			}
+			if (key === "bezier") {
+				const [name, ...points] = value.split(",").map((x) => x.trim()),
+					nums = points.map(Number);
+				if (
+					/^[\w-]+$/.test(name) &&
+					nums.length === 4 &&
+					nums.every(Number.isFinite) &&
+					nums[0] >= 0 &&
+					nums[0] <= 1 &&
+					nums[2] >= 0 &&
+					nums[2] <= 1 &&
+					Math.abs(nums[1]) <= 4 &&
+					Math.abs(nums[3]) <= 4
+				) {
+					result.style.curves = {
+						...(result.style.curves || {}),
+						[name]: nums,
+					};
+					result.applied.push(`Bezier curve: ${name}`);
+				} else
+					warn(at, "Invalid cubic Bezier (x must be 0�1, y between -4 and 4).");
+				continue;
+			}
+			if (key === "animation") {
+				const [leaf, on, speed, curve = "default", style = "popin"] = value
+					.split(",")
+					.map((x) => x.trim());
+				if (
+					[
+						"global",
+						"windows",
+						"windowsIn",
+						"windowsMove",
+						"workspaces",
+					].includes(leaf) &&
+					["0", "1"].includes(on) &&
+					(on === "0" || (Number(speed) > 0 && Number(speed) <= 20)) &&
+					["popin", "slide", "fade"].includes(style) &&
+					/^[\w-]+$/.test(curve)
+				) {
+					result.style.animations = {
+						...(result.style.animations || {}),
+						[leaf]: {
+							enabled: on === "1",
+							duration: on === "0" ? 0 : Number(speed) * 100,
+							curve,
+							style,
+						},
+					};
+					result.applied.push(
+						`Animation ${leaf}: ${on === "0" ? "off" : Number(speed) * 100 + "ms / " + style}`,
+					);
+				} else
+					warn(
+						at,
+						"Unsupported animation leaf/style or duration (maximum 2 seconds).",
+					);
+				continue;
+			}
 			const numeric = {
 				__proto__: null,
+				"master:mfact": ["mfact", 0.1, 0.9],
 				"general:gaps_in": ["inner", 0, 48],
 				"general:gaps_out": ["outer", 0, 64],
 				"general:border_size": ["border", 0, 8],
@@ -167,18 +234,44 @@ export function parseHyprland(files, entry, existing = DEFAULT_BINDINGS) {
 					.split(",")
 					.map((s) => s.trim());
 				const action =
-					dispatcher === "workspace" && /^[1-4]$/.test(arg)
-						? `workspace${arg}`
-						: ["movetoworkspace", "movetoworkspacesilent"].includes(
-									dispatcher,
-							  ) && /^[1-4]$/.test(arg)
-							? `move${arg}`
-							: {
-									__proto__: null,
-									killactive: "close",
-									fullscreen: "fullscreen",
-									togglesplit: "tile",
-								}[dispatcher];
+					dispatcher === "exec" &&
+					Object.hasOwn(
+						{
+							kitty: 1,
+							alacritty: 1,
+							foot: 1,
+							"rofi -show drun": 1,
+							"wofi --show drun": 1,
+							thunar: 1,
+							dolphin: 1,
+							firefox: 1,
+							hyprlock: 1,
+						},
+						arg,
+					)
+						? {
+								kitty: "terminal",
+								alacritty: "terminal",
+								foot: "terminal",
+								"rofi -show drun": "apps",
+								"wofi --show drun": "apps",
+								thunar: "files",
+								dolphin: "files",
+								firefox: "browser",
+								hyprlock: "lock",
+							}[arg]
+						: dispatcher === "workspace" && /^[1-4]$/.test(arg)
+							? `workspace${arg}`
+							: ["movetoworkspace", "movetoworkspacesilent"].includes(
+										dispatcher,
+								  ) && /^[1-4]$/.test(arg)
+								? `move${arg}`
+								: {
+										__proto__: null,
+										killactive: "close",
+										fullscreen: "fullscreen",
+										togglesplit: "tile",
+									}[dispatcher];
 				const tokens = (mods || "")
 					.toUpperCase()
 					.replace(/SUPER/g, "META")
@@ -241,5 +334,14 @@ export function parseHyprland(files, entry, existing = DEFAULT_BINDINGS) {
 		(n) => /(^|\/)hyprpaper\.conf$/.test(n) && !result.visited.includes(n),
 	))
 		parse(name);
+	for (const [leaf, item] of Object.entries(result.style.animations || {}))
+		if (
+			item.curve !== "default" &&
+			!Object.hasOwn(result.style.curves || {}, item.curve)
+		)
+			warn(
+				entry,
+				`Animation ${leaf}: missing curve ${item.curve}; using Flow default.`,
+			);
 	return result;
 }
