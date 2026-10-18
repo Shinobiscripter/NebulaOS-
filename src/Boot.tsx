@@ -41,7 +41,7 @@ channel.addEventListener("message", (msg) => {
             </head>
             <body>
             <div id="wrapper">
-            <h1>AnuraOS is already running in another tab</h1>
+            <h1>NebulaHub is already running in another tab</h1>
             <p>Please close the other tab and reload.</p>
             </div>
             </body>
@@ -91,6 +91,11 @@ let anura: Anura;
 // global
 
 window.addEventListener("load", async () => {
+	const accountModule = "/nebula/accounts.js";
+	await (await import(accountModule)).prepareSession();
+	splashToRemove = bootsplash;
+	document.body.appendChild(bootsplash);
+	setNebulaBootStage(0, "Opening your filesystem…");
 	const swShared: any = {
 		test: true,
 	};
@@ -102,14 +107,21 @@ window.addEventListener("load", async () => {
 
 	let conf, milestone, commit;
 	let bootStrapFs = Filer.fs;
+	if ((window as any).nebulaProfileId !== "default") {
+		bootStrapFs = new Filer.FileSystem({
+			provider: new Filer.FileSystem.providers.IndexedDB(
+				`nebula-profile-${(window as any).nebulaProfileId}`,
+			),
+		});
+	}
 
 	if (await (window as any).idbKeyval.get("bootFromOPFS")) {
 		bootStrapFs = (await LocalFS.newRootOPFS()) as any;
 	}
 	try {
 		conf = await (await fetch("/config.json")).json();
-		milestone = await (await fetch("/MILESTONE")).text();
-		commit = await (await fetch("/COMMIT")).text();
+		milestone = (await (await fetch("/MILESTONE")).text()).trim();
+		commit = (await (await fetch("/COMMIT")).text()).trim();
 
 		console.debug("writing config??");
 		await bootStrapFs.promises.writeFile(
@@ -125,6 +137,7 @@ window.addEventListener("load", async () => {
 	}
 
 	anura = await Anura.new(conf);
+	setNebulaBootStage(1, "Starting system services…");
 	if (bootStrapFs instanceof LocalFS) {
 		anura.settings.cache["bootFromOPFS"] = true;
 	} else {
@@ -150,6 +163,7 @@ window.addEventListener("load", async () => {
 	swShared.anura = anura;
 	swShared.sh = new anura.fs.Shell();
 	async function initComlink() {
+		if (!navigator.serviceWorker.controller) return;
 		const { port1, port2 } = new MessageChannel();
 
 		const msg = {
@@ -169,6 +183,16 @@ window.addEventListener("load", async () => {
 	navigator.serviceWorker.addEventListener("controllerchange", initComlink);
 
 	await navigator.serviceWorker.register("/anura-sw.js");
+	await navigator.serviceWorker.ready;
+	if (!navigator.serviceWorker.controller) {
+		await new Promise<void>((resolve) =>
+			navigator.serviceWorker.addEventListener(
+				"controllerchange",
+				() => resolve(),
+				{ once: true },
+			),
+		);
+	}
 	initComlink();
 
 	navigator.serviceWorker.addEventListener("message", (event) => {
@@ -199,7 +223,7 @@ window.addEventListener("load", async () => {
 					const tracker_br = document.getElementById("systemstatus-br")!;
 					tracker.style.display = "unset";
 					tracker_br.style.display = "unset";
-					tracker.innerText = "Anura is updating your system...";
+					tracker.innerText = "NebulaHub is updating your system...";
 					try {
 						await new anura.fs.Shell().promises.rm("/anura_files", {
 							recursive: true,
@@ -211,6 +235,7 @@ window.addEventListener("load", async () => {
 				}
 				console.debug("invalidated cache");
 				window.location.reload();
+				return;
 			}
 		} else {
 			// Domain is either expired or some non conformant milestone is being delivered (bad extension?)
@@ -276,9 +301,9 @@ window.addEventListener("load", async () => {
 
 		if (needsMigration.length > 0) {
 			anura.notifications.add({
-				title: "Anura Update",
+				title: "NebulaHub Update",
 				description:
-					"AnuraOS has been updated to a new version. Users are recommended to change the installation directory of their apps and libraries to /usr/ to ensure consistency with new installations.",
+					"NebulaHub has been updated to a new version. Users are recommended to change the installation directory of their apps and libraries to /usr/ to ensure consistency with new installations.",
 				timeout: "never",
 				buttons: [
 					{
@@ -444,23 +469,8 @@ window.addEventListener("load", async () => {
 		anura.settings.set("handler-migration-complete", true);
 	}
 
-	setTimeout(
-		() => {
-			setTimeout(() => {
-				if (splashToRemove) {
-					splashToRemove.classList.add("hide");
-				}
-			}, 350); // give the taskbar time to init
-			setTimeout(() => {
-				bootsplash.remove();
-				bootsplashMobile.remove();
-				gangstaBootsplash.remove();
-			}, 550);
-			anura.logger.debug("boot completed");
-			document.dispatchEvent(new Event("anura-boot-completed"));
-		},
-		anura.settings.get("oobe-complete") ? 500 : 1500,
-	);
+	anura.logger.debug("boot services ready");
+	document.dispatchEvent(new Event("anura-boot-completed"));
 });
 
 document.addEventListener("anura-boot-completed", async () => {
@@ -469,10 +479,12 @@ document.addEventListener("anura-boot-completed", async () => {
 		document.dispatchEvent(new Event("anura-login-completed"));
 	} else {
 		document.body.appendChild(oobeview.element);
+		bootsplash.remove();
 	}
 });
 
 document.addEventListener("anura-login-completed", async () => {
+	setNebulaBootStage(2, "Loading your applications…");
 	AnuradHelpers.setStage("anura.login");
 	const directories = anura.settings.get("directories");
 	anura.ui.theme = Theme.new(anura.settings.get("theme"));
@@ -537,6 +549,7 @@ document.addEventListener("anura-login-completed", async () => {
 	}
 
 	// Initialize static UI components that utilize anura.ui after loading apps, scripts, libs, so that external apps and libraries can apply overrides.
+	setNebulaBootStage(3, "Preparing your workspace…");
 	await quickSettings.init();
 	await calendar.init();
 	await launcher.init();
@@ -651,7 +664,17 @@ document.addEventListener("anura-login-completed", async () => {
 		}
 	});
 
+	try {
+		const desktopModule = "/nebula/desktop.js";
+		(await import(desktopModule)).default(anura);
+	} catch (error) {
+		console.error("Nebula desktop extensions could not load", error);
+	}
 	anura.initComplete = true;
+	setNebulaBootStage(3, "Ready. Welcome aboard.");
+	if (splashToRemove) splashToRemove.dataset.ready = "true";
+	splashToRemove?.classList.add("hide");
+	setTimeout(() => splashToRemove?.remove(), 350);
 	AnuradHelpers.setReady("anura.initComplete");
 	taskbar.updateTaskbar();
 	alttab.update();

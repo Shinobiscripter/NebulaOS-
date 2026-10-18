@@ -21,11 +21,10 @@ hooks: FORCE
 submodules: .gitmodules
 	git submodule update --recursive
 
-build/bootstrap: package.json server/package.json
+build/bootstrap: package.json package-lock.json server/package.json server/package-lock.json
 	mkdir -p build/lib
-	npm i
-	cd server; npm i
-	make hooks
+	npm ci
+	cd server; npm ci
 	>build/bootstrap
 
 # Each dependency should have a similar structure to the following:
@@ -149,7 +148,7 @@ apps/libfileview.lib/icons: apps/libfileview.lib/icons.json
 
 ANURA_VERSION = $(shell jq -r '.version' package.json)
 
-bundle: tsc css lint milestone commit build/cache-load.json
+bundle: tsc css milestone commit build/cache-load.json
 	mkdir -p build/artifacts
 	
 watch: FORCE
@@ -184,12 +183,14 @@ build/cache-load.json: FORCE
 	(find apps/ -type f && cd build/ && find lib/ -type f && find libs/ -type f && find assets/ -type f && find bundle.css -type f && cd ../public/ && find . -type f)| grep -v -e node_modules -e \.map -e \.d\.ts -e "/\." -e "workbox/" | jq -Rnc '[inputs]' > build/cache-load.json
 	
 static: all
+	node scripts/clean-static.mjs
 	mkdir -p static/
 	cp -r public/* static/
 	cp -r build/* static/
 	cp -r bin static/
 	cp -r apps static/
-	cp -r external/anura-browserjs/packages/chrome/dist static/browser
+	mkdir -p static/browser
+	cp -r external/anura-browserjs/packages/chrome/dist/. static/browser/
 
 server: FORCE
 	cd server; node server.js

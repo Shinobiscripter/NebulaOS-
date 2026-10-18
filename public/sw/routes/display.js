@@ -1,7 +1,7 @@
 /* global workbox, corsheaders */
 
 workbox.routing.registerRoute(
-	/\/blob/,
+	({ url }) => url.origin === self.location.origin && url.pathname === "/blob",
 	async (event) => {
 		console.log("Got blob req");
 		const blobURL = new URL(event.request.url).searchParams.get("url");
@@ -23,7 +23,8 @@ workbox.routing.registerRoute(
 );
 
 workbox.routing.registerRoute(
-	/\/display/,
+	({ url }) =>
+		url.origin === self.location.origin && url.pathname === "/display",
 	async (event) => {
 		const url = new URL(event.request.url);
 		const content = url.searchParams.get("content");

@@ -32,6 +32,9 @@ export function SideBar() {
     `;
 	return html`
 		<div>
+			<button on:click=${() => anura.apps["nebula.gamemode"]?.open()}>
+				<i class="material-symbols-outlined">sports_esports</i>Game Mode
+			</button>
 			<button><i class="material-symbols-outlined">history</i>Recent</button>
 			<hr />
 			<button onclick="loadPath('/')">

@@ -1,0 +1,230 @@
+.nebula-horizon-desktop,
+.nebula-horizon-start,
+.nebula-horizon-start-button {
+	display: none;
+}
+.nebula-env-horizon .nebula-horizon-desktop {
+	display: block;
+	position: fixed;
+	inset: 0 0 64px;
+	z-index: 1;
+	pointer-events: none;
+}
+.nh-shortcut {
+	position: absolute;
+	width: 90px;
+	height: 92px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 5px;
+	border: 1px solid transparent;
+	border-radius: 5px;
+	background: transparent;
+	color: white;
+	text-shadow: 0 1px 4px black;
+	font: 12px system-ui;
+	pointer-events: auto;
+	touch-action: none;
+}
+.nh-shortcut img {
+	width: 42px;
+	height: 42px;
+	object-fit: contain;
+	pointer-events: none;
+}
+.nh-shortcut:hover,
+.nh-shortcut:focus {
+	background: #bdd7ff26;
+	border-color: #bdd7ff66;
+	outline: none;
+}
+.nebula-env-horizon .nebula-horizon-desktop {
+	pointer-events: auto;
+}
+.nebula-env-horizon .nebula-horizon-start-button {
+	display: block;
+	flex: none;
+	background: #303e5e;
+	color: #e8f1ff;
+	border: 0;
+	border-radius: 5px;
+	padding: 12px;
+	cursor: pointer;
+}
+body.nebula-desktop.nebula-env-horizon > footer {
+	width: 100%;
+	max-width: none;
+	bottom: 0;
+	height: 56px;
+	border-radius: 0;
+	border-width: 1px 0 0;
+	background: #151b2af5;
+	box-sizing: border-box;
+	justify-content: flex-start;
+	padding-right: 300px;
+}
+.nebula-env-horizon #taskbar-bar {
+	height: 54px;
+}
+.nebula-env-horizon .nebula-menubar {
+	inset: auto 0 5px auto;
+	width: auto;
+	height: 44px;
+	background: transparent;
+	border: 0;
+	z-index: 9500;
+	padding: 0 5px;
+}
+.nebula-env-horizon
+	.nebula-menubar
+	> :not(.nebula-menu-utilities):not(#taskbar-right) {
+	display: none;
+}
+.nebula-env-horizon .nebula-menu-utilities > :not(:last-child) {
+	display: none;
+}
+.nebula-env-horizon.nebula-fullscreen .nebula-menubar {
+	transform: translateY(120%);
+}
+.nebula-env-horizon.nebula-fullscreen.nebula-dock-reveal .nebula-menubar {
+	transform: none;
+	opacity: 1;
+	pointer-events: auto;
+}
+.nebula-env-horizon .nebula-horizon-start:not([hidden]) {
+	display: flex;
+	flex-direction: column;
+	position: fixed;
+	bottom: 66px;
+	left: 12px;
+	width: min(530px, calc(100vw - 48px));
+	max-height: calc(100vh - 120px);
+	padding: 20px;
+	background: #121b2bf5;
+	color: #edf3ff;
+	border: 1px solid #9dc1ff40;
+	border-radius: 10px;
+	z-index: 10002;
+	box-shadow: 0 18px 60px #0008;
+}
+.nebula-horizon-start h2 {
+	margin: 0 0 10px;
+	font: 24px system-ui;
+}
+.nebula-horizon-start p {
+	font: 12px/1.4 system-ui;
+	color: #b5c6e2;
+}
+.nebula-horizon-start input {
+	padding: 12px;
+	color: white;
+	background: #070e1d;
+	border: 1px solid #a3bded44;
+	border-radius: 5px;
+}
+.nh-apps {
+	overflow: auto;
+	min-height: 80px;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 5px;
+}
+.nh-app {
+	display: flex;
+	min-width: 0;
+}
+.nh-app button,
+.nh-actions button {
+	border: 0;
+	border-radius: 4px;
+	background: #263249;
+	color: #eff5ff;
+	padding: 9px;
+	cursor: pointer;
+}
+.nh-app button:first-child {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	text-align: left;
+	min-width: 0;
+}
+.nh-app img {
+	width: 26px;
+	height: 26px;
+	object-fit: contain;
+}
+.nh-actions {
+	display: flex;
+	gap: 8px;
+	margin-top: 12px;
+}
+.nebula-motion .nebula-horizon-start {
+	animation: nh-enter 180ms ease-out;
+}
+@keyframes nh-enter {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+@media (max-width: 650px) {
+	body.nebula-desktop.nebula-env-horizon > footer {
+		padding-right: 10px;
+	}
+	.nebula-env-horizon .nebula-menubar {
+		display: none;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.nebula-horizon-start {
+		animation: none !important;
+	}
+}
+.nebula-dock-edge,
+.nebula-menu-edge {
+	font-size: 0;
+	overflow: hidden;
+}
+body.nebula-env-horizon .aliceWMwin .title {
+	padding-left: 12px;
+	padding-right: 0;
+}
+body.nebula-env-horizon .aliceWMwin .titleContent {
+	order: 0;
+	text-align: left;
+	margin: 0;
+	flex: 1;
+}
+body.nebula-env-horizon .aliceWMwin .windowButton {
+	position: static;
+	order: 1;
+	width: 40px;
+	height: 32px;
+	margin: 0;
+	border-radius: 0;
+	background: transparent;
+}
+body.nebula-env-horizon .aliceWMwin .windowButton::before {
+	display: none;
+}
+body.nebula-env-horizon .aliceWMwin .windowButton svg {
+	opacity: 1;
+	display: block;
+	fill: #e6edff;
+}
+body.nebula-env-horizon .aliceWMwin .windowButton:hover {
+	background: #ffffff20;
+}
+body.nebula-env-horizon .aliceWMwin .windowButton.close:hover {
+	background: #b8354d;
+}
+body.nebula-env-horizon .aliceWMwin .windowButton:hover {background:#ffffff20!important;}
+body.nebula-env-horizon .aliceWMwin .windowButton.close:hover {background:#b8354d!important;}
+body.nebula-env-horizon .aliceWMwin .windowButton svg {width:10px;height:10px;}

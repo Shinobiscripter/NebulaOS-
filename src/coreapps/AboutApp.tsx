@@ -1,7 +1,7 @@
 class AboutApp extends App {
-	name = "About Anura";
+	name = "About NebulaHub";
 	package = "anura.about";
-	icon = "/assets/icons/aboutapp.png";
+	icon = "/nebula/icon.svg";
 
 	page = () => (
 		<div class="aboutapp-container">
@@ -18,13 +18,19 @@ class AboutApp extends App {
 			</div>
 			<div class="aboutapp-logo-divider"></div>
 			<div class="aboutapp-content">
-				<p>AnuraOS</p>
+				<p>NebulaHub</p>
+				<p>Powered by AnuraOS / Mercury Workshop</p>
+				<p>
+					<a href="/nebula/credits.html" target="_blank" rel="noopener">
+						Source, credits &amp; licenses
+					</a>
+				</p>
 				<p>
 					Version {anura.version.codename} ({anura.version.pretty}) (OS build{" "}
 					<button
 						on:click={() => {
 							anura.apps["anura.browser"].open([
-								`https://github.com/MercuryWorkshop/anuraOS/commit/${this.getOSBuild()}`,
+								`https://github.com/Shinobiscripter/NebulaOS-/commit/${this.getOSBuild()}`,
 							]);
 						}}
 						class="aboutapp-link-button"
@@ -121,7 +127,7 @@ class AboutApp extends App {
 		const aboutview = anura.wm.create(this, {
 			title: "",
 			width: "400px",
-			height: fullscreenEasterEgg ? "400px" : "450px",
+			height: fullscreenEasterEgg ? "400px" : "530px",
 			resizable: false,
 		});
 

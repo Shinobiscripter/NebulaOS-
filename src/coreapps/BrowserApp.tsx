@@ -1,5 +1,5 @@
 class BrowserApp extends App {
-	name = "Anura Browser";
+	name = "Nebula Browser";
 	package = "anura.browser";
 	icon = "/assets/icons/chrome.svg";
 	source: string;

@@ -1,6 +1,10 @@
 {
 	"wallpapers": [
 		{
+			"name": "Nebula \u2014 Quiet orbit",
+			"url": "/nebula/wallpaper.svg"
+		},
+		{
 			"name": "Nocturne",
 			"url": "/assets/wallpaper/bundled_wallpapers/Nocturne.jpg"
 		},

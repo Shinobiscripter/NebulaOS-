@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: nebulahub-wisp
+    runtime: node
+    plan: free
+    branch: nebula/rebrand-and-games
+    rootDir: server
+    buildCommand: npm ci --omit=dev
+    startCommand: node relay.mjs
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 24.21.0
+      - key: ALLOWED_ORIGINS
+        value: https://nebulahub-shinobiscripter.netlify.app

@@ -1,0 +1,3 @@
+https://github.com/gabrielecirulli/2048
+Commit: 478b6ec346e3787f589e4af751378d06ded4cbbc
+Nebula distribution: removed remote ads/analytics, obsolete score upload and remote font; retained local gameplay and credits.
