@@ -55,3 +55,14 @@ Supported legacy config behavior now includes `general:layout = master|dwindle|g
 Remaining differences include window-exit timing, workspace slide direction/geometry, unsupported animation leaves/styles/springs, native layer surfaces, input/window rules, plugins, arbitrary Lua logic, GTK/Qt rendering, Wayland clients, daemon behavior, monitors and hardware-dependent compositor effects. No claim of perfect Linux parity is made. Existing descriptions above of unsupported custom curves/layouts or all exec bindings are superseded by this explicitly supported subset.
 
 Implementation: `compat-installer.js` compiles data-only plans; `compat-runtime.js` installs scoped config artifacts and connects built-in adapters; `flow-layout.js` supplies shared geometry and animation settings; `flow-preview.js` hosts the isolated interactive preview. The existing Anura window manager remains the runtime. Syntax reference: [Hyprland legacy animation documentation](https://wiki.hypr.land/0.52.0/Configuring/Animations/).
+
+## Flow extensions: workspace overview and idle lock
+
+Open **Extensions** in the Flow panel. Preferences are saved per local profile.
+
+- **Workspace overview** is an original browser implementation inspired by [hyprexpo](https://github.com/sandwichfarm/hyprexpo). Open it with the panel's Overview button or **Ctrl+Alt+O** (editable in shortcut settings). It lists actual windows across all four Flow workspaces. Drag a window to another workspace, use its accessible Move menu, click a window to restore/focus it, or press 1–4 to switch. Escape closes the overview. It respects reduced motion and can be disabled. Cards show window titles, not live compositor screenshots.
+- **Automatic lock** is inspired by [hypridle](https://wiki.hypr.land/Hypr-Ecosystem/hypridle/). Enable it explicitly in Extensions and choose 1–240 idle minutes. Desktop pointer, keyboard, wheel and focus activity reset the timer; the existing local-account lock screen handles unlocking. Focused embedded frames pause locking, since cross-origin game activity is not observable. Background timer throttling may delay locking. It does not suspend the device, control displays, or execute timeout shell commands. Native hypridle listener configuration is not yet translated; configure the timeout in Extensions.
+
+Literal supported package-manager requests for `hyprexpo` and `hypridle` now enable launch adapters for these real features. Legacy `bind = CTRL ALT, O, hyprexpo:expo, toggle` imports as the overview shortcut. Other hyprexpo dispatch arguments, plugin configuration options and hyprpm compilation remain unsupported and are reported by the importer. These are independently implemented browser equivalents, not Linux binaries or full native package replacements.
+
+Implementation: `flow-plugins.js` and `flow-plugins.css`, connected to the existing workspace assignments in `environments.js`. No upstream plugin code or assets are bundled.

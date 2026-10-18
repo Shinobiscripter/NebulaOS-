@@ -112,3 +112,15 @@ test("Workspace animation styles and reduced motion are honored", () => {
 	assert.equal(frames[0].transform, "translateX(-40px)");
 	assert.equal(animateFlow(node, {}, "workspaces", true), null);
 });
+
+test("New plugin package names and hyprexpo toggle translate to native features", () => {
+	const plan = compileInstaller({
+		"install.sh": "pacman -S hyprexpo hypridle",
+	});
+	assert.deepEqual(plan.bridges, ["hyprexpo", "hypridle"]);
+	const parsed = parseHyprland(
+		{ "hyprland.conf": "bind = CTRL ALT, O, hyprexpo:expo, toggle" },
+		"hyprland.conf",
+	);
+	assert.equal(parsed.bindings.overview, "Ctrl+Alt+KeyO");
+});

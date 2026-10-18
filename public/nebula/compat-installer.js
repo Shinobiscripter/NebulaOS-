@@ -1,6 +1,8 @@
 import { resolveUpload } from "./hyprland-parser.js";
 export const BRIDGES = Object.freeze({
 	hyprland: "Flow window manager",
+	hyprexpo: "Workspace overview",
+	hypridle: "Automatic desktop lock",
 	waybar: "Flow panel",
 	rofi: "Application search",
 	wofi: "Application search",

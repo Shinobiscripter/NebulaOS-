@@ -260,18 +260,20 @@ export function parseHyprland(files, entry, existing = DEFAULT_BINDINGS) {
 								firefox: "browser",
 								hyprlock: "lock",
 							}[arg]
-						: dispatcher === "workspace" && /^[1-4]$/.test(arg)
-							? `workspace${arg}`
-							: ["movetoworkspace", "movetoworkspacesilent"].includes(
-										dispatcher,
-								  ) && /^[1-4]$/.test(arg)
-								? `move${arg}`
-								: {
-										__proto__: null,
-										killactive: "close",
-										fullscreen: "fullscreen",
-										togglesplit: "tile",
-									}[dispatcher];
+						: dispatcher === "hyprexpo:expo" && arg === "toggle"
+							? "overview"
+							: dispatcher === "workspace" && /^[1-4]$/.test(arg)
+								? `workspace${arg}`
+								: ["movetoworkspace", "movetoworkspacesilent"].includes(
+											dispatcher,
+									  ) && /^[1-4]$/.test(arg)
+									? `move${arg}`
+									: {
+											__proto__: null,
+											killactive: "close",
+											fullscreen: "fullscreen",
+											togglesplit: "tile",
+										}[dispatcher];
 				const tokens = (mods || "")
 					.toUpperCase()
 					.replace(/SUPER/g, "META")

@@ -1,0 +1,94 @@
+.nebula-expo {
+	color: #eef2ff;
+	background: #0b101beb;
+	border: 1px solid var(--flow-accent, #93b4ac);
+	border-radius: 16px;
+	width: min(1100px, 90vw);
+	max-height: 85vh;
+	overflow: auto;
+	padding: 24px;
+}
+.nebula-expo::backdrop {
+	background: #02050ce0;
+}
+.nebula-expo[open] {
+	animation: nebula-expo-in 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nebula-expo-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 18px;
+	margin: 24px 0;
+}
+.nebula-expo-grid section {
+	border: 1px solid #ffffff25;
+	border-radius: 10px;
+	padding: 14px;
+	min-height: 160px;
+	background: #ffffff05;
+}
+.nebula-expo-grid section.current {
+	border-color: var(--flow-accent, #93b4ac);
+}
+.nebula-expo button,
+.nebula-expo select {
+	color: inherit;
+	background: #202a3d;
+	border: 1px solid #ffffff25;
+	padding: 10px;
+	border-radius: 6px;
+	cursor: pointer;
+}
+.nebula-expo-window {
+	display: flex;
+	gap: 8px;
+	margin-top: 12px;
+	padding: 8px;
+	background: #131e31;
+	border-radius: 8px;
+	cursor: grab;
+}
+.nebula-expo-window button {
+	flex: 1;
+	text-align: left;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.nebula-expo button:focus-visible,
+.nebula-expo select:focus-visible {
+	outline: 2px solid var(--flow-accent, #93b4ac);
+	outline-offset: 3px;
+}
+.nebula-plugin-settings label {
+	display: flex;
+	justify-content: space-between;
+	gap: 24px;
+	margin: 20px 0;
+}
+@keyframes nebula-expo-in {
+	from {
+		opacity: 0;
+		transform: scale(0.95) translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.nebula-expo[open] {
+		animation: none;
+	}
+}
+.nebula-motion-reduced .nebula-expo[open],
+.nebula-hypr-still .nebula-expo[open] {
+	animation: none;
+}
+@media (max-width: 650px) {
+	.nebula-expo-grid {
+		grid-template-columns: 1fr;
+	}
+	.nebula-expo-window {
+		flex-wrap: wrap;
+	}
+}

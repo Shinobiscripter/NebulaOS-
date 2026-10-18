@@ -1,3 +1,4 @@
+import { installFlowPlugins } from "./flow-plugins.js";
 import { layoutRects, animationSpec } from "./flow-layout.js";
 // Original browser-native implementation inspired by the user's Ilyamiro/Serpantinum clip.
 import { installKeybinds } from "./keybinds.js";
@@ -335,7 +336,19 @@ export function installEnvironments(
 	window.addEventListener("resize", update);
 	window.addEventListener("nebula:compat-launcher", spotlight);
 	window.addEventListener("nebula:compat-dashboard", () => clock.click());
+	const plugins = installFlowPlugins(os, {
+		windows,
+		assignments,
+		active: () => active,
+		switchWorkspace,
+		update,
+	});
+	actions.append(
+		button("Overview", plugins.showOverview),
+		button("Extensions", plugins.preferences),
+	);
 	installKeybinds(os, {
+		overview: plugins.showOverview,
 		...Object.fromEntries(
 			[1, 2, 3, 4].flatMap((n) => [
 				[`workspace${n}`, () => switchWorkspace(n)],

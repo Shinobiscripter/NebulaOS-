@@ -55,6 +55,10 @@ export function installCompatRuntime(os) {
 			return window.dispatchEvent(new Event("nebula:compat-launcher"));
 		if (["hyprpaper", "swww", "swaybg"].includes(name))
 			return window.dispatchEvent(new Event("nebula:wallpapers"));
+		if (name === "hyprexpo")
+			return window.dispatchEvent(new Event("nebula:flow-overview"));
+		if (name === "hypridle")
+			return window.dispatchEvent(new Event("nebula:flow-extensions"));
 		if (name === "hyprlock")
 			return window.dispatchEvent(new Event("nebula:lock-request"));
 		if (name === "waybar")

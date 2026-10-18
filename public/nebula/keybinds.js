@@ -10,6 +10,7 @@ export const DEFAULT_BINDINGS = Object.freeze({
 	browser: "",
 	close: "",
 	fullscreen: "",
+	overview: "Ctrl+Alt+KeyO",
 	tile: "Ctrl+Alt+KeyT",
 	float: "Ctrl+Alt+KeyF",
 	dashboard: "Ctrl+Alt+KeyD",
@@ -59,6 +60,7 @@ export function installKeybinds(os, actions) {
 			: id.startsWith("move")
 				? `Move window to ${id.slice(-1)}`
 				: {
+						overview: "Workspace overview",
 						terminal: "Terminal adapter",
 						files: "Files adapter",
 						browser: "Browser adapter",
