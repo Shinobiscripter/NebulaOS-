@@ -75,10 +75,16 @@ test("Installer adapters, interactive preview and actual automatic master tiling
 			),
 		)
 		.toBe(2);
-	const widths = await page
-		.locator(".aliceWMwin")
-		.evaluateAll((nodes) => nodes.map((n) => n.getBoundingClientRect().width));
-	expect(Math.max(...widths)).toBeGreaterThan(Math.min(...widths) * 1.5);
+	await expect
+		.poll(async () => {
+			const widths = await page
+				.locator(".aliceWMwin")
+				.evaluateAll((nodes) =>
+					nodes.map((n) => n.getBoundingClientRect().width),
+				);
+			return Math.max(...widths) / Math.min(...widths);
+		})
+		.toBeGreaterThan(1.5);
 	await page.evaluate(() => window.dispatchEvent(new Event("nebula:hyprland")));
 	await page.getByRole("button", { name: "Undo last import" }).click();
 	await expect(page.locator(".nebula-hypr-import [role=status]")).toContainText(
