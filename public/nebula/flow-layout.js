@@ -69,15 +69,23 @@ export function animationSpec(config = {}, kind = "windowsIn") {
 		easing: curve
 			? `cubic-bezier(${curve.join(",")})`
 			: "cubic-bezier(.16,1,.3,1)",
-		style: item?.style || "popin",
+		style: item?.style || (kind === "workspaces" ? "slide" : "popin"),
 	};
 }
-export function animateFlow(node, config, kind = "windowsIn", reduced = false) {
+export function animateFlow(
+	node,
+	config,
+	kind = "windowsIn",
+	reduced = false,
+	direction = 1,
+) {
 	const spec = animationSpec(config, kind);
 	if (reduced || !spec.duration) return null;
 	const offset =
 		spec.style === "slide"
-			? "translateY(28px)"
+			? kind === "workspaces"
+				? `translateX(${direction * 40}px)`
+				: "translateY(28px)"
 			: spec.style === "fade"
 				? "none"
 				: "scale(.9)";

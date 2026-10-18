@@ -1,6 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { layoutRects, animationSpec } from "../public/nebula/flow-layout.js";
+import {
+	layoutRects,
+	animationSpec,
+	animateFlow,
+} from "../public/nebula/flow-layout.js";
 import { parseHyprland } from "../public/nebula/hyprland-parser.js";
 import { compileInstaller } from "../public/nebula/compat-installer.js";
 test("Master and dwindle layouts have bounded non-overlapping rectangles", () => {
@@ -82,4 +86,29 @@ test("Directory installation preserves relative paths inside its scoped root", (
 		"hypr/colors.conf": "general:border_size = 2",
 	});
 	assert.equal(p.aliases["colors.conf"], "general:border_size = 2");
+});
+
+test("Workspace animation styles and reduced motion are honored", () => {
+	let frames;
+	const node = {
+		animate: (f) => {
+			frames = f;
+			return {};
+		},
+	};
+	animateFlow(
+		node,
+		{ animations: { workspaces: { style: "fade", duration: 100 } } },
+		"workspaces",
+	);
+	assert.equal(frames[0].transform, "none");
+	animateFlow(
+		node,
+		{ animations: { workspaces: { style: "slide", duration: 100 } } },
+		"workspaces",
+		false,
+		-1,
+	);
+	assert.equal(frames[0].transform, "translateX(-40px)");
+	assert.equal(animateFlow(node, {}, "workspaces", true), null);
 });
