@@ -379,6 +379,13 @@ class SettingsApp extends App {
 								<span>Flow keyboard controls</span>
 								<button
 									on:click={() =>
+										window.dispatchEvent(new Event("nebula:flow-extensions"))
+									}
+								>
+									Flow extensions
+								</button>
+								<button
+									on:click={() =>
 										window.dispatchEvent(new Event("nebula:hyprland"))
 									}
 								>

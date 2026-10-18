@@ -107,6 +107,10 @@ export function installEnvironments(
 				);
 		}
 		apps.append(
+			button("Flow extensions", () => {
+				dashboard.close();
+				window.dispatchEvent(new Event("nebula:flow-extensions"));
+			}),
 			button("Search all apps", () => {
 				dashboard.close();
 				spotlight();
