@@ -5,8 +5,9 @@ import { createHash } from "node:crypto";
 import { selectGames } from "../apps/nebula-games.app/library.js";
 const { games } = JSON.parse(await readFile(new URL("../public/nebula/games.json",import.meta.url)));
 test("all migrated launchers are present, unique, unchanged and URL-encoded", async () => {
-  assert.equal(games.length,46);assert.equal(new Set(games.map(game => game.id)).size,46);
-  for (const game of games) {
+  const migrated = games.filter(game => game.launch !== "external");
+  assert.equal(migrated.length,46);assert.equal(new Set(games.map(game => game.id)).size,games.length);
+  for (const game of migrated) {
     assert.equal(decodeURIComponent(game.path),`/Games/${game.file}`);
     const bytes = await readFile(new URL(`../public/Games/${encodeURIComponent(game.file)}`,import.meta.url));
     assert.equal(createHash("sha256").update(bytes).digest("hex"),game.sha256);

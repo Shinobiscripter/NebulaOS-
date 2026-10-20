@@ -11,6 +11,11 @@ function save() {
 }
 function played(game) { state.recent[game.id] = Date.now(); save(); }
 function launch(game, inWindow = false) {
+  if (game.launch === "external") {
+    window.parent.open(game.path, "_blank", "noopener,noreferrer");
+    tell(game.title + " requested on its external host. " + (game.description || ""));
+    played(game); return;
+  }
   if (inWindow) {
     if (!("credentialless" in HTMLIFrameElement.prototype)) {
       tell("This browser cannot embed compatibility games. Use Play to open a browser tab.");
@@ -58,7 +63,10 @@ function render() {
     const secondary = document.createElement("div");secondary.className = "secondary";
     const native = document.createElement("button");native.className = "window-launch";native.textContent = "Open in window";native.onclick = () => launch(game, true);
     const original = document.createElement("a");original.textContent = "Original URL";original.href = game.originalUrl;original.target = "_blank";original.rel = "noopener noreferrer";
-    actions.append(play, favorite);secondary.append(native, original);details.append(title, actions, secondary);card.append(art, details);fragment.append(card);
+    if (game.launch === "external") { native.hidden = true; original.textContent = "GitHub project"; original.href = game.source; }
+    actions.append(play, favorite);secondary.append(native, original);details.append(title);
+    if (game.description) { const description = document.createElement("p"); description.textContent = game.description; details.append(description); }
+    details.append(actions, secondary);card.append(art, details);fragment.append(card);
   }
   if (!games.length) { const empty = document.createElement("p");empty.className = "empty";empty.textContent = state.view === "favorites" ? "No favorites yet. Star a game in All games." : state.view === "recent" ? "Games you launch will appear here." : "No games match your search.";fragment.append(empty); }
   $("#games").replaceChildren(fragment);

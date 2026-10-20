@@ -557,6 +557,33 @@
       "kind": "online",
       "url": "https://nebula-hub-2.vercel.app/Games/n-gon.html",
       "source": "https://github.com/Shinobiscripter/NebulaHub-2"
+    },
+    {
+      "id": "web-deltarune-demo",
+      "title": "DELTARUNE — Chapters 1 & 2",
+      "url": "https://orangeify.github.io/deltarune-port/free.html",
+      "source": "https://github.com/Orangeify/deltarune-port",
+      "category": "Adventure",
+      "description": "Unofficial browser port of the Chapters 1 & 2 demo. Original game by Toby Fox. Hosted externally; requires internet.",
+      "kind": "online"
+    },
+    {
+      "id": "web-undertale",
+      "title": "UNDERTALE",
+      "url": "https://heavenorcayt.github.io/Undertale-Web-Port-main/",
+      "source": "https://github.com/heavenorcayt/Undertale-Web-Port-main",
+      "category": "Adventure",
+      "description": "Unofficial browser port. Original game by Toby Fox. Hosted externally; requires internet and may take time to load.",
+      "kind": "online"
+    },
+    {
+      "id": "web-pizza-tower",
+      "title": "Pizza Tower",
+      "url": "https://realestxenoxx.github.io/Pizza-Tower-Web-Port/",
+      "source": "https://github.com/RealestXenoxx/Pizza-Tower-Web-Port",
+      "category": "Platformer",
+      "description": "Unofficial browser port. Original game by Tour De Pizza; port credits belong to the linked project. Hosted externally; requires internet.",
+      "kind": "online"
     }
   ]
 }
