@@ -4,6 +4,8 @@ Nebula Cinema is an independent Stremio-compatible media application. Open it fr
 
 ## Add-ons
 
+Torrentio and Cinemeta install automatically on first launch (including existing Cinema profiles). Torrentio exposes streams, not catalogs; Cinemeta supplies browsable/searchable movies and series. Existing configured URLs are preserved by add-on ID. Removing a default is remembered, and a failed first install retries next launch. Torrentio's infoHash/fileIdx streams require the companion, available peers, and a browser-compatible video file. Automatic installation does not supply a public torrent server or transcoding.
+
 In **Add-ons & server**, paste the configured HTTPS `/manifest.json` URL (or `stremio://` installation URL). Installed manifests and the server address are stored locally in this origin's localStorage. Configured add-on URLs can contain private credentials; treat browser storage accordingly. The companion token stays in memory for the current tab only. Different website origins have separate preferences.
 
 Supported: HTTP manifests; catalog feeds and search; metadata; series episode selection; resource-specific type/ID filters; direct HTTP(S) video sources; external source links; BitTorrent v1 info hashes and file indices through the companion. Failed providers do not prevent other catalogs from loading. Remove add-ons from the connection dialog.

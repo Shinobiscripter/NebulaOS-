@@ -5,6 +5,7 @@ import {
 	supports,
 	json,
 } from "./protocol.js";
+import { installDefaults } from "./default-addons.js";
 const $ = (s) => document.querySelector(s);
 const el = (tag, text, cls) => {
 	const n = document.createElement(tag);
@@ -46,7 +47,11 @@ function renderAddons() {
 	for (const a of addons) {
 		const row = el("div", null, "row");
 		row.append(
-			el("span", a.manifest.name),
+			el(
+				"span",
+				a.manifest.name +
+					(a.manifest.catalogs.length ? " · Catalogs" : " · Stream provider"),
+			),
 			button("Remove", () => {
 				addons = addons.filter((x) => x !== a);
 				save();
@@ -375,3 +380,22 @@ async function play(source, root, run) {
 	await video.play().catch(() => {});
 }
 discover();
+installDefaults({
+	storage: localStorage,
+	getAddons: () => addons,
+	saveAddons: (value) => {
+		addons = value;
+		save();
+	},
+}).then((failed) => {
+	renderAddons();
+	discover($("#search input").value.trim());
+	if (failed.length) {
+		const warning = el(
+			"p",
+			"Some default add-ons could not be reached. They will retry next time Cinema opens.",
+			"error",
+		);
+		$("#catalogs").before(warning);
+	}
+});

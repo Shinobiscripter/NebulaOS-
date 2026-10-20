@@ -2,6 +2,12 @@ import { test, expect } from "@playwright/test";
 test("Cinema installs, searches and removes a Stremio addon across reloads", async ({
 	page,
 }) => {
+	await page.addInitScript(() =>
+		localStorage.setItem(
+			"nebula.cinema.defaults.v1",
+			JSON.stringify(["com.stremio.torrentio.addon", "com.linvo.cinemeta"]),
+		),
+	);
 	await page.route("https://cinema-test.example/**", async (route) => {
 		const url = route.request().url();
 		let data;
