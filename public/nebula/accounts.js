@@ -50,6 +50,32 @@ async function credential(password) {
 	return { salt, hash: await verifier(password, salt) };
 }
 let locking = false;
+export function currentLocalAccount() {
+	return read().find((account) => account.id === profileId());
+}
+export async function createLocalAccount(name, password, confirm, wallpaper) {
+	const accounts = read(),
+		clean = name.trim();
+	if (!clean || clean.length > 40)
+		throw Error("Enter a name of 1–40 characters.");
+	if (accounts.some((a) => a.name.toLowerCase() === clean.toLowerCase()))
+		throw Error("That account name already exists.");
+	if (password.length < 8) throw Error("Use at least eight characters.");
+	if (password !== confirm) throw Error("Passwords do not match.");
+	const id = accounts.length ? crypto.randomUUID() : "default";
+	const account = {
+		id,
+		name: clean,
+		...(await credential(password)),
+		wallpaper,
+	};
+	// Re-read after hashing so simultaneous creation cannot overwrite another account.
+	const latest = read();
+	if (JSON.stringify(latest) !== JSON.stringify(accounts))
+		throw Error("Accounts changed in another window. Please try again.");
+	write([...accounts, account]);
+	return account;
+}
 export async function prepareSession() {
 	const accounts = read();
 	if (!accounts.length) {
@@ -337,23 +363,12 @@ function openAccounts(os) {
 		e.preventDefault();
 		submit.disabled = true;
 		try {
-			const accounts = read();
-			const clean = name.value.trim();
-			if (!clean) throw Error("Enter an account name.");
-			if (accounts.some((a) => a.name.toLowerCase() === clean.toLowerCase()))
-				throw Error("That account name already exists.");
-			if (password.value.length < 8)
-				throw Error("Use at least eight characters.");
-			if (password.value !== confirm.value)
-				throw Error("Passwords do not match.");
-			const id = accounts.length ? crypto.randomUUID() : "default";
-			accounts.push({
-				id,
-				name: clean,
-				...(await credential(password.value)),
-				wallpaper: os.settings.get("nebula.wallpaper.lockPreview"),
-			});
-			write(accounts);
+			const { id, name: clean } = await createLocalAccount(
+				name.value,
+				password.value,
+				confirm.value,
+				os.settings.get("nebula.wallpaper.lockPreview"),
+			);
 			status.textContent =
 				id === profileId()
 					? "Account created. Your existing files and settings are preserved."
