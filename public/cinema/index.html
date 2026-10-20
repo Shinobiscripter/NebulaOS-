@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<meta name="theme-color" content="#090c16" />
+		<title>Nebula Cinema</title>
+		<link rel="icon" href="./icon.svg" />
+		<link rel="stylesheet" href="./style.css" />
+	</head>
+	<body>
+		<header>
+			<a class="brand" href="./">✦ <strong>NEBULA</strong> CINEMA</a>
+			<nav>
+				<button id="home">Discover</button
+				><button id="settings">Add-ons & server</button>
+			</nav>
+		</header>
+		<main>
+			<section class="intro">
+				<span class="eyebrow">YOUR PERSONAL SCREENING ROOM</span>
+				<h1>A universe of stories.</h1>
+				<p>Your catalogs. Your sources. One place to watch.</p>
+			</section>
+			<form id="search">
+				<input
+					aria-label="Search titles"
+					placeholder="Search your add-on catalogs…"
+					type="search"
+				/><button>Search</button>
+			</form>
+			<p id="status" role="status"></p>
+			<div id="catalogs"></div>
+		</main>
+		<dialog id="details">
+			<button class="close">Close</button>
+			<div id="detail-content"></div>
+		</dialog>
+		<dialog id="preferences">
+			<button class="close">Close</button>
+			<h2>Your connections</h2>
+			<p>
+				Install an HTTP Stremio add-on using its configured manifest URL. Add-on
+				URLs and preferences stay in this browser.
+			</p>
+			<form id="install">
+				<label
+					>Add-on manifest URL<input
+						name="url"
+						required
+						placeholder="https://example.org/manifest.json" /></label
+				><button>Install add-on</button>
+			</form>
+			<div id="addons"></div>
+			<hr />
+			<h2>Torrent companion</h2>
+			<p>
+				Direct video streams work without a server. Torrent sources need the
+				free Nebula Cinema companion running on your computer or your own
+				server.
+			</p>
+			<form id="server">
+				<label
+					>Companion address<input
+						name="endpoint"
+						placeholder="http://127.0.0.1:8787" /></label
+				><label
+					>Access token<input name="token" type="password" autocomplete="off"
+				/></label>
+				<p>The token is kept for this tab only.</p>
+				<button>Save & test connection</button>
+			</form>
+			<p id="settings-status" role="status"></p>
+			<a
+				href="https://github.com/Shinobiscripter/NebulaOS-/blob/nebula/rebrand-and-games/documentation/CINEMA.md"
+				target="_blank"
+				rel="noopener"
+				>Companion setup & compatibility ↗</a
+			>
+		</dialog>
+		<footer>
+			<a
+				href="https://nebula-cinema-shinobiscripter.netlify.app/"
+				target="_blank"
+				rel="noopener"
+				>Open standalone Cinema</a
+			>
+			· Independent Stremio-compatible client ·
+			<a href="https://github.com/Shinobiscripter/NebulaOS-"
+				>Source & AGPL-3.0 license</a
+			>
+		</footer>
+		<script type="module" src="./app.js"></script>
+	</body>
+</html>
