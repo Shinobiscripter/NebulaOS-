@@ -1,5 +1,44 @@
 import { test, expect } from "@playwright/test";
 
+test("new ports appear in both catalogs and launch the selected external destination", async ({
+	page,
+	context,
+}) => {
+	await page.addInitScript(() =>
+		localStorage.setItem("nebula.welcome.v1.default", "complete"),
+	);
+	await page.goto("/");
+	await page.waitForFunction(() => window.anura?.initComplete);
+	const games = await (await page.request.get("/nebula/games.json")).json();
+	const store = await (
+		await page.request.get("/game-library/catalog.json")
+	).json();
+	const added = games.games.filter((g) => g.launch === "external");
+	expect(added).toHaveLength(3);
+	await page.evaluate(() => anura.apps["nebula.games"].open());
+	const frame = page.frameLocator('iframe[src*="nebula-games.app"]');
+	for (const game of added) {
+		expect(store.games.find((g) => g.id === game.id)?.url).toBe(game.path);
+		await frame.locator("#search").fill(game.title);
+		await expect(
+			frame.getByRole("heading", { name: game.title, exact: true }),
+		).toBeVisible();
+		await context.route(game.path, (route) =>
+			route.fulfill({
+				contentType: "text/html",
+				body: "<title>External destination fixture</title>",
+			}),
+		);
+		const popup = page.waitForEvent("popup");
+		await frame
+			.getByRole("button", { name: "Play " + game.title, exact: true })
+			.click();
+		const tab = await popup;
+		await expect(tab).toHaveURL(game.path);
+		await tab.close();
+	}
+});
+
 test("setup creates a real local account, applies a desktop, persists completion and replays", async ({
 	page,
 }) => {

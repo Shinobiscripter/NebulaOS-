@@ -128,7 +128,7 @@ export function installWelcome(os) {
 		const content = node("div", undefined, "nw-content");
 		const status = node("p", "", "nw-status");
 		status.setAttribute("role", "status");
-		const footer = node("footer");
+		const footer = node("div", undefined, "nw-navigation");
 		const back = button("Back", () => {
 			step--;
 			render();

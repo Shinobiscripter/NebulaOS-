@@ -36,13 +36,13 @@ for (const app of config.apps) {
 for (const lib of config.libs)
 	await exists(`${lib.replace(/^\//, "")}/manifest.json`);
 const { games } = JSON.parse(await text("nebula/games.json"));
-assert.equal(games.filter(g => g.launch !== "external").length, 46);
-assert.equal(new Set(games.map(g => g.id)).size, games.length);
+assert.equal(games.filter((g) => g.launch !== "external").length, 46);
+assert.equal(new Set(games.map((g) => g.id)).size, games.length);
 for (const game of games) {
- if (game.launch === "external") {
-  assert.equal(new URL(game.path).protocol, "https:");
-  assert.equal(new URL(game.source).hostname, "github.com");
- } else await exists(decodeURIComponent(game.path.slice(1)));
+	if (game.launch === "external") {
+		assert.equal(new URL(game.path).protocol, "https:");
+		assert.equal(new URL(game.source).hostname, "github.com");
+	} else await exists(decodeURIComponent(game.path.slice(1)));
 }
 await exists("nebula/welcome.js");
 await exists("nebula/welcome.css");

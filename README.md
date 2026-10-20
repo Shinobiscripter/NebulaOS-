@@ -8,7 +8,9 @@ Live deployment: **[nebulahub-shinobiscripter.netlify.app](https://nebulahub-shi
 
 ## Desktop features
 
-**Game Mode** is available from Files, Explore and every desktop environment's launcher. Nova reproduces the PS5 home layout, Deck the Steam Deck Gaming Mode layout, and Pulse the Xbox Series dashboard layout, using Nebula's shared library, store, settings and configurable performance overlay. The catalog contains 49 games: two downloadable packages and 47 online launchers. See [Game Mode](documentation/GAME-MODE.md) for controls, downloads, offline behavior, licensing and performance-measurement limits. Catalog source: [NebulaGames](https://github.com/Shinobiscripter/NebulaGames).
+**Welcome** provides animated first-run local-account setup, live desktop selection and an interactive feature guide. Reopen it from the launcher anytime. See [setup and local-account details](documentation/WELCOME.md).
+
+**Game Mode** is available from Files, Explore and every desktop environment's launcher. Nova reproduces the PS5 home layout, Deck the Steam Deck Gaming Mode layout, and Pulse the Xbox Series dashboard layout, using Nebula's shared library, store, settings and configurable performance overlay. The catalog contains 52 games: two downloadable packages and 50 online launchers. See [Game Mode](documentation/GAME-MODE.md) for controls, downloads, offline behavior, licensing and performance-measurement limits. Catalog source: [NebulaGames](https://github.com/Shinobiscripter/NebulaGames).
 
 **NebulaCraft Launcher** is also available as a native app and at [its standalone website](https://nebulacraft-shinobiscripter.netlify.app/). It runs the supplied repository's 1.20.4-labeled EaglercraftZ build; upstream asset/version caveats are documented in the standalone launcher.
 
