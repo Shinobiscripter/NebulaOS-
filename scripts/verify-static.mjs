@@ -36,8 +36,16 @@ for (const app of config.apps) {
 for (const lib of config.libs)
 	await exists(`${lib.replace(/^\//, "")}/manifest.json`);
 const { games } = JSON.parse(await text("nebula/games.json"));
-assert.equal(games.length, 46);
-for (const game of games) await exists(decodeURIComponent(game.path.slice(1)));
+assert.equal(games.filter(g => g.launch !== "external").length, 46);
+assert.equal(new Set(games.map(g => g.id)).size, games.length);
+for (const game of games) {
+ if (game.launch === "external") {
+  assert.equal(new URL(game.path).protocol, "https:");
+  assert.equal(new URL(game.source).hostname, "github.com");
+ } else await exists(decodeURIComponent(game.path.slice(1)));
+}
+await exists("nebula/welcome.js");
+await exists("nebula/welcome.css");
 const cache = JSON.parse(await text("cache-load.json"));
 assert.ok(cache.includes("browser/index.html"));
 assert.ok(cache.includes("apps/nebula-games.app/index.html"));
@@ -47,5 +55,5 @@ assert.ok(
 );
 for (const path of cache) await exists(path.replace(/^\.\//, ""));
 console.log(
-	"Production entry points, 46 game launchers, PWA assets, WASM signatures, app manifests and offline cache paths verified.",
+	"Production entry points, local and external game launchers, PWA assets, WASM signatures, app manifests and offline cache paths verified.",
 );
