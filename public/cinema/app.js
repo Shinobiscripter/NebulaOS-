@@ -109,12 +109,13 @@ $("#install").onsubmit = async (e) => {
 };
 $("#server").onsubmit = async (e) => {
 	e.preventDefault();
+	notice('Connecting… A sleeping free server can take about a minute to wake.', true);
 	try {
 		endpoint = safeURL(e.target.elements.endpoint.value).replace(/\/$/, "");
 		token = e.target.elements.token.value;
 		const result = await fetch(endpoint + "/health", {
 			headers: { Authorization: "Bearer " + token },
-			signal: AbortSignal.timeout(10000),
+			signal: AbortSignal.timeout(90000),
 		});
 		if (!result.ok) throw new Error("Connection rejected: " + result.status);
 		localStorage.setItem("nebula.cinema.server", endpoint);

@@ -91,6 +91,7 @@ export async function createCompanion({
 		};
 		try {
 			const url = new URL(req.url, "http://localhost");
+			if (url.pathname === '/ready' && req.method === 'GET') return reply(200, {ok:true});
 			if (url.pathname === "/health") {
 				if (!authorized(req))
 					return reply(401, { error: "Access token required." });
@@ -259,6 +260,8 @@ if (
 	process.argv[1] &&
 	import.meta.url === pathToFileURL(process.argv[1]).href
 ) {
+	const host = process.env.HOST || "127.0.0.1";
+	if (!['127.0.0.1', 'localhost', '::1'].includes(host) && !process.env.CINEMA_TOKEN) throw new Error('Set CINEMA_TOKEN before exposing the companion publicly.');
 	const token = process.env.CINEMA_TOKEN || randomBytes(32).toString("hex");
 	const origins = (
 		process.env.CINEMA_ORIGINS ||
@@ -268,7 +271,6 @@ if (
 		.map((s) => s.trim());
 	const app = await createCompanion({ token, origins });
 	const port = Number(process.env.PORT || 8787);
-	const host = process.env.HOST || "127.0.0.1";
 	app.server.listen(port, host, () => {
 		console.log(`Nebula Cinema companion: http://${host}:${port}`);
 		if (!process.env.CINEMA_TOKEN)
