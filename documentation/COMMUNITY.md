@@ -19,7 +19,9 @@ cannot grant developer privileges. Announcements use plain text, expire after
 3. Add this exact authorized redirect URI:
    `https://nebulahub-shinobiscripter.netlify.app/api/community?action=callback`.
 4. Set Netlify environment variables `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
-   and `NEBULA_SITE_ORIGIN` (the origin above), scoped to Functions. Never commit
+   and `NEBULA_SITE_ORIGIN` (the origin above), scoped to Functions when your plan
+   supports scope selection. On the free plan use all scopes in the production
+   context; the client secret is read only by server code. Never commit
    secrets or put them in the static build. Redeploy the functions after changes.
 5. Deploy `static` **and** `netlify/functions`. The shared Netlify Blobs store
    `nebula-community-v1` is initialized on use. The daily scheduled cleanup runs
