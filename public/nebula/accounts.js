@@ -1,4 +1,5 @@
 // Local account gate. Passwords are salted verifiers; filesystem contents are not encrypted.
+import { getGoogleSession, beginGoogleSignIn } from "./google-auth.js";
 const KEY = "nebula.accounts.v1";
 export const profileId = () => window.nebulaProfileId || "default";
 const read = () => JSON.parse(localStorage.getItem(KEY) || "[]");
@@ -78,6 +79,56 @@ export async function createLocalAccount(name, password, confirm, wallpaper) {
 }
 export async function prepareSession() {
 	const accounts = read();
+	const callback = new URL(location.href).searchParams.get("google");
+	if (callback || accounts.some((a) => a.google)) {
+		const session = await getGoogleSession();
+		if (
+			session.user &&
+			(callback === "connected" ||
+				!sessionStorage.getItem("nebula.google.locked"))
+		) {
+			let account = accounts.find((a) => a.google?.sub === session.user.sub);
+			const linkId = sessionStorage.getItem("nebula.google.link");
+			if (callback === "connected" && linkId) {
+				const target = accounts.find((a) => a.id === linkId);
+				if (
+					target &&
+					(!target.google || target.google.sub === session.user.sub) &&
+					(!account || account.id === target.id)
+				) {
+					target.google = session.user;
+					account = target;
+				}
+			}
+			if (!account && callback === "connected") {
+				account = {
+					id: accounts.length ? crypto.randomUUID() : "default",
+					name: session.user.name,
+					google: session.user,
+				};
+				accounts.push(account);
+			}
+			if (account) {
+				write(accounts);
+				window.nebulaProfileId = account.id;
+				localStorage.setItem("nebula.account.selected", account.id);
+				sessionStorage.removeItem("nebula.google.link");
+				sessionStorage.removeItem("nebula.google.locked");
+				if (callback) {
+					const url = new URL(location.href);
+					url.searchParams.delete("google");
+					history.replaceState(null, "", url);
+				}
+				return;
+			}
+		}
+		if (callback) {
+			sessionStorage.removeItem("nebula.google.link");
+			const url = new URL(location.href);
+			url.searchParams.delete("google");
+			history.replaceState(null, "", url);
+		}
+	}
 	if (!accounts.length) {
 		window.nebulaProfileId = "default";
 		return;
@@ -87,6 +138,7 @@ export async function prepareSession() {
 export async function lockScreen(os, boot = false) {
 	if (locking) return;
 	locking = true;
+	sessionStorage.setItem("nebula.google.locked", "1");
 	if (document.fullscreenElement)
 		await document.exitFullscreen().catch(() => {});
 	document.body.classList.add("nebula-locked");
@@ -171,8 +223,9 @@ export async function lockScreen(os, boot = false) {
 			password.required = false;
 		} else {
 			submit.textContent = accounts.length ? "Unlock" : "Return to desktop";
-			password.hidden = !accounts.length;
-			password.required = !!accounts.length;
+			password.hidden = !accounts.length || !a?.hash;
+			password.required = !!a?.hash;
+			if (a && !a.hash) submit.textContent = "Sign in with Google to unlock";
 		}
 		reveal.hidden = password.hidden;
 	};
@@ -186,6 +239,8 @@ export async function lockScreen(os, boot = false) {
 	update();
 	if (accounts.length) form.append(select, password, reveal, caps);
 	form.append(submit, status);
+	if (accounts.some((a) => a.google))
+		form.append(button("Continue with Google", () => beginGoogleSignIn()));
 	const connection = el("span", null, { className: "nebula-lock-connection" });
 	const network = () => {
 		connection.textContent = navigator.onLine
@@ -235,6 +290,10 @@ export async function lockScreen(os, boot = false) {
 			e.preventDefault();
 			if (submit.disabled) return;
 			const account = accounts.find((a) => a.id === select.value);
+			if (account && !account.hash) {
+				beginGoogleSignIn();
+				return;
+			}
 			if (!boot && account && account.id !== profileId()) {
 				localStorage.setItem("nebula.account.selected", account.id);
 				location.reload();
@@ -283,6 +342,7 @@ export async function lockScreen(os, boot = false) {
 				document.body.classList.remove("nebula-locked");
 				window.removeEventListener("keydown", swallow, true);
 				locking = false;
+				sessionStorage.removeItem("nebula.google.locked");
 				resolve();
 			} catch (error) {
 				status.textContent = `Could not unlock: ${error.message}`;
@@ -390,7 +450,7 @@ function openAccounts(os) {
 			lockScreen(os);
 		}),
 	);
-	if (current) {
+	if (current?.hash) {
 		const change = el("form"),
 			old = field("Current password", "password"),
 			next = field("Replacement password", "password"),

@@ -3,7 +3,7 @@
 workbox.routing.registerRoute(
 	({ url }) =>
 		url.origin === self.location.origin &&
-		!/^\/(?:config\.json$|MILESTONE$|x86images\/|service\/|Games\/|play\/)/.test(
+		!/^\/(?:api\/|\.netlify\/functions\/|config\.json$|MILESTONE$|x86images\/|service\/|Games\/|play\/)/.test(
 			url.pathname,
 		),
 	async (event) => {

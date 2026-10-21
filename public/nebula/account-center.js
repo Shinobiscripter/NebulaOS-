@@ -1,4 +1,5 @@
-import { profileId } from "./accounts.js";
+import { profileId, currentLocalAccount } from "./accounts.js";
+import { googleProfileHint } from "./google-auth.js";
 export const SERVICES = Object.freeze({
 	github: {
 		name: "GitHub",
@@ -71,11 +72,14 @@ export function normalizeAccount(input) {
 		lastOpened: Number(input.lastOpened) || 0,
 	};
 }
-export function exportHub(accounts) {
+export function exportHub(accounts, googleProfile = null) {
 	return JSON.stringify(
 		{
 			format: "nebulahub-account-center",
-			version: 1,
+			version: googleProfile ? 2 : 1,
+			...(googleProfile
+				? { googleProfile: googleProfileHint(googleProfile) }
+				: {}),
 			accounts: accounts.map((account) => {
 				const { id, ...profile } = normalizeAccount(account);
 				return profile;
@@ -96,10 +100,12 @@ export function importHub(text, existing) {
 	}
 	if (
 		data?.format !== "nebulahub-account-center" ||
-		data.version !== 1 ||
+		![1, 2].includes(data.version) ||
 		!Array.isArray(data.accounts)
 	)
-		throw Error("Choose a supported Account Center .hub file (version 1).");
+		throw Error(
+			"Choose a supported Account Center .hub file (version 1 or 2).",
+		);
 	if (data.accounts.length > 1000)
 		throw Error("A .hub file can contain up to 1,000 profiles.");
 	// Validate the entire file before changing storage; never import credentials or IDs.
@@ -126,7 +132,13 @@ export function importHub(text, existing) {
 			skipped++;
 		} else rows.push(account);
 	}
-	return { rows, added: rows.length - existing.length, skipped };
+	return {
+		rows,
+		added: rows.length - existing.length,
+		skipped,
+		googleProfile:
+			data.version === 2 ? googleProfileHint(data.googleProfile) : null,
+	};
 }
 const el = (tag, text, props = {}) =>
 	Object.assign(document.createElement(tag), {
@@ -211,6 +223,9 @@ export function installAccountCenter(os) {
 			}
 			sidebar.append(
 				tabs,
+				button("Google sign-in & privacy", () =>
+					window.dispatchEvent(new Event("nebula:community")),
+				),
 				button("Local desktop accounts", () =>
 					window.dispatchEvent(new Event("nebula:accounts")),
 				),
@@ -252,10 +267,18 @@ export function installAccountCenter(os) {
 					const text = await selected.text();
 					const result = importHub(text, read());
 					store(result.rows);
+					if (result.googleProfile)
+						localStorage.setItem(
+							"nebula.google.import." + profileId(),
+							JSON.stringify(result.googleProfile),
+						);
 					filter = "all";
 					query = search.value = "";
 					render();
 					status.textContent = `Imported ${result.added} profiles. ${result.skipped} duplicate labels skipped; existing profiles kept. Sign in again on each service in this browser.`;
+					if (result.googleProfile)
+						status.textContent +=
+							" Google profile restored. Open Google sign-in & privacy to verify it; this file does not sign you in.";
 				} catch (error) {
 					status.textContent = `Import failed: ${error.message}`;
 				} finally {
@@ -265,9 +288,12 @@ export function installAccountCenter(os) {
 			transfer.append(
 				button("Export .hub", () => {
 					try {
-						const blob = new Blob([exportHub(read())], {
-							type: "application/json",
-						});
+						const blob = new Blob(
+							[exportHub(read(), currentLocalAccount()?.google || null)],
+							{
+								type: "application/json",
+							},
+						);
 						const url = URL.createObjectURL(blob);
 						const link = el("a", null, {
 							href: url,
@@ -285,7 +311,7 @@ export function installAccountCenter(os) {
 				file,
 				el(
 					"small",
-					"Transfer names, links and favorites. No passwords or login sessions. Existing profiles are kept. The file is readable text; keep it private.",
+					"Transfer names, links, favorites and your linked Google profile. Google requires sign-in again after import. No passwords, cookies or login tokens are exported. The file is readable text; keep it private.",
 				),
 			);
 			const undoButton = button("Undo removal", () => {

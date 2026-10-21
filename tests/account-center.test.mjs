@@ -56,7 +56,7 @@ test(".hub rejects corrupt, unsupported and unsafe files without changing existi
 		"{}",
 		JSON.stringify({
 			format: "nebulahub-account-center",
-			version: 2,
+			version: 99,
 			accounts: [],
 		}),
 		JSON.stringify({
