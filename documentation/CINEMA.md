@@ -30,6 +30,8 @@ One active torrent at a time; starting a new session replaces the previous torre
 
 ## Hosting findings
 
+For an Oracle Always Free deployment, see [the Oracle companion guide](CINEMA-ORACLE.md). It includes the container configuration, HTTPS setup, resource limits, and deployment verification. Infrastructure availability and successful external playback must still be verified for each deployment.
+
 Netlify serves the static client, not long-lived torrent sessions. Render's free service hours are shared per workspace, its filesystem is ephemeral, outbound bandwidth is metered, and heavy service-initiated internet traffic can cause suspension. It is not a reliable unlimited free torrent server. No new cloud torrent service or paid plan is provisioned by this implementation. A persistent public torrent backend needs an appropriate host and bandwidth budget; the free working option supplied here is self-hosting.
 
 ## Tests and deployment

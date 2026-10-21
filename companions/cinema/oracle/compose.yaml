@@ -1,0 +1,39 @@
+services:
+  cinema:
+    build: ..
+    restart: unless-stopped
+    init: true
+    environment:
+      CINEMA_TOKEN: ${CINEMA_TOKEN:?Set a private access token}
+      CINEMA_ORIGINS: https://nebulahub-shinobiscripter.netlify.app,https://nebula-cinema-shinobiscripter.netlify.app
+    read_only: true
+    tmpfs:
+      - /tmp:size=2560m,mode=1777
+    mem_limit: 4g
+    cpus: 1
+    pids_limit: 256
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+  https:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      CINEMA_DOMAIN: ${CINEMA_DOMAIN:?Set a hostname pointing to this VM}
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      cinema:
+        condition: service_healthy
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+volumes:
+  caddy_data:
+  caddy_config:
