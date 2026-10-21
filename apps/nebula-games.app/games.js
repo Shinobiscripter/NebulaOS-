@@ -9,7 +9,7 @@ function save() {
   const snapshot = { favorites: [...state.favorites], recent: { ...state.recent } };
   saveQueue = saveQueue.then(() => os.settings.set("nebula.games.library", snapshot)).catch(error => tell(`Could not save your library: ${error.message}`));
 }
-function played(game) { state.recent[game.id] = Date.now(); save(); }
+function played(game) { state.recent[game.id] = Date.now(); save(); window.parent.dispatchEvent(new CustomEvent('nebula:game-open', {detail:game.id})); }
 function launch(game, inWindow = false) {
   if (game.launch === "external") {
     window.parent.open(game.path, "_blank", "noopener,noreferrer");

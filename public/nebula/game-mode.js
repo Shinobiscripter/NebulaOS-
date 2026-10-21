@@ -844,6 +844,7 @@ export function installGameMode(os) {
 		}
 	}
 	async function play(game) {
+		window.dispatchEvent(new CustomEvent('nebula:game-open', {detail:game.id}));
 		if (game.kind === "online") {
 			const tab = window.open(game.url, "_blank", "noopener,noreferrer");
 			notify(

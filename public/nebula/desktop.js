@@ -12,6 +12,7 @@ import { installMinecraft } from "./minecraft.js";
 import { installAI } from "./ai.js";
 import { installCinema } from "./cinema.js";
 import { installWelcome } from "./welcome.js";
+import { installCommunity } from './community.js';
 import { installGameMode } from "./game-mode.js";
 // Nebula desktop conveniences use the existing Anura apps, windows and settings.
 export default function installDesktop(os) {
@@ -25,6 +26,7 @@ export default function installDesktop(os) {
 	installGameMode(os);
 	// Let synchronous desktop registration finish before showing the first-run guide.
 	queueMicrotask(() => installWelcome(os));
+	queueMicrotask(() => installCommunity(os));
 	if (
 		document.getElementById("nebula-menubar") ||
 		os.platform.type === "mobile"

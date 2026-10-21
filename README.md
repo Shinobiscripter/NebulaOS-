@@ -165,3 +165,7 @@ Games and remote assets retain their own licenses/ownership. The OS license does
 Nebula AI provides free-only general, thinking, coding and fast chat models. See [setup and privacy](documentation/NEBULA-AI.md). NebulaCraft now offers all eleven builds from the Minecraft repository.
 
 Flow supports importing compatible Hyprland dotfiles. See [the importer guide](documentation/HYPRLAND-IMPORT.md) for supported settings and limitations.
+
+Google sign-in, portable profile references, shared announcements and optional usage
+statistics are documented in [Google accounts and the Developer Panel](documentation/COMMUNITY.md).
+Google OAuth credentials must be configured on Netlify before sign-in is available.

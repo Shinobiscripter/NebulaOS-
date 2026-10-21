@@ -8,7 +8,7 @@ export function showAccountNotice() {
 	notice.setAttribute("aria-label", "Account privacy notice");
 	const message = document.createElement("p");
 	message.textContent =
-		"NebulaHub does not access your service accounts or store their login credentials. Saved profile names and links stay in this browser.";
+		"Service passwords stay with their providers. Optional Google sign-in shares your name, email and account ID with NebulaHub. Basic usage sharing is off by default; manage it in Google & Privacy. Saved service links stay in this browser.";
 	const dismiss = document.createElement("button");
 	dismiss.type = "button";
 	dismiss.textContent = "Got it";

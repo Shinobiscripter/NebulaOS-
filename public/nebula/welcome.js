@@ -3,6 +3,7 @@ import {
 	createLocalAccount,
 	profileId,
 } from "./accounts.js";
+import { getGoogleSession, beginGoogleSignIn } from "./google-auth.js";
 
 const features = [
 	[
@@ -192,6 +193,17 @@ export function installWelcome(os) {
 				);
 			}
 			if (step === 1) {
+				const google = button("Continue with Google", () =>
+					beginGoogleSignIn(currentLocalAccount()?.id),
+				);
+				google.disabled = true;
+				content.append(google);
+				getGoogleSession().then((s) => {
+					google.disabled = !s.configured;
+					if (!s.configured)
+						google.title =
+							"Google sign-in is awaiting site-owner configuration.";
+				});
 				const account = currentLocalAccount();
 				content.append(
 					node(

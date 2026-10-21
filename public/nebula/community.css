@@ -1,0 +1,138 @@
+.nebula-community {
+	box-sizing: border-box;
+	height: 100%;
+	overflow: auto;
+	background: #0b1220;
+	color: #e2edff;
+	font: 15px/1.5 system-ui;
+	padding: 28px;
+}
+.nebula-community h1 {
+	font-size: 32px;
+	margin: 8px 0 20px;
+}
+.nebula-community h2 {
+	margin-top: 28px;
+}
+.nebula-community p {
+	max-width: 850px;
+	color: #b7c6dd;
+}
+.nc-eyebrow {
+	letter-spacing: 0.2em;
+	font-size: 11px;
+}
+.nebula-community button {
+	font: inherit;
+	background: #243954;
+	border: 1px solid #506682;
+	color: #f0f7ff;
+	border-radius: 6px;
+	padding: 9px 15px;
+	margin: 7px 8px 7px 0;
+	cursor: pointer;
+}
+.nebula-community button:hover {
+	background: #355479;
+}
+.nebula-community button:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+.nebula-community input,
+.nebula-community textarea {
+	font: inherit;
+	background: #060c15;
+	color: #e4f2ff;
+	border: 1px solid #4c6381;
+	border-radius: 5px;
+	padding: 10px;
+	box-sizing: border-box;
+}
+.nebula-community textarea {
+	display: block;
+	width: 100%;
+	resize: vertical;
+}
+.nebula-community input[type="number"] {
+	display: block;
+	width: 130px;
+}
+.nc-consent {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	padding: 16px 0;
+}
+.nc-consent input {
+	width: 22px;
+	height: 22px;
+}
+.nc-preview {
+	padding: 18px;
+	border-left: 3px solid #9dd8ff;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+.nebula-community table {
+	border-collapse: collapse;
+	width: 100%;
+}
+.nebula-community td,
+.nebula-community th {
+	text-align: left;
+	padding: 9px;
+	border-bottom: 1px solid #304159;
+}
+.nebula-community :focus-visible {
+	outline: 2px solid #a6d9ff;
+	outline-offset: 3px;
+}
+.nebula-announcement {
+	position: fixed;
+	right: 20px;
+	top: 45px;
+	z-index: 99990;
+	max-width: min(410px, 90vw);
+	box-sizing: border-box;
+	padding: 20px;
+	background: #101e33;
+	color: #e5f1ff;
+	border: 1px solid #557392;
+	border-radius: 8px;
+	box-shadow: 0 15px 45px #0009;
+	font: 14px/1.5 system-ui;
+	animation: nc-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nebula-announcement p {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+.nebula-announcement button {
+	background: #284766;
+	border: 1px solid #6386a8;
+	color: white;
+	padding: 8px 12px;
+	cursor: pointer;
+}
+.nebula-locked .nebula-announcement {
+	display: none;
+}
+@keyframes nc-enter {
+	from {
+		opacity: 0;
+		transform: translateY(-16px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.nebula-announcement {
+		animation: none;
+	}
+}
+.nebula-motion-reduced .nebula-announcement {
+	animation: none;
+}
