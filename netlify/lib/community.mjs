@@ -1,5 +1,6 @@
 import { randomBytes, createHash, timingSafeEqual } from "node:crypto";
 import { createRemoteJWKSet, jwtVerify } from "jose";
+import { memberKey, restriction, rememberMember } from "./moderation.mjs";
 import gameCatalog from "../../public/nebula/games.json" with { type: "json" };
 import storeCatalog from "../../public/game-library/catalog.json" with { type: "json" };
 
@@ -134,6 +135,18 @@ export function createCommunityHandler({
 			);
 		return s;
 	}
+	async function access(s) {
+		if (!s || s.user.email === OWNER) return null;
+		return restriction(
+			{
+				restriction: await store.get(
+					"restrictions/" + memberKey(s.user.sub).slice(8),
+					{ type: "json" },
+				),
+			},
+			now(),
+		);
+	}
 	return async function handler(req) {
 		try {
 			const url = new URL(req.url),
@@ -144,7 +157,11 @@ export function createCommunityHandler({
 				throw fail("Origin rejected.", 403);
 			if (action === "session" && req.method === "GET") {
 				const s = await session(req);
+				if (s && !(await store.get(memberKey(s.user.sub), { type: "json" })))
+					await rememberMember(store, s.user, now());
 				return json({
+					requireSignIn: true,
+					restriction: await access(s),
 					configured: configured(),
 					user: s
 						? { sub: s.user.sub, email: s.user.email, name: s.user.name }
@@ -237,6 +254,7 @@ export function createCommunityHandler({
 						pending.nonce,
 					);
 				const token = day(now()) + "." + random();
+				await rememberMember(store, user, now());
 				await store.setJSON(tokenKey("sessions", token), {
 					user,
 					expires: now() + 86400000,
@@ -260,6 +278,86 @@ export function createCommunityHandler({
 					"Set-Cookie": cookie("__Host-nebula-session", "", 0),
 				});
 			}
+			if (action === "members" && req.method === "GET") {
+				await owner(req);
+				const cursor = url.searchParams.get("cursor") || "";
+				if (cursor && !/^[a-f0-9]{64}$/.test(cursor))
+					throw fail("Invalid account cursor.");
+				const page = await store.list({ prefix: "members/" });
+				const items = page.blobs
+					.filter((item) => item.key.slice(8) > cursor)
+					.sort((a, b) => a.key.localeCompare(b.key));
+				const members = [];
+				for (const item of items.slice(0, 100)) {
+					const m = await store.get(item.key, { type: "json" });
+					if (!m) continue;
+					const rule = await store.get("restrictions/" + m.id, {
+						type: "json",
+					});
+					members.push({
+						id: m.id,
+						name: m.name,
+						email: m.email,
+						firstSeen: m.firstSeen,
+						lastSignIn: m.lastSignIn,
+						restriction: restriction({ restriction: rule }, now()),
+						protected: m.email === OWNER,
+					});
+				}
+				return json({
+					members,
+					cursor: items.length > 100 ? items[99].key.slice(8) : null,
+				});
+			}
+			if (action === "moderate" && req.method === "POST") {
+				await owner(req);
+				const data = await body(req);
+				if (
+					!/^[a-f0-9]{64}$/.test(data.id || "") ||
+					!["active", "suspended", "banned"].includes(data.kind)
+				)
+					throw fail("Choose a valid account and action.");
+				const m = await store.get("members/" + data.id, { type: "json" });
+				if (!m) throw fail("Account not found.", 404);
+				if (m.email === OWNER)
+					throw fail("The developer account cannot be restricted.", 403);
+				const reason =
+					typeof data.reason === "string" ? data.reason.trim() : "";
+				if (!reason || reason.length > 300)
+					throw fail("Enter a reason of 1–300 characters.");
+				const hours = Number(data.hours);
+				if (
+					data.kind === "suspended" &&
+					(!Number.isInteger(hours) || hours < 1 || hours > 8760)
+				)
+					throw fail("Choose 1–8,760 hours.");
+				const rule = {
+					kind: data.kind,
+					reason,
+					until: data.kind === "suspended" ? now() + hours * 3600000 : null,
+					at: now(),
+				};
+				await store.setJSON("restrictions/" + data.id, rule);
+				await store.setJSON(`moderation/${day(now())}/${random()}`, {
+					member: data.id,
+					...rule,
+				});
+				return json({ restriction: restriction({ restriction: rule }, now()) });
+			}
+			const visitor = await session(req);
+			if (!visitor) throw fail("Google sign-in is required.", 401);
+			const blocked = await access(visitor);
+			if (blocked)
+				return json(
+					{
+						error:
+							blocked.kind === "banned"
+								? "This account is banned."
+								: "This account is suspended.",
+						restriction: blocked,
+					},
+					403,
+				);
 			if (action === "announcements" && req.method === "GET") {
 				const a = await store.get("announcement", { type: "json" });
 				return json({

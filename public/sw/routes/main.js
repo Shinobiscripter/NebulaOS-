@@ -1,5 +1,30 @@
 /* global workbox, bootStrapFSReady, idbKeyval, cacheenabled, opfs, filerfs, opfssh, filersh, serveFile, corsheaders */
 
+// The Community Update requires a fresh online access check for the desktop.
+// Never serve an old cached shell or stale account-gate module after sign-out.
+workbox.routing.registerRoute(
+	({ url }) =>
+		url.origin === self.location.origin &&
+		(url.pathname === "/" ||
+			url.pathname === "/index.html" ||
+			/^\/nebula\/(community(?:-[a-z]+)?|google-auth|accounts|startup-notice)\.(?:js|css)$/.test(
+				url.pathname,
+			)),
+	async ({ request }) => {
+		try {
+			return await fetch(request, { cache: "no-store" });
+		} catch {
+			return new Response(
+				"NebulaHub requires an internet connection to verify account access. Reconnect and reload.",
+				{
+					status: 503,
+					headers: { "Content-Type": "text/plain; charset=utf-8" },
+				},
+			);
+		}
+	},
+);
+
 workbox.routing.registerRoute(
 	({ url }) =>
 		url.origin === self.location.origin &&

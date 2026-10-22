@@ -4,6 +4,23 @@ const owner = {
 	email: "gamergeek1107@gmail.com",
 	name: "Developer",
 };
+test("developer reviews and applies an account suspension", async ({ page }) => {
+	const calls = await mockAPI(page, owner, true);
+	await page.route("**/api/community?action=members", route => route.fulfill({ json: { members: [{ id: "a".repeat(64), name: "Test Pilot", email: "pilot@example.com", lastSignIn: Date.now(), restriction: null, protected: false }], cursor: null } }));
+	await page.route("**/api/community?action=moderate", route => {
+		const body = route.request().postDataJSON(); calls.push({ action: "moderate", body });
+		return route.fulfill({ json: { restriction: { kind: body.kind, reason: body.reason, until: Date.now() + 86400000 } } });
+	});
+	await page.addInitScript(() => localStorage.setItem("nebula.welcome.v1.default", "complete"));
+	await page.goto("/");
+	await page.waitForFunction(() => window.anura?.apps["nebula.developer"]);
+	await page.evaluate(() => anura.apps["nebula.developer"].open());
+	await page.getByLabel("Moderation reason for pilot@example.com").fill("Test community rule");
+	page.once("dialog", dialog => dialog.accept());
+	await page.getByRole("button", { name: "Review action", exact: true }).click();
+	await expect(page.locator(".nc-member")).toContainText("suspended until");
+	expect(calls.find(c => c.action === "moderate").body.kind).toBe("suspended");
+});
 async function mockAPI(page, user = null, isOwner = false) {
 	const calls = [];
 	let announcement = null;
@@ -32,6 +49,7 @@ async function mockAPI(page, user = null, isOwner = false) {
 			};
 		if (action === "consent")
 			data = { enabled: request.postDataJSON().enabled };
+		if (action === "members") data = { members: [], cursor: null };
 		await route.fulfill({ json: data });
 	});
 	return calls;
@@ -57,19 +75,20 @@ test("owner sees developer panel, previews plain text and publishes through the 
 	await root
 		.getByRole("button", { name: "Publish announcement", exact: true })
 		.click();
-	await expect(root.getByRole("status")).toHaveText("Published to NebulaHub.");
+	await expect(root.getByRole("status").filter({ hasText: "Published to NebulaHub." })).toHaveText("Published to NebulaHub.");
 	expect(calls.find((c) => c.action === "announcement").body.text).toContain(
 		"<b>",
 	);
 	await page.screenshot({ path: "../../outputs/Nebula-Developer-Panel.png" });
 });
-test("visitors do not see developer app, and usage is collected only after opting in", async ({
+test("existing opt-outs remain off and visitors do not see developer controls", async ({
 	page,
 }) => {
 	const calls = await mockAPI(page);
-	await page.addInitScript(() =>
-		localStorage.setItem("nebula.welcome.v1.default", "complete"),
-	);
+	await page.addInitScript(() => {
+		localStorage.setItem("nebula.welcome.v1.default", "complete");
+		localStorage.setItem("nebula.activity.optin.default", "false");
+	});
 	await page.goto("/");
 	await page.waitForFunction(() => window.anura?.apps["nebula.community"]);
 	await page.evaluate(() => anura.apps["nebula.community"].open());
@@ -117,6 +136,71 @@ test("visitors do not see developer app, and usage is collected only after optin
 		.getByRole("checkbox", { name: "Share basic usage activity" })
 		.uncheck();
 	await expect(root.getByRole("status")).toContainText("stopped");
+});
+test("new profiles report basic usage by default with visible privacy controls", async ({
+	page,
+}) => {
+	const calls = await mockAPI(page);
+	await page.addInitScript(() =>
+		localStorage.setItem("nebula.welcome.v1.default", "complete"),
+	);
+	await page.goto("/");
+	await page.waitForFunction(() => window.anura?.apps["nebula.community"]);
+	await expect
+		.poll(() => calls.some((c) => c.action === "consent" && c.body.enabled))
+		.toBe(true);
+	await page.evaluate(() => anura.apps["nebula.community"].open());
+	await expect(
+		page.getByRole("checkbox", { name: "Share basic usage activity" }),
+	).toBeChecked();
+});
+test("browser privacy signal disables default reporting", async ({ page }) => {
+	const calls = await mockAPI(page);
+	await page.addInitScript(() => {
+		Object.defineProperty(navigator, "globalPrivacyControl", { value: true });
+		localStorage.setItem("nebula.welcome.v1.default", "complete");
+	});
+	await page.goto("/");
+	await page.waitForFunction(() => window.anura?.apps["nebula.community"]);
+	await page.evaluate(() => anura.apps["nebula.community"].open());
+	await expect(
+		page.getByRole("checkbox", { name: "Share basic usage activity" }),
+	).toBeDisabled();
+	expect(
+		calls.some((c) => c.action === "consent" || c.action === "events"),
+	).toBe(false);
+});
+test("required sign-in stops boot for guests", async ({ page }) => {
+	await page.route("**/api/community?**", (route) =>
+		route.fulfill({
+			json: { requireSignIn: true, configured: true, user: null },
+		}),
+	);
+	await page.goto("/");
+	await expect(page.locator("#nebula-signin-required")).toBeVisible();
+	expect(await page.evaluate(() => !!window.anura?.initComplete)).toBe(false);
+});
+test("suspended accounts see reason and expiry before desktop initialization", async ({
+	page,
+}) => {
+	await page.route("**/api/community?**", (route) =>
+		route.fulfill({
+			json: {
+				requireSignIn: true,
+				user: owner,
+				restriction: {
+					kind: "suspended",
+					reason: "Test restriction",
+					until: Date.now() + 3600000,
+				},
+			},
+		}),
+	);
+	await page.goto("/");
+	await expect(page.locator("#nebula-access-restriction")).toContainText(
+		"Test restriction",
+	);
+	expect(await page.evaluate(() => !!window.anura?.initComplete)).toBe(false);
 });
 test("Google callback creates a linked local profile without a password or exported session", async ({
 	page,

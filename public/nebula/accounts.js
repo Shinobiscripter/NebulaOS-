@@ -1,5 +1,6 @@
 // Local account gate. Passwords are salted verifiers; filesystem contents are not encrypted.
 import { getGoogleSession, beginGoogleSignIn } from "./google-auth.js";
+import { checkCommunityAccess } from "./community-access.js";
 const KEY = "nebula.accounts.v1";
 export const profileId = () => window.nebulaProfileId || "default";
 const read = () => JSON.parse(localStorage.getItem(KEY) || "[]");
@@ -78,6 +79,7 @@ export async function createLocalAccount(name, password, confirm, wallpaper) {
 	return account;
 }
 export async function prepareSession() {
+	await checkCommunityAccess();
 	const accounts = read();
 	const callback = new URL(location.href).searchParams.get("google");
 	if (callback || accounts.some((a) => a.google)) {

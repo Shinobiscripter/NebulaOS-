@@ -1,7 +1,7 @@
 export const COMMUNITY_API = "/api/community";
-export async function communityRequest(action, data) {
+export async function communityRequest(action, data, query = {}) {
 	const response = await fetch(
-		COMMUNITY_API + "?action=" + encodeURIComponent(action),
+		COMMUNITY_API + "?" + new URLSearchParams({ ...query, action }),
 		{
 			method: data === undefined ? "GET" : "POST",
 			credentials: "same-origin",

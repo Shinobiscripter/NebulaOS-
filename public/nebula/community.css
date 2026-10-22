@@ -49,6 +49,32 @@
 	padding: 10px;
 	box-sizing: border-box;
 }
+.nc-member {
+	border-top: 1px solid #304159;
+	padding: 18px 0;
+}
+.nc-member h3 {
+	margin: 0;
+}
+.nc-member form {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+	align-items: center;
+}
+.nc-member input[type="number"] {
+	width: 100px;
+}
+.nc-member select {
+	background: #060c15;
+	color: #e4f2ff;
+	padding: 10px;
+	border: 1px solid #4c6381;
+	font: inherit;
+}
+.nc-member input[hidden] {
+	display: none;
+}
 .nebula-community textarea {
 	display: block;
 	width: 100%;

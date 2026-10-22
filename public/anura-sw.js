@@ -1,4 +1,5 @@
 /* global workbox */
+// Community Update: refresh online account checks even on existing installations.
 
 // was a workaround for a firefox quirk where crossOriginIsolated
 // is not reported properly in a service worker, now its just assumed for

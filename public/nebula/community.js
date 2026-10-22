@@ -5,6 +5,8 @@ import {
 	googleProfileHint,
 } from "./google-auth.js";
 import { profileId, currentLocalAccount } from "./accounts.js";
+import { mountMembers } from "./community-members.js";
+import { showRestriction, showSignIn } from "./community-access.js";
 const el = (tag, text, props = {}) =>
 	Object.assign(document.createElement(tag), {
 		...(text == null ? {} : { textContent: text }),
@@ -27,6 +29,30 @@ export function installCommunity(os) {
 	});
 	document.head.append(css);
 	const consentKey = () => `nebula.activity.optin.${profileId()}`;
+	const privacySignal =
+		navigator.globalPrivacyControl === true || navigator.doNotTrack === "1";
+	const sharingEnabled = () =>
+		!privacySignal && localStorage.getItem(consentKey()) !== "false";
+	let analyticsLoaded = false;
+	function loadAnalytics() {
+		if (
+			analyticsLoaded ||
+			!sharingEnabled() ||
+			location.hostname !== "nebulahub-shinobiscripter.netlify.app"
+		)
+			return;
+		analyticsLoaded = true;
+		const script = el("script", null, {
+			type: "module",
+			src: "https://static.cloudflareinsights.com/beacon.min.js",
+			crossOrigin: "anonymous",
+			referrerPolicy: "no-referrer",
+		});
+		script.dataset.cfBeacon = JSON.stringify({
+			token: "84ec9e89b5924ac680116eded9cc6b8b",
+		});
+		document.head.append(script);
+	}
 	let activityReady = false,
 		queue = [],
 		pending = false,
@@ -36,9 +62,11 @@ export function installCommunity(os) {
 	async function consent(enabled) {
 		activityReady = false;
 		queue = [];
+		enabled = enabled && !privacySignal;
 		localStorage.setItem(consentKey(), String(enabled));
 		await communityRequest("consent", { enabled });
 		activityReady = enabled;
+		if (enabled) loadAnalytics();
 		if (enabled) record("visit", "desktop");
 	}
 	const trackedApps = new Set([
@@ -195,25 +223,41 @@ export function installCommunity(os) {
 					}),
 				);
 			root.append(
-				el("h2", "Optional activity sharing"),
+				el("h2", "Community Update · usage reports"),
 				el(
 					"p",
-					"Share desktop visits, app opens and game opens with the developer. Reports use temporary random identifiers, not your Google account. No messages, searches, files, browsing URLs, passwords or keystrokes are collected. Events are retained for up to 8 days; the dashboard shows the last 24 hours. Hosting providers still process normal request logs.",
+					"Basic reports are enabled for new profiles. An earlier opt-out is preserved, and Do Not Track / Global Privacy Control disables reporting. Reports include desktop visits, app opens and game opens, using temporary random identifiers rather than your Google account. No messages, searches, files, browsing URLs, passwords or keystrokes are collected. Events expire within 8 days. Signed-in account details and sign-in times are stored separately for account moderation. Hosting providers process normal request logs.",
 				),
 			);
 			const label = el("label", null, { className: "nc-consent" }),
 				toggle = field("Share basic usage activity");
 			toggle.type = "checkbox";
-			toggle.checked = localStorage.getItem(consentKey()) === "true";
+			toggle.checked = sharingEnabled();
+			toggle.disabled = privacySignal;
 			label.append(
 				toggle,
-				el("span", "Share basic usage activity (off by default)"),
+				el(
+					"span",
+					privacySignal
+						? "Reporting disabled by your browser privacy preference"
+						: "Share basic usage activity",
+				),
 			);
 			root.append(label);
+			root.append(
+				el(
+					"p",
+					"Cloudflare Web Analytics provides aggregate page views and performance statistics. It does not identify individual visitors. Turning reporting off reloads the desktop to stop the loaded analytics script; save your work first.",
+				),
+			);
 			toggle.onchange = async () => {
 				toggle.disabled = true;
 				try {
 					await consent(toggle.checked);
+					if (!toggle.checked && analyticsLoaded) {
+						location.reload();
+						return;
+					}
 					status.textContent = toggle.checked
 						? "Activity sharing enabled."
 						: "Activity sharing stopped. Previously shared events expire automatically.";
@@ -337,7 +381,7 @@ export function installCommunity(os) {
 						el("h2", "Usage · last 24 hours"),
 						el(
 							"p",
-							`${data.sessions} participating browser sessions. Counts cover opted-in visitors only; events are client-reported, not an audit log.${data.truncated ? " Report capped at 500 batches." : ""}`,
+							`${data.sessions} reporting browser sessions. Opt-outs, blockers and offline use are excluded; these are client-reported counts, not an audit log.${data.truncated ? " Report capped at 500 batches." : ""}`,
 						),
 					);
 					const table = el("table"),
@@ -371,6 +415,13 @@ export function installCommunity(os) {
 				}
 			}
 			root.append(form, button("Refresh usage report", refresh), stats);
+			mountMembers(root);
+			const analyticsLink = el("a", "Open Cloudflare Web Analytics", {
+				href: "https://dash.cloudflare.com/8f336a7fd88e6e8fce2bdcd4fd1f192b/web-analytics",
+				target: "_blank",
+				rel: "noopener noreferrer",
+			});
+			root.append(analyticsLink);
 			await refresh();
 		},
 	};
@@ -380,9 +431,12 @@ export function installCommunity(os) {
 		session = s;
 		if (s.owner && !os.apps[developer.package]) os.registerApp(developer);
 	});
-	if (localStorage.getItem(consentKey()) === "true")
-		consent(true).catch(() => {});
+	if (sharingEnabled()) consent(true).catch(() => {});
 	let announcementPending = false;
+	window.addEventListener("nebula:access-restricted", () => {
+		activityReady = false;
+		queue = [];
+	});
 	async function announcement() {
 		if (
 			document.hidden ||
@@ -392,6 +446,15 @@ export function installCommunity(os) {
 			return;
 		announcementPending = true;
 		try {
+			const access = await communityRequest("session");
+			if (access.restriction) {
+				showRestriction(access.restriction);
+				return;
+			}
+			if (access.requireSignIn && !access.user) {
+				showSignIn();
+				return;
+			}
 			const { announcement: a } = await communityRequest("announcements");
 			let banner = document.getElementById("nebula-announcement");
 			if (!a) {

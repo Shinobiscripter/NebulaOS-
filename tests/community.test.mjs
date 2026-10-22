@@ -9,6 +9,7 @@ import {
 	verifyGoogleToken,
 } from "../netlify/lib/community.mjs";
 import { generateKeyPair, exportJWK, createLocalJWKSet, SignJWT } from "jose";
+import { memberKey, restriction } from "../netlify/lib/moderation.mjs";
 import { exportHub, importHub } from "../public/nebula/account-center.js";
 const origin = "https://nebula.test";
 const now = Date.UTC(2026, 9, 20, 12);
@@ -124,6 +125,113 @@ function setup() {
 	}
 	return { request, session, data, store };
 }
+test("moderation is owner-only, persists across sessions, expires suspensions and protects the owner", async () => {
+	const s = setup();
+	const id = memberKey("test-sub").slice(8);
+	s.data.set("members/" + id, {
+		id,
+		sub: "test-sub",
+		email: "visitor@example.com",
+		name: "Visitor",
+		lastSignIn: now,
+	});
+	const body = {
+		id,
+		kind: "suspended",
+		reason: "Community rule violation",
+		hours: 24,
+	};
+	assert.equal((await s.request("members")).status, 403);
+	assert.equal(
+		(await s.request("moderate", { method: "POST", body })).status,
+		403,
+	);
+	assert.equal(
+		(
+			await s.request("moderate", {
+				method: "POST",
+				body,
+				cookie: s.session("visitor@example.com"),
+			})
+		).status,
+		403,
+	);
+	assert.equal(
+		(
+			await s.request("moderate", {
+				method: "POST",
+				body,
+				cookie: s.session(),
+				requestOrigin: "https://evil.test",
+			})
+		).status,
+		403,
+	);
+	assert.equal(
+		(await s.request("moderate", { method: "POST", body, cookie: s.session() }))
+			.status,
+		200,
+	);
+	const visitorCookie = s.session("visitor@example.com");
+	assert.equal(
+		(await (await s.request("session", { cookie: visitorCookie })).json())
+			.restriction.kind,
+		"suspended",
+	);
+	assert.equal(
+		(await s.request("announcements", { cookie: visitorCookie })).status,
+		403,
+	);
+	assert.equal(
+		restriction(
+			{ restriction: s.data.get("restrictions/" + id) },
+			now + 86400001,
+		),
+		null,
+	);
+	assert.equal(
+		(
+			await s.request("moderate", {
+				method: "POST",
+				body: { ...body, kind: "banned" },
+				cookie: s.session(),
+			})
+		).status,
+		200,
+	);
+	assert.equal(
+		(
+			await (
+				await s.request("session", { cookie: s.session("visitor@example.com") })
+			).json()
+		).restriction.kind,
+		"banned",
+	);
+	assert.equal(
+		(
+			await s.request("moderate", {
+				method: "POST",
+				body: { ...body, kind: "active" },
+				cookie: s.session(),
+			})
+		).status,
+		200,
+	);
+	assert.equal(
+		(
+			await (
+				await s.request("session", { cookie: s.session("visitor@example.com") })
+			).json()
+		).restriction,
+		null,
+	);
+	s.data.set("members/" + id, { id, sub: "test-sub", email: OWNER });
+	assert.equal(
+		(await s.request("moderate", { method: "POST", body, cookie: s.session() }))
+			.status,
+		403,
+	);
+});
 test("developer routes reject anonymous, forged, wrong-account and unverified sessions", async () => {
 	const s = setup();
 	for (const makeCookie of [
@@ -133,7 +241,9 @@ test("developer routes reject anonymous, forged, wrong-account and unverified se
 		() => s.session(OWNER, false),
 	]) {
 		const cookie = makeCookie();
-		assert.equal((await s.request("dashboard", { cookie })).status, 403);
+		assert.ok(
+			[401, 403].includes((await s.request("dashboard", { cookie })).status),
+		);
 	}
 	assert.equal(
 		(
@@ -142,7 +252,7 @@ test("developer routes reject anonymous, forged, wrong-account and unverified se
 				body: { email: OWNER, text: "fake", active: true, hours: 1 },
 			})
 		).status,
-		403,
+		401,
 	);
 });
 test("owner announcements are shared, plain text and withdrawable; cross-origin writes fail", async () => {
@@ -169,7 +279,8 @@ test("owner announcements are shared, plain text and withdrawable; cross-origin 
 		200,
 	);
 	assert.equal(
-		(await (await s.request("announcements")).json()).announcement.text,
+		(await (await s.request("announcements", { cookie })).json()).announcement
+			.text,
 		body.text,
 	);
 	await s.request("announcement", {
@@ -178,7 +289,7 @@ test("owner announcements are shared, plain text and withdrawable; cross-origin 
 		body: { ...body, active: false },
 	});
 	assert.equal(
-		(await (await s.request("announcements")).json()).announcement,
+		(await (await s.request("announcements", { cookie })).json()).announcement,
 		null,
 	);
 });
@@ -223,7 +334,7 @@ test("logout revokes the server session", async () => {
 		false,
 	);
 });
-test("activity requires opt-in and accepts only whitelisted metadata", async () => {
+test("activity requires authenticated reporting preference and accepts only whitelisted metadata", async () => {
 	const s = setup(),
 		events = [
 			{
@@ -234,14 +345,21 @@ test("activity requires opt-in and accepts only whitelisted metadata", async () 
 			},
 		];
 	assert.equal(
-		(await s.request("events", { method: "POST", body: { events } })).status,
+		(
+			await s.request("events", {
+				method: "POST",
+				cookie: s.session(),
+				body: { events },
+			})
+		).status,
 		403,
 	);
 	const res = await s.request("consent", {
 			method: "POST",
+			cookie: s.session(),
 			body: { enabled: true },
 		}),
-		cookie = res.headers.get("set-cookie").split(";")[0];
+		cookie = s.session() + "; " + res.headers.get("set-cookie").split(";")[0];
 	assert.equal(
 		(await s.request("events", { method: "POST", cookie, body: { events } }))
 			.status,
