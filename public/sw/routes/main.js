@@ -1,7 +1,36 @@
 /* global workbox, bootStrapFSReady, idbKeyval, cacheenabled, opfs, filerfs, opfssh, filersh, serveFile, corsheaders */
 
+// The Community Update requires a fresh online access check for the desktop.
+// Never serve an old cached shell or stale account-gate module after sign-out.
 workbox.routing.registerRoute(
-	/^(?!.*(\/config.json|\/MILESTONE|\/x86images\/|\/service\/))/,
+	({ url }) =>
+		url.origin === self.location.origin &&
+		(url.pathname === "/" ||
+			url.pathname === "/index.html" ||
+			/^\/nebula\/(community(?:-[a-z]+)?|google-auth|accounts|startup-notice)\.(?:js|css)$/.test(
+				url.pathname,
+			)),
+	async ({ request }) => {
+		try {
+			return await fetch(request, { cache: "no-store" });
+		} catch {
+			return new Response(
+				"NebulaHub requires an internet connection to verify account access. Reconnect and reload.",
+				{
+					status: 503,
+					headers: { "Content-Type": "text/plain; charset=utf-8" },
+				},
+			);
+		}
+	},
+);
+
+workbox.routing.registerRoute(
+	({ url }) =>
+		url.origin === self.location.origin &&
+		!/^\/(?:api\/|\.netlify\/functions\/|config\.json$|MILESTONE$|x86images\/|service\/|Games\/|play\/)/.test(
+			url.pathname,
+		),
 	async (event) => {
 		if (new URL(event.url).origin !== self.location.origin) return false;
 		await bootStrapFSReady;
@@ -23,6 +52,8 @@ workbox.routing.registerRoute(
 		if (!cacheenabled) {
 			const fetchResponse = await fetch(event.request);
 			return new Response(await fetchResponse.arrayBuffer(), {
+				status: fetchResponse.status,
+				statusText: fetchResponse.statusText,
 				headers: {
 					...Object.fromEntries(fetchResponse.headers.entries()),
 					...corsheaders,
@@ -49,19 +80,27 @@ workbox.routing.registerRoute(
 		} else {
 			try {
 				const fetchResponse = await fetch(event.request);
-				// Promise so that we can return the response before we cache it, for faster response times
-				return new Promise(async (resolve) => {
+				// Static hosts redirect /apps/example.app to its directory index.
+				// Never store that HTML as a file named example.app: it would block
+				// the manifest and every other cached file in the same app directory.
+				const finalPath = new URL(fetchResponse.url).pathname;
+				if (fetchResponse.redirected && finalPath.endsWith("/")) {
+					path = decodeURI(finalPath) + "index.html";
+				}
+				// Complete disk writes before reporting a precache request as successful.
+				// An async Promise executor could lose write failures and hang callers.
+				{
 					const corsResponse = new Response(
 						await fetchResponse.clone().arrayBuffer(),
 						{
+							status: fetchResponse.status,
+							statusText: fetchResponse.statusText,
 							headers: {
 								...Object.fromEntries(fetchResponse.headers.entries()),
 								...corsheaders,
 							},
 						},
 					);
-
-					resolve(corsResponse);
 
 					if (fetchResponse.ok) {
 						const buffer = await fetchResponse.clone().arrayBuffer();
@@ -77,13 +116,14 @@ workbox.routing.registerRoute(
 							Buffer.from(buffer),
 						);
 					}
-				}).catch((e) => {
-					console.error("I hate this bug: ", e);
-				});
+					return corsResponse;
+				}
 			} catch (e) {
 				return new Response(
 					JSON.stringify({
 						error: e.message,
+						path,
+						cacheError: await response.text(),
 						status: 500,
 					}),
 					{
@@ -124,7 +164,7 @@ function offlineError() {
             </head>
             <body>
             <div id="wrapper">
-            <h1>AnuraOS is offline without offline support enabled.</h1>
+            <h1>NebulaHub is offline without offline support enabled.</h1>
             <p>If you have offline support enabled and you are seeing this, please refresh the page.</p>
             </div>
             </body>

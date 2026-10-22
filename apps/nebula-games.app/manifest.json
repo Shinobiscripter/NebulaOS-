@@ -1,0 +1,9 @@
+{
+  "name": "Nebula Games",
+  "package": "nebula.games",
+  "type": "auto",
+  "index": "index.html",
+  "icon": "icon.svg",
+  "background": "#10141f",
+  "wininfo": { "title": "Nebula Games", "width": "960px", "height": "650px", "resizable": true }
+}

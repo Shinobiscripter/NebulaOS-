@@ -1,0 +1,5 @@
+{$CINEMA_DOMAIN} {
+    reverse_proxy cinema:8787
+    header X-Content-Type-Options nosniff
+    # No access log: media paths are private session capabilities.
+}

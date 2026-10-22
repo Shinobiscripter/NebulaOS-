@@ -10,6 +10,7 @@ const SLICE_SIZE = 2 ** 17 * 32;
 const BUF_SIZE = 256;
 
 interface FakeFile {
+	loadfile: (file: Blob) => Promise<void>;
 	slice: (start: number, end: number) => Promise<Blob>;
 	save: (emulator?: any) => Promise<void>;
 	delete: () => Promise<void>;
@@ -20,7 +21,10 @@ interface FakeFile {
 async function InitV86Hdd(): Promise<FakeFile> {
 	// all right! time to explain what goes on here
 
-	const request = indexedDB.open("image", 2);
+	const profile = (window as any).nebulaProfileId;
+	const imageDatabase =
+		profile && profile !== "default" ? `nebula-image-${profile}` : "image";
+	const request = indexedDB.open(imageDatabase, 2);
 	request.onupgradeneeded = (event: any) => {
 		const db: IDBDatabase = event.target.result;
 
@@ -91,7 +95,7 @@ async function InitV86Hdd(): Promise<FakeFile> {
 			}
 			return new Blob([buf!]);
 		},
-		loadfile: async (f: File) => {
+		loadfile: async (f: Blob) => {
 			const trn = db.transaction("parts", "readwrite").objectStore("parts");
 			trn.put(f.size, "size");
 			fakefile.size = f.size;
@@ -115,7 +119,7 @@ async function InitV86Hdd(): Promise<FakeFile> {
 		},
 		delete: async () => {
 			db.close();
-			indexedDB.deleteDatabase("image");
+			indexedDB.deleteDatabase(imageDatabase);
 			window.location.reload();
 		},
 		// when a "file" is loaded with v86, it keeps around a "block_cache" so it can write on top of the drive in ram

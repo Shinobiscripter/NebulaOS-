@@ -44,6 +44,11 @@ class Networking {
 		},
 	};
 	fetch = async (input: RequestInfo | URL, init: RequestInit) => {
+		// Browser iframe streams belong to another realm, so libcurl's instanceof
+		// check misses them. Chromium still requires duplex for streamed POST bodies.
+		if (typeof (init?.body as ReadableStream)?.getReader === "function") {
+			init = { ...init, duplex: "half" } as RequestInit;
+		}
 		const url = new URL(
 			input instanceof Request ? input.url : input.toString(),
 		);

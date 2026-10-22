@@ -1,0 +1,1009 @@
+/* Reference-shaped console layouts. Shared store, download and OS behavior lives in game-mode.js. */
+.ng-mode {
+	--accent: #fff;
+	background: #080b13;
+	font-family: Arial, system-ui, sans-serif;
+	font-weight: 400;
+}
+.ng-scene {
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	overflow: hidden;
+	pointer-events: none;
+	background:
+		linear-gradient(90deg, #080b18cc, #060a1540),
+		radial-gradient(
+			ellipse at 70% 40%,
+			hsl(var(--scene-hue) 48% 26%),
+			transparent 65%
+		),
+		url("/nebula/wallpaper.svg") center/cover;
+	transition: filter 0.6s;
+}
+.ng-scene::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(0deg, #050810f5, transparent 70%);
+}
+.ng-scene::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-image: var(--scene-art);
+	background-position: right center;
+	background-size: 72vw auto;
+	background-repeat: no-repeat;
+	opacity: 0.4;
+	mask-image: linear-gradient(90deg, transparent 10%, black 70%);
+	transition: opacity 0.5s;
+}
+.ng-scene[data-has-art="true"] .ng-scene-mark {
+	display: none;
+}
+.ng-mode .ng-art[data-game="2048"] {
+	background:
+		linear-gradient(#32220b20, #32220b70),
+		url("/nebula/covers/2048.svg") center/cover;
+}
+.ng-mode .ng-art[data-game="hextris"] {
+	background:
+		linear-gradient(#06121d10, #06121d70),
+		url("/nebula/covers/hextris.svg") center/cover;
+}
+.ng-console-tile .ng-symbol {
+	max-width: 90%;
+	font-size: 15px !important;
+	line-height: 1.1;
+	text-align: center;
+	overflow-wrap: anywhere;
+}
+.ng-console-tile[data-game-id="2048"] .ng-symbol,
+.ng-console-tile[data-game-id="hextris"] .ng-symbol,
+.ng-console-tile[data-game-id="ovo"] .ng-symbol {
+	font-size: 28px !important;
+}
+.ng-mode[data-mode="deck"] .ng-console-tile .ng-symbol {
+	font-size: 32px !important;
+}
+.ng-mode[data-mode="deck"] .ng-console-tile.ng-selected .ng-symbol {
+	font-size: 65px !important;
+}
+.ng-scene-mark {
+	position: absolute;
+	right: 6vw;
+	top: 24vh;
+	max-width: 55vw;
+	color: #ffffff20;
+	font-weight: 800;
+	font-size: clamp(100px, 20vw, 300px);
+	line-height: 0.9;
+	text-align: right;
+	overflow-wrap: anywhere;
+	transform: rotate(-9deg);
+	text-shadow: 0 20px 100px #0005;
+}
+.ng-scene-enter {
+	animation: ng-backdrop-in 0.65s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes ng-backdrop-in {
+	from {
+		opacity: 0;
+		transform: scale(1.08) rotate(-9deg);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1) rotate(-9deg);
+	}
+}
+.ng-mode .ng-nav {
+	position: relative;
+	inset: auto;
+	width: 100%;
+	height: 100px;
+	min-height: 0;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 24px;
+	padding: 24px 5.5vw;
+	border: 0;
+	background: none;
+	z-index: 3;
+}
+.ng-nav-left,
+.ng-nav-center,
+.ng-nav-right {
+	display: flex;
+	align-items: center;
+	gap: 22px;
+	white-space: nowrap;
+}
+.ng-nav-center {
+	flex: 1;
+	justify-content: center;
+}
+.ng-nav-right {
+	margin-left: auto;
+	gap: 15px;
+}
+.ng-mode .ng-icon {
+	display: grid;
+	place-items: center;
+	width: 43px;
+	height: 43px;
+	padding: 0;
+	font-size: 25px;
+	border-radius: 50%;
+	background: transparent;
+	color: white;
+}
+.ng-icon:hover,
+.ng-icon:focus-visible {
+	background: #ffffff25 !important;
+	transform: scale(1.08);
+}
+.ng-time {
+	font-size: 20px;
+	font-weight: 300;
+	margin: 0 8px;
+}
+.ng-mode .ng-tab {
+	padding: 8px 10px;
+	font-size: 25px;
+	font-weight: 400;
+	background: none;
+	color: #ffffff85;
+	border-radius: 0;
+}
+.ng-mode .ng-tab.active {
+	color: #fff;
+	text-shadow: 0 0 25px #fff8;
+}
+.ng-mode .ng-main {
+	position: relative;
+	width: 100%;
+	height: calc(100% - 148px);
+	margin: 0;
+	padding: 24px 6vw 40px;
+	display: block;
+	overflow: auto;
+	scrollbar-width: thin;
+}
+.ng-controls {
+	height: 48px;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	padding: 0 4vw;
+	background: #060a11d9;
+	border-top: 1px solid #ffffff08;
+	z-index: 4;
+	font-size: 13px;
+}
+.ng-controls button {
+	font-size: 12px !important;
+	letter-spacing: 0.4px;
+	background: none !important;
+	padding: 8px !important;
+}
+.ng-control-hints {
+	margin-left: auto;
+	color: #e3e7ef;
+	white-space: pre;
+	word-spacing: 5px;
+}
+.ng-status {
+	bottom: 48px;
+	min-height: 0;
+	padding: 9px 5vw;
+	pointer-events: none;
+}
+.ng-status:empty {
+	display: none;
+}
+.ng-mode .ng-main[data-page="home"] {
+	display: block;
+	padding-top: 8px;
+}
+.ng-console-rail {
+	display: flex;
+	align-items: flex-start;
+	gap: 14px;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: none;
+	padding: 8px 8px 25px;
+	margin-left: -8px;
+}
+.ng-mode .ng-console-tile {
+	flex: 0 0 76px;
+	min-width: 0;
+	height: 120px;
+	position: relative;
+	padding: 0;
+	border: 0;
+	background: none;
+	transition:
+		flex-basis 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+		transform 0.25s;
+	overflow: visible;
+}
+.ng-console-tile > .ng-art {
+	min-height: 0;
+	width: 100%;
+	height: 76px;
+	border-radius: 15px;
+	transition:
+		height 0.28s,
+		border-radius 0.28s;
+	box-shadow: 0 4px 12px #0005;
+}
+.ng-console-tile .ng-symbol {
+	font-size: 23px;
+	letter-spacing: 0;
+}
+.ng-console-tile .ng-art[data-game="hextris"] .ng-symbol {
+	font-size: 55px;
+}
+.ng-console-tile > .ng-tile-title {
+	display: none;
+	font-size: 17px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.ng-mode .ng-console-tile:hover {
+	background: none;
+}
+.ng-mode .ng-console-tile:focus-visible {
+	outline: none;
+}
+.ng-console-tile.ng-selected > .ng-art {
+	outline: 2px solid white;
+	outline-offset: 5px;
+	border: 1px solid #ffffff80;
+}
+.ng-mode .ng-system-tile {
+	flex: 0 0 65px;
+	height: 65px;
+	align-self: flex-start;
+	margin: 5px 4px 0;
+	padding: 0;
+	background: #20232be6;
+	font-size: 32px;
+	border-radius: 12px;
+}
+.ng-console-preview {
+	position: relative;
+}
+.ng-mode .ng-console-preview .ng-hero {
+	padding: 0;
+	background: none;
+	border: 0;
+	display: block;
+	margin: 0;
+	animation: ng-console-detail 0.35s both;
+}
+.ng-console-preview .ng-hero > .ng-art {
+	display: none;
+}
+.ng-console-preview .ng-info {
+	max-width: 560px;
+}
+.ng-console-preview .ng-info h1 {
+	font-size: clamp(42px, 5vw, 76px);
+	font-weight: 400;
+	text-shadow: 0 4px 30px #0006;
+	letter-spacing: -2px;
+}
+.ng-console-preview .ng-info > p:not(.ng-eyebrow) {
+	font-size: 17px;
+	color: #f0f0f5;
+	max-width: 530px;
+}
+.ng-console-preview .ng-info .ng-primary {
+	border-radius: 30px;
+	background: #ffffff24;
+	color: white;
+	min-width: 240px;
+	padding: 13px 28px;
+	font-size: 19px;
+	backdrop-filter: blur(15px);
+}
+.ng-console-preview .ng-info .ng-primary:hover,
+.ng-console-preview .ng-info .ng-primary:focus-visible {
+	background: #fff;
+	color: #161a23;
+}
+.ng-console-preview .ng-delivery {
+	opacity: 0.6;
+	max-width: 530px;
+	line-height: 1.6;
+}
+.ng-console-preview .ng-info > a {
+	font-size: 12px;
+	color: #ddd;
+	opacity: 0.65;
+}
+@keyframes ng-console-detail {
+	from {
+		opacity: 0;
+		transform: translateX(15px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+.ng-mode[data-mode="nova"] .ng-console-tile.ng-selected {
+	flex-basis: 118px;
+}
+.ng-mode[data-mode="nova"] .ng-console-tile.ng-selected > .ng-art {
+	height: 118px;
+	border-radius: 19px;
+}
+.ng-mode[data-mode="nova"] .ng-console-tile.ng-selected .ng-symbol {
+	font-size: 36px;
+}
+.ng-mode[data-mode="nova"] .ng-main[data-page="home"] .ng-console-preview {
+	margin-top: clamp(90px, 16vh, 210px);
+}
+.ng-mode[data-mode="nova"] .ng-console-preview .ng-eyebrow {
+	font-size: 13px;
+	letter-spacing: 1px;
+	color: #e1e1e7;
+}
+.ng-mode[data-mode="nova"] .ng-controls {
+	background: none;
+	border: 0;
+	opacity: 0.75;
+}
+/* Deck Gaming Mode: top status strip, expanding carousel, bottom button legend. */
+.ng-mode[data-mode="deck"] {
+	--accent: #1a9fff;
+	background: #101822;
+}
+.ng-mode[data-mode="deck"] .ng-scene {
+	filter: saturate(0.65);
+	background:
+		linear-gradient(0deg, #101822 12%, #10182288 90%),
+		radial-gradient(
+			ellipse at 60% 15%,
+			hsl(var(--scene-hue) 38% 24%),
+			#101822 65%
+		);
+}
+.ng-mode[data-mode="deck"] .ng-scene-mark {
+	top: 6vh;
+	opacity: 0.35;
+	font-size: 25vw;
+}
+.ng-mode[data-mode="deck"] .ng-nav {
+	position: relative;
+	inset: auto;
+	width: 100%;
+	height: 65px;
+	flex-direction: row;
+	align-items: center;
+	padding: 12px 3vw;
+	border: 0;
+	background: #10182230;
+}
+.ng-mode[data-mode="deck"] .ng-nav .ng-icon {
+	width: 33px;
+	height: 33px;
+	font-size: 23px;
+}
+.ng-mode[data-mode="deck"] .ng-time {
+	font-size: 16px;
+}
+.ng-deck-title {
+	font-size: 23px;
+}
+.ng-mode[data-mode="deck"] .ng-main {
+	margin: 0;
+	width: 100%;
+	height: calc(100% - 113px);
+	padding: 20px 4vw 40px;
+}
+.ng-mode[data-mode="deck"] .ng-main[data-page="home"] {
+	padding: 0 3.5vw 35px;
+}
+.ng-recent-heading {
+	font-size: 14px;
+	font-weight: 400;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	color: #a5b2c3;
+	margin: 4vh 0 15px;
+}
+.ng-mode[data-mode="deck"] .ng-console-rail {
+	height: 38vh;
+	min-height: 235px;
+	gap: 14px;
+	padding: 7px 7px 10px;
+	align-items: stretch;
+}
+.ng-mode[data-mode="deck"] .ng-console-tile {
+	flex-basis: 14vw;
+	height: 100%;
+	min-width: 130px;
+	transition: flex-basis 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.ng-mode[data-mode="deck"] .ng-console-tile > .ng-art {
+	height: 100%;
+	min-height: 0;
+	border-radius: 0;
+	box-shadow: 0 5px 20px #0005;
+	border: 0;
+}
+.ng-mode[data-mode="deck"] .ng-console-tile.ng-selected {
+	flex-basis: 45vw;
+	min-width: 300px;
+}
+.ng-mode[data-mode="deck"] .ng-console-tile.ng-selected > .ng-art {
+	outline: 2px solid #dceeff;
+	outline-offset: 3px;
+}
+.ng-mode[data-mode="deck"] .ng-console-tile .ng-symbol {
+	font-size: 46px;
+}
+.ng-mode[data-mode="deck"] .ng-console-tile.ng-selected .ng-symbol {
+	font-size: clamp(60px, 8vw, 120px);
+}
+.ng-mode[data-mode="deck"] .ng-system-tile {
+	height: 100%;
+	flex-basis: 110px;
+	border-radius: 0;
+	margin: 0;
+}
+.ng-mode[data-mode="deck"] .ng-console-preview {
+	padding: 0 3px;
+	min-height: 55px;
+}
+.ng-mode[data-mode="deck"] .ng-console-preview strong {
+	display: block;
+	font-size: 21px;
+	text-transform: uppercase;
+	margin: 2px 0 5px;
+}
+.ng-mode[data-mode="deck"] .ng-console-preview small {
+	display: block;
+	font-size: 11px;
+	letter-spacing: 1px;
+	color: #a0afb9;
+}
+.ng-home-tabs {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	margin: 22px 0;
+}
+.ng-mode .ng-home-tabs button {
+	background: transparent;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.7px;
+	border-radius: 25px;
+	padding: 9px 15px;
+}
+.ng-mode .ng-home-tabs button.active {
+	background: #ffffff1c;
+}
+.ng-home-feed {
+	display: flex;
+	gap: 20px;
+	min-height: 150px;
+}
+.ng-mode .ng-feed-feature {
+	display: flex;
+	align-items: center;
+	gap: 25px;
+	width: 75%;
+	text-align: left;
+	background: linear-gradient(110deg, #105b91, #182c4a);
+	font-size: 24px;
+	padding: 0;
+	overflow: hidden;
+}
+.ng-feed-feature .ng-art {
+	height: 180px;
+	min-width: 30%;
+	border: 0;
+}
+.ng-feed-store {
+	flex: 1;
+	background: #223448 !important;
+}
+.ng-mode[data-mode="deck"] .ng-controls {
+	background: linear-gradient(90deg, #0d253c, #142c42);
+	font-weight: 600;
+}
+.ng-mode[data-mode="deck"] .ng-hero {
+	display: block;
+	background: #17222ee6;
+	padding: 30px;
+}
+.ng-mode[data-mode="deck"] .ng-hero > .ng-art {
+	height: 27vh;
+	width: 100%;
+	margin-bottom: 24px;
+}
+.ng-mode[data-mode="deck"] .ng-hero .ng-primary {
+	background: #5c7e10;
+	color: #fff;
+	border-radius: 2px;
+}
+.ng-mode[data-mode="deck"] .ng-hero .ng-info h1 {
+	font-size: 35px;
+}
+/* Xbox Series dashboard: central quick access and a low game row. */
+.ng-mode[data-mode="pulse"] {
+	--accent: #7ed339;
+	background: #0a1413;
+}
+.ng-mode[data-mode="pulse"] .ng-scene {
+	background:
+		linear-gradient(0deg, #06100eef, #08110b25 70%),
+		radial-gradient(
+			ellipse at 65% 25%,
+			hsl(var(--scene-hue) 30% 28%),
+			transparent 70%
+		),
+		url("/nebula/wallpaper.svg") center/cover;
+}
+.ng-mode[data-mode="pulse"] .ng-nav {
+	height: 110px;
+	padding: 24px 5vw;
+	gap: 5px;
+}
+.ng-mode[data-mode="pulse"] .ng-nav-left {
+	width: 240px;
+	gap: 13px;
+}
+.ng-mode[data-mode="pulse"] .ng-nav-center {
+	gap: 17px;
+}
+.ng-mode[data-mode="pulse"] .ng-nav-right {
+	gap: 9px;
+}
+.ng-mode .ng-avatar {
+	width: 43px;
+	height: 43px;
+	border-radius: 50%;
+	font-size: 25px;
+	padding: 0;
+	background: #157a70;
+}
+.ng-user {
+	font-size: 16px;
+}
+.ng-mode[data-mode="pulse"] .ng-main[data-page="home"] {
+	padding: calc(40vh - 110px) 5vw 28px;
+	overflow-y: auto;
+}
+.ng-mode[data-mode="pulse"] .ng-console-rail {
+	height: 26vh;
+	min-height: 170px;
+	align-items: flex-end;
+	gap: 16px;
+	padding-bottom: 12px;
+	margin-bottom: 12px;
+}
+.ng-mode[data-mode="pulse"] .ng-console-tile {
+	flex-basis: 9vw;
+	min-width: 105px;
+	height: 15vh;
+	min-height: 105px;
+	transition:
+		flex-basis 0.22s,
+		height 0.22s;
+	overflow: hidden;
+	border-radius: 4px;
+}
+.ng-mode[data-mode="pulse"] .ng-console-tile > .ng-art {
+	height: 100%;
+	border-radius: 4px;
+	min-height: 0;
+}
+.ng-mode[data-mode="pulse"] .ng-console-tile.ng-selected {
+	flex-basis: 15vw;
+	height: 23vh;
+	min-width: 170px;
+	outline: 3px solid #68c637;
+	outline-offset: 5px;
+	box-shadow: 0 0 18px #4fbd4055;
+	overflow: visible;
+}
+.ng-mode[data-mode="pulse"] .ng-console-tile.ng-selected > .ng-art {
+	outline: 0;
+}
+.ng-mode[data-mode="pulse"] .ng-console-tile .ng-symbol {
+	font-size: 35px;
+}
+.ng-mode[data-mode="pulse"] .ng-console-tile.ng-selected .ng-symbol {
+	font-size: 58px;
+}
+.ng-mode[data-mode="pulse"] .ng-console-tile.ng-selected .ng-tile-title {
+	display: block;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: #101610d9;
+	padding: 9px 12px;
+	border-radius: 0 0 4px 4px;
+}
+.ng-mode[data-mode="pulse"] .ng-system-tile {
+	align-self: flex-end;
+	height: 15vh;
+	min-height: 105px;
+	margin: 0 0 0 4px;
+	flex-basis: 90px;
+	border-radius: 4px;
+}
+.ng-mode[data-mode="pulse"] .ng-console-preview {
+	display: none;
+}
+.ng-pulse-promos {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 20px;
+}
+.ng-mode .ng-pulse-promos button {
+	position: relative;
+	height: 18vh;
+	min-height: 135px;
+	background: linear-gradient(140deg, #1b544d, #11212f);
+	padding: 18px;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-end;
+	border-radius: 4px;
+	text-align: left;
+	overflow: hidden;
+}
+.ng-mode .ng-pulse-promos button:nth-child(2) {
+	background: #102332;
+}
+.ng-mode .ng-pulse-promos button:nth-child(3) {
+	background: linear-gradient(140deg, #466b27, #122816);
+}
+.ng-mode .ng-pulse-promos button:nth-child(4) {
+	background: linear-gradient(140deg, #181a32, #05070d);
+}
+.ng-pulse-promos strong {
+	font-size: 17px;
+	font-weight: 400;
+	position: relative;
+}
+.ng-pulse-promos small {
+	margin-top: 7px;
+	color: #b3c2cb;
+	font-size: 11px;
+	position: relative;
+}
+.ng-promo-symbol {
+	position: absolute;
+	right: 20px;
+	top: 5px;
+	font-size: 65px;
+	color: #ffffff48;
+}
+.ng-mode[data-mode="pulse"] :focus-visible {
+	outline-color: #7bd145;
+}
+.ng-mode[data-mode="pulse"] .ng-controls {
+	background: none;
+	border: 0;
+}
+.ng-mode[data-mode="pulse"] .ng-hero {
+	background: #101c19e8;
+}
+/* Native-feeling panels and store navigation retain real controls. */
+.ng-drawer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 340px;
+	max-width: 85vw;
+	background: #182431f5;
+	backdrop-filter: blur(25px);
+	z-index: 15;
+	box-shadow: 30px 0 90px #0008;
+	padding: 30px 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	animation: ng-menu-left 0.2s ease-out;
+}
+.ng-drawer h2 {
+	font-size: 21px;
+	padding: 10px 15px;
+	letter-spacing: 1px;
+}
+.ng-mode .ng-drawer > button {
+	text-align: left;
+	border-radius: 0;
+	padding: 17px 22px;
+	background: none;
+	font-size: 19px;
+}
+.ng-mode .ng-drawer > button:hover,
+.ng-mode .ng-drawer > button:focus-visible {
+	background: #ffffff20;
+}
+.ng-mode .ng-drawer-close {
+	font-size: 13px !important;
+	align-self: flex-end;
+}
+.ng-drawer.ng-quick {
+	left: auto;
+	right: 0;
+	animation-name: ng-menu-right;
+}
+.ng-drawer [aria-pressed="true"]::after {
+	content: "  ✓";
+	color: var(--accent);
+}
+.ng-mode[data-mode="nova"] .ng-drawer:not(.ng-quick) {
+	inset: auto 5vw 6vh;
+	width: auto;
+	max-width: none;
+	min-height: 240px;
+	bottom: 55px;
+	border-radius: 15px;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+	background: #15171ee8;
+	animation: ng-menu-bottom 0.25s ease-out;
+	box-shadow: 0 -30px 100px #0005;
+}
+.ng-mode[data-mode="nova"] .ng-drawer:not(.ng-quick) h2 {
+	position: absolute;
+	left: 20px;
+	top: 0;
+}
+.ng-mode[data-mode="nova"] .ng-drawer:not(.ng-quick) .ng-drawer-close {
+	position: absolute;
+	top: 12px;
+	right: 14px;
+}
+.ng-mode[data-mode="nova"]
+	.ng-drawer:not(.ng-quick)
+	> button:not(.ng-drawer-close) {
+	flex: 1;
+	font-size: 15px;
+	padding: 24px 10px;
+	text-align: center;
+	border-radius: 8px;
+	background: #ffffff08;
+}
+.ng-mode[data-mode="pulse"] .ng-drawer {
+	background: #121712f7;
+	width: 360px;
+}
+.ng-mode[data-mode="pulse"] .ng-drawer button:focus-visible {
+	outline: 3px solid #7bd145;
+}
+@keyframes ng-menu-left {
+	from {
+		transform: translateX(-100%);
+	}
+	to {
+		transform: translateX(0);
+	}
+}
+@keyframes ng-menu-right {
+	from {
+		transform: translateX(100%);
+	}
+	to {
+		transform: translateX(0);
+	}
+}
+@keyframes ng-menu-bottom {
+	from {
+		transform: translateY(40px);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+.ng-main[data-page="settings"] {
+	background: #151c26f5;
+	padding: 38px 7vw;
+}
+.ng-mode[data-mode="nova"] .ng-main[data-page="settings"] {
+	background: #11151be8;
+}
+.ng-main[data-page="settings"] > h1 {
+	font-weight: 300;
+	font-size: 36px;
+}
+.ng-mode-choices button {
+	border-radius: 0 !important;
+}
+.ng-settings {
+	max-width: 1000px;
+	grid-template-columns: 1fr;
+	gap: 0;
+	margin-left: 20%;
+	border-top: 1px solid #ffffff20;
+}
+.ng-settings > label {
+	padding: 17px 20px;
+	border-bottom: 1px solid #ffffff15;
+	justify-content: space-between;
+	font-size: 18px;
+}
+.ng-settings input[type="checkbox"] {
+	order: 2;
+	width: 22px;
+	height: 22px;
+}
+.ng-settings select {
+	min-width: 180px;
+}
+.ng-settings input[type="range"] {
+	width: 200px;
+}
+.ng-note {
+	font-size: 13px;
+	margin-left: 20%;
+}
+.ng-mode[data-mode="deck"] .ng-settings {
+	background: #0b141b66;
+}
+.ng-mode[data-mode="pulse"] .ng-settings {
+	background: #161e1666;
+}
+.ng-main[data-page="store"] .ng-intro h2 {
+	font-size: 38px;
+	font-weight: 300;
+}
+.ng-main[data-page="store"] .ng-grid {
+	gap: 26px;
+}
+.ng-mode[data-mode="nova"] .ng-main[data-page="store"] .ng-card .ng-art {
+	aspect-ratio: 0.85;
+	border-radius: 8px;
+}
+.ng-mode[data-mode="deck"] .ng-main[data-page="store"] {
+	background: linear-gradient(#1c3d57dd, #142230);
+}
+.ng-mode[data-mode="deck"] .ng-main[data-page="store"] .ng-card .ng-art {
+	aspect-ratio: 1.8;
+}
+.ng-mode[data-mode="pulse"] .ng-main[data-page="store"] {
+	background: #0a130eed;
+}
+.ng-main[data-page="library"] .ng-intro h2 {
+	font-size: 34px;
+}
+.ng-mode[data-mode="deck"] .ng-main[data-page="library"] .ng-grid {
+	grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+}
+.ng-session {
+	z-index: 12;
+}
+.ng-hud {
+	z-index: 14;
+}
+.ng-hud[data-position="top-left"],
+.ng-mode[data-mode="deck"] .ng-hud[data-position="top-left"] {
+	left: 12px;
+}
+.ng-hud[data-position="bottom-left"],
+.ng-hud[data-position="bottom-right"] {
+	bottom: 55px;
+}
+.ng-back {
+	margin-bottom: 20px;
+}
+.ng-media-tile {
+	width: 240px;
+	height: 160px;
+	margin: 15px;
+	font-size: 25px !important;
+	background: #1b2948 !important;
+}
+@media (max-width: 800px) {
+	.ng-mode .ng-nav,
+	.ng-mode[data-mode="deck"] .ng-nav,
+	.ng-mode[data-mode="pulse"] .ng-nav {
+		padding: 12px 18px;
+		height: 80px;
+		gap: 5px;
+	}
+	.ng-nav-left,
+	.ng-nav-center,
+	.ng-nav-right {
+		gap: 5px !important;
+	}
+	.ng-time {
+		font-size: 13px !important;
+		margin: 0;
+	}
+	.ng-mode .ng-icon {
+		width: 29px !important;
+		height: 30px !important;
+		font-size: 20px !important;
+	}
+	.ng-mode .ng-tab {
+		font-size: 18px;
+	}
+	.ng-mode[data-mode="pulse"] .ng-nav-left {
+		width: auto;
+	}
+	.ng-user {
+		display: none;
+	}
+	.ng-mode .ng-main,
+	.ng-mode[data-mode="deck"] .ng-main {
+		height: calc(100% - 128px);
+	}
+	.ng-mode[data-mode="pulse"] .ng-main[data-page="home"] {
+		padding-top: calc(36vh - 80px);
+	}
+	.ng-pulse-promos {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 12px;
+	}
+	.ng-mode[data-mode="deck"] .ng-console-tile.ng-selected {
+		min-width: 260px;
+	}
+	.ng-mode[data-mode="deck"] .ng-console-rail {
+		min-height: 210px;
+	}
+	.ng-mode[data-mode="nova"] .ng-main[data-page="home"] .ng-console-preview {
+		margin-top: 6vh;
+	}
+	.ng-settings,
+	.ng-note {
+		margin-left: 0;
+	}
+	.ng-controls {
+		padding: 0 12px;
+		gap: 5px;
+	}
+	.ng-control-hints {
+		font-size: 11px;
+		word-spacing: 0;
+	}
+	.ng-mode[data-mode="nova"] .ng-drawer:not(.ng-quick) {
+		flex-wrap: wrap;
+		padding-top: 75px;
+	}
+	.ng-home-feed {
+		flex-direction: column;
+	}
+	.ng-mode .ng-feed-feature {
+		width: 100%;
+	}
+	.ng-scene-mark {
+		font-size: 120px;
+		top: 30vh;
+	}
+	.ng-feed-store {
+		min-height: 65px;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.ng-mode * {
+		animation: none !important;
+		transition: none !important;
+		scroll-behavior: auto !important;
+	}
+}

@@ -4,7 +4,7 @@ type WallpaperObject = {
 };
 
 class WallpaperAndStyle extends App {
-	name = "Wallpaper & Style";
+	name = "Nebula Wallpapers";
 	package = "anura.wallpaper";
 	icon = "/assets/icons/wallpaper.png";
 
@@ -657,6 +657,7 @@ class WallpaperAndStyle extends App {
 	}
 
 	setWallpaper(url: string) {
+		window.dispatchEvent(new Event("nebula:wallpaper-changed"));
 		window.document.documentElement.style.backgroundColor = anura.settings.get(
 			"wallpaper-contain-color",
 		); // this might not be ideal but it works

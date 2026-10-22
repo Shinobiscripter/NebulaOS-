@@ -1,5 +1,6 @@
 {
 	"apps": [
+		"apps/nebula-games.app",
 		"apps/fsapp.app",
 		"apps/marketplace.app",
 		"apps/ashell.app",
@@ -20,10 +21,32 @@
 	],
 	"defaultsettings": {
 		"use-sw-cache": false,
-		"applist": ["anura.browser", "anura.settings", "anura.fsapp"],
+		"applist": [
+			"nebula.games",
+			"anura.fsapp",
+			"anura.ashell",
+			"anura.browser",
+			"anura.settings"
+		],
 		"clampWindows": true,
 		"launcher-keybind": true,
-		"relay-url": "wss://relay.widgetry.org/"
+		"relay-url": "wss://relay.widgetry.org/",
+		"x86-disabled": true,
+		"oobe-complete": true,
+		"handler-migration-complete": true,
+		"explore-shown": true,
+		"wallpaper": "/nebula/wallpaper.svg",
+		"blur-disable": true,
+		"theme": {
+			"foreground": "#f3f5fa",
+			"secondaryForeground": "#a6afc4",
+			"border": "#30384b",
+			"darkBorder": "#080b12",
+			"background": "#10141f",
+			"secondaryBackground": "#1c2333",
+			"darkBackground": "#090d16",
+			"accent": "#8eaaff"
+		}
 	},
 	"x86": {
 		"alpine": {

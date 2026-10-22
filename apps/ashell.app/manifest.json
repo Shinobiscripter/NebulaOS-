@@ -1,5 +1,5 @@
 {
-	"name": "Anura Shell",
+	"name": "Terminal",
 	"type": "auto",
 	"package": "anura.ashell",
 	"index": "term.html",

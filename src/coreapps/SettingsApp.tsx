@@ -243,7 +243,7 @@ class SettingsApp extends App {
 			class={`background ${settingsCSS}`}
 		>
 			<div class="header">
-				<h2>Anura Settings</h2>
+				<h2>NebulaHub Settings</h2>
 			</div>
 
 			<div css={this.state} class="container">
@@ -295,13 +295,144 @@ class SettingsApp extends App {
 					<div id="general" class="general settings-category">
 						<h3 class="settings-category-name">General</h3>
 						<div class="settings-group">
+							<label class="settings-item">
+								<span>Desktop environment</span>
+								<select
+									aria-label="Desktop environment"
+									value={
+										anura.settings.get("nebula.desktop.environment") || "orbit"
+									}
+									on:change={async (event: any) => {
+										await anura.settings.set(
+											"nebula.desktop.environment",
+											event.target.value,
+										);
+										window.dispatchEvent(new Event("nebula:environment"));
+									}}
+								>
+									<option
+										value="orbit"
+										selected={
+											!anura.settings.get("nebula.desktop.environment") ||
+											anura.settings.get("nebula.desktop.environment") ===
+												"orbit"
+										}
+									>
+										Orbit — classic Nebula desktop
+									</option>
+									<option
+										value="flow"
+										selected={
+											anura.settings.get("nebula.desktop.environment") ===
+											"flow"
+										}
+									>
+										Flow — Hyprland-inspired desktop
+									</option>
+									<option
+										value="horizon"
+										selected={
+											anura.settings.get("nebula.desktop.environment") ===
+											"horizon"
+										}
+									>
+										Horizon — taskbar and desktop shortcuts
+									</option>
+								</select>
+							</label>
+							<label class="settings-item">
+								<span>Use environment wallpaper</span>
+								<input
+									type="checkbox"
+									aria-label="Use environment wallpaper"
+									checked={
+										anura.settings.get(
+											"nebula.desktop.environmentWallpaper",
+										) !== false
+									}
+									on:change={async (event: any) => {
+										await anura.settings.set(
+											"nebula.desktop.environmentWallpaper",
+											event.target.checked,
+										);
+										window.dispatchEvent(new Event("nebula:environment"));
+									}}
+								/>
+							</label>
+							<p>
+								Flow adds four workspaces, a dashboard, scratchpad and window
+								tiling. Ctrl+Alt+1–4 switches workspaces; add Shift to move a
+								window. Ctrl+Alt+T tiles, Ctrl+Alt+D opens the dashboard.
+								Disable its wallpaper to use your own.
+							</p>
+							<div class="settings-item">
+								<span>Personalization</span>
+								<button
+									on:click={() =>
+										window.dispatchEvent(new Event("nebula:wallpapers"))
+									}
+								>
+									Wallpaper switcher
+								</button>
+							</div>
+							<div class="settings-item">
+								<span>Flow keyboard controls</span>
+								<button
+									on:click={() =>
+										window.dispatchEvent(new Event("nebula:flow-extensions"))
+									}
+								>
+									Flow extensions
+								</button>
+								<button
+									on:click={() =>
+										window.dispatchEvent(new Event("nebula:hyprland"))
+									}
+								>
+									Import Hyprland dotfiles
+								</button>
+								<button
+									on:click={() =>
+										window.dispatchEvent(new Event("nebula:keybinds"))
+									}
+								>
+									Customize shortcuts
+								</button>
+							</div>
+							<div class="settings-item">
+								<span>Local accounts</span>
+								<button
+									on:click={() =>
+										window.dispatchEvent(new Event("nebula:accounts"))
+									}
+								>
+									Manage accounts
+								</button>
+								<button
+									on:click={() =>
+										window.dispatchEvent(new Event("nebula:lock-request"))
+									}
+								>
+									Lock screen
+								</button>
+							</div>
+							<div class="settings-item">
+								<span>Online account profiles</span>
+								<button
+									on:click={() =>
+										window.dispatchEvent(new Event("nebula:account-center"))
+									}
+								>
+									Account Center
+								</button>
+							</div>
 							<SettingSwitch
 								title="Allow offline use"
 								setting="use-sw-cache"
 								callback={async () => {
 									if (
 										await anura.dialog.confirm(
-											"This will restart Anura. Are you sure?",
+											"This will restart NebulaHub. Are you sure?",
 										)
 									) {
 										anura.settings.set("milestone", "__INVALID");
@@ -320,7 +451,7 @@ class SettingsApp extends App {
 								callback={async () => {
 									if (
 										await anura.dialog.confirm(
-											"This will restart Anura. Are you sure?\nYour data will not be accessible",
+											"This will restart NebulaHub. Are you sure?\nYour data will not be accessible",
 										)
 									) {
 										await (window as any).idbKeyval.set(
@@ -341,6 +472,9 @@ class SettingsApp extends App {
 							<SettingSwitch
 								title="Reduce motion"
 								setting="disable-animation"
+								callback={() =>
+									window.dispatchEvent(new Event("nebula:motion"))
+								}
 							/>
 							<SettingSwitch
 								title="Window Edge Clamping"
@@ -359,7 +493,7 @@ class SettingsApp extends App {
 						</div>
 					</div>
 					<div id="v86" class="v86 settings-category">
-						<h3 class="settings-category-name">Anura x86</h3>
+						<h3 class="settings-category-name">Linux / v86</h3>
 						<div class="settings-group">
 							{this.state.show_x86_install ? (
 								<div>
@@ -367,7 +501,18 @@ class SettingsApp extends App {
 										on:click={async () => {
 											this.state.x86_installing = true;
 											anura.settings.set("x86-image", "alpine");
-											await installx86();
+											try {
+												await installx86();
+											} catch (error) {
+												this.state.x86_installing = false;
+												const tracker = document.getElementById("tracker");
+												if (tracker)
+													tracker.textContent =
+														error instanceof Error
+															? error.message
+															: String(error);
+												return;
+											}
 											anura.settings.set("x86-disabled", false);
 											anura.notifications.add({
 												title: "x86 Subsystem Installed",
@@ -617,17 +762,17 @@ class SettingsApp extends App {
 						</div>
 					</div>
 					<div id="reset" class="settings-category">
-						<h3 class="settings-category-name">Reset Anura</h3>
+						<h3 class="settings-category-name">Reset NebulaHub</h3>
 						<div class="settings-group">
 							<div class="settings-item">
 								<span class="settings-item-name">
-									Reset your Anura install.
+									Reset your NebulaHub install.
 								</span>
 								<button
 									class="matter-button-outlined"
 									on:click={async () => {
 										const confirmation = await anura.dialog.confirm(
-											"Are you sure you want to powerwash Anura? All of your data will be lost.",
+											"Are you sure you want to reset NebulaHub? All of your data will be lost.",
 										);
 										if (confirmation) {
 											try {

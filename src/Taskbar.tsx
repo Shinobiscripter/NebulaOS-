@@ -337,6 +337,16 @@ class Taskbar {
 				<div id="launcher-button-container">
 					<div
 						id="launcher-button"
+						title="NebulaHub launcher"
+						role="button"
+						tabindex={0}
+						aria-label="Open launcher"
+						on:keydown={(event: KeyboardEvent) => {
+							if (event.key === "Enter" || event.key === " ") {
+								event.preventDefault();
+								launcher.toggleVisible();
+							}
+						}}
 						on:click={() => {
 							quickSettings.close();
 							calendar.close();

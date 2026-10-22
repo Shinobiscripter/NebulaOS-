@@ -22,6 +22,7 @@ class Settings {
 		defaultsettings: { [key: string]: any },
 	) {
 		const initial = defaultsettings;
+		const deploymentRelay = initial["wisp-url"];
 
 		if (!initial["i-am-a-true-gangsta"]) {
 			initial["i-am-a-true-gangsta"] = false;
@@ -71,6 +72,19 @@ class Settings {
 			fs.writeFile("/anura_settings.json", JSON.stringify(initial));
 		}
 
+		// Migrate only the unusable same-origin Netlify default, preserving custom relays.
+		const oldNetlifyRelay = `wss://${location.host}/`;
+		if (
+			deploymentRelay &&
+			location.hostname.endsWith(".netlify.app") &&
+			initial["wisp-url"] === oldNetlifyRelay
+		) {
+			initial["wisp-url"] = deploymentRelay;
+			await fs.promises.writeFile(
+				"/anura_settings.json",
+				JSON.stringify(initial),
+			);
+		}
 		return new Settings(fs, initial);
 	}
 
@@ -81,16 +95,19 @@ class Settings {
 		return prop in this.cache;
 	}
 	async set(prop: string, val: any, subprop?: string) {
-		console.debug("Setting " + prop + " to " + val);
+		console.debug("Updating setting " + prop);
 		if (subprop) {
 			this.cache[prop][subprop] = val;
 		} else {
 			this.cache[prop] = val;
 		}
-		this.save();
+		// Keep desktop motion in sync with Settings and Quick Settings alike.
+		if (prop === "disable-animation")
+			window.dispatchEvent(new Event("nebula:motion"));
+		await this.save();
 	}
 	async save() {
-		console.debug("Saving settings to fs", this.cache);
+		console.debug("Saving settings to fs");
 		await this.fs.promises.writeFile(
 			"/anura_settings.json",
 			JSON.stringify(this.cache),
@@ -105,6 +122,6 @@ class Settings {
 		} else {
 			delete this.cache[prop];
 		}
-		this.save();
+		await this.save();
 	}
 }

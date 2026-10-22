@@ -169,7 +169,13 @@ class LocalFS extends AFSProvider<LocalFSStats> {
 		return [await parentHandle.getFileHandle(fileName, options), path];
 	}
 	static async newOPFS(anuraPath: string) {
-		const dirHandle = await navigator.storage.getDirectory();
+		let dirHandle = await navigator.storage.getDirectory();
+		const profile = (window as any).nebulaProfileId;
+		if (profile && profile !== "default")
+			dirHandle = await dirHandle.getDirectoryHandle(
+				`nebula-profile-${profile}`,
+				{ create: true },
+			);
 
 		try {
 			await anura.fs.promises.mkdir(anuraPath);

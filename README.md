@@ -1,98 +1,171 @@
-![AnuraOS logo](/assets/logo_dark.png#gh-light-mode-only)
-![AnuraOS logo](/assets/logo_light.png#gh-dark-mode-only)
+# NebulaHub
 
-The next-gen webOS and development environment with full Linux emulation.
+A browser desktop powered by **[AnuraOS](https://github.com/MercuryWorkshop/anuraOS)** from **[Mercury Workshop](https://mercurywork.shop)**. NebulaHub replaces the old hub frontend with Anura's real window manager, apps, filesystem, terminal, browser, settings, service worker and optional Linux/v86 subsystem.
 
----
+The Nebula layer adds a space theme, boot UI tied to real initialization, a native Games app and Netlify packaging. Internal `anura.*` APIs, package IDs, storage names and worker paths remain compatible.
 
-## What is AnuraOS?
+Live deployment: **[nebulahub-shinobiscripter.netlify.app](https://nebulahub-shinobiscripter.netlify.app)**. This site was uploaded from the tested production output; Git pushes do not automatically deploy it. The Netlify badge is disabled in site settings so it does not overlay application windows.
 
-An entirely local browser-based "OS" and development environment with complete graphical Linux emulation, visually based on ChromiumOS. See a demo [here](https://anura.pro), fully in your browser.
+## Desktop features
 
-> [!WARNING]  
-> Anura mainly targets Chromium but should work on most browsers. For a list of known browser specific quirks check [this document](BrowserQuirks.md).
+**Welcome** provides animated first-run local-account setup, live desktop selection and an interactive feature guide. Reopen it from the launcher anytime. See [setup and local-account details](documentation/WELCOME.md).
 
-Anura uses the features of a PWA (Progressive Web App) to make its environment work fully offline, providing a virtual filesystem (synced with the Linux emulator), a code editor, and a modular and extensible app system. You can even edit Anura's code live while inside of it!
+**Game Mode** is available from Files, Explore and every desktop environment's launcher. Nova reproduces the PS5 home layout, Deck the Steam Deck Gaming Mode layout, and Pulse the Xbox Series dashboard layout, using Nebula's shared library, store, settings and configurable performance overlay. The catalog contains 52 games: two downloadable packages and 50 online launchers. See [Game Mode](documentation/GAME-MODE.md) for controls, downloads, offline behavior, licensing and performance-measurement limits. Catalog source: [NebulaGames](https://github.com/Shinobiscripter/NebulaGames).
 
-Anura shows as more of a proof-of-concept with what's possible on the modern web rather than an actual product. However, it proves useful in many actual cases and is a useful educational tool.
-![](/assets/showcase.png)
+**NebulaCraft Launcher** is also available as a native app and at [its standalone website](https://nebulacraft-shinobiscripter.netlify.app/). It runs the supplied repository's 1.20.4-labeled EaglercraftZ build; upstream asset/version caveats are documented in the standalone launcher.
 
-## Development
+The custom boot animation draws the Nebula mark, traces an orbital ring and fades into the desktop. Storage, Services, Apps and Desktop indicators follow actual initialization events; no simulated percentage or minimum wait is added. Animations respect reduced-motion preferences and stop when the splash is removed.
 
-> [!IMPORTANT]  
-> Anura will not build on Windows. Please use a Linux VM or WSL.
+The desktop uses a macOS-inspired top menu, centered dock and colored window controls while retaining Anura's actual window manager. Search launches installed apps; Ctrl/Command+K opens it when the desktop has keyboard focus. Windows provides an overview with left/right tiling, and Show Desktop minimizes and restores open windows.
 
-### Easy Install for GitHub Codespaces
+Desktop widgets include a live clock/calendar shortcut, saved quick note, reminders with completion/deletion, and a pausable 25-minute focus timer with a completion notification. Notes, reminders, timer state and widget visibility use the existing OS settings storage. The Widgets menu controls individual widgets. Mobile retains the upstream layout. No Apple assets or macOS application compatibility are included.
 
-- Run `source codespace-basic-setup.sh`
+Drag each widget by its title, or focus the title and use arrow keys (Shift for one-pixel movement). Each × hides only that widget; **Widgets** restores individual widgets, hides/shows the whole set, or resets positions. Layout and visibility survive refresh and positions are clamped to the viewport.
 
-> [!NOTE]
->
-> - If you are not in a codespace skip to the regular installation steps.
-> - This does NOT build RootFS.
+Nebula Music replaces Spotify with a full-screen native app and a draggable Music widget. The rebuilt app uses library navigation, a central discovery browser, a visible YouTube listening pane and a bottom transport with seek/volume. The widget has its own compact Search/Library tabs and row-based results. Search is shared between both views. Both share saved playlists, song metadata and one playback queue. Open Music to automatically discover space/ambient music, search songs/artists, or paste a `music.youtube.com` / YouTube song link. Search and metadata use public YouTube pages through the existing relay, without an API key; this unofficial discovery parser can break if YouTube changes its pages or blocks the relay. Playback uses the official visible YouTube embedded player, with full-length videos where permitted. Ads, region restrictions, sign-in and embedding availability remain controlled by YouTube. No Premium subscription, audio extraction or download service is provided. Hide/minimize pauses the active player; switching playback views resumes near the current position. Saved playlists are local to this OS installation, not synced to a Google account.
 
-### Dependencies
+Choose **Settings → General → Desktop environment → Flow** for the Hyprland-inspired desktop: four workspaces, a saved scratchpad, central dashboard, tiling and an illustrated space wallpaper. Orbit keeps the classic layout. Maximized apps now fill the viewport and automatically retract the dock; reveal it at the bottom edge. See [Flow controls and design notes](documentation/FLOW.md).
 
-- `make`
-- Node.js (24+)
-- PNPM
-- `jq`
-- `uuid-runtime`
-- `rustup`
-- `wasm-bindgen` (v0.2.105)
-- `wasm-opt`
-- [this `wasm-snip` fork](https://github.com/r58Playz/wasm-snip)
-- A recent version of `java` (11+)
-- `wget`
-- `clang`
-- `gcc` (`gcc-multilib` on Debian and Ubuntu x86_64)
-- 32 bit version of `glibc` (needed for building rootfs, `lib32-glibc` on Arch Linux)
-- `docker`
-- An x86(-64) Linux PC (`make rootfs-alpine` build depends on x86 specific tools)
+The new lock screen and local account setup are in **Settings → General → Manage accounts**. The same section opens customizable Flow shortcuts and the wallpaper switcher, including public GitHub collections, local imports and automatic wallpaper accent matching. Account Center adds locally saved social/GitHub profiles and real service sign-in links. Desktop transitions honor the existing Reduce motion setting. See [personalization and local account details](documentation/PERSONALIZATION.md).
 
-> [!NOTE]
-> You will have to install the required Rust toolchain by running `rustup target add wasm32-unknown-unknown` and also `rustup target add i686-unknown-linux-gnu` if you are planning to build v86 images.
+## Build setup
 
-#### Building
-
-- Clone the repository with `git clone --recursive https://github.com/MercuryWorkshop/anuraOS`
-- Then, `make all`
-
-> [!TIP]
-> You can use `make all -B` instead if you want to force a full build.
-
-### Building the Linux RootFS
-
-- Make sure you have `Docker` installed and running.
-- Make sure to add yourself to the Docker group using `usermod -a -G docker $USER`
-- Run `make rootfs`
-
-### Running Anura Locally
-
-You can run Anura with the command
+Use x86-64 Linux or WSL2; upstream does not support native Windows builds.
 
 ```sh
-make server
+git clone --recurse-submodules --branch nebula/rebrand-and-games https://github.com/Shinobiscripter/NebulaOS-
+cd NebulaOS-
 ```
 
-Anura should now be running at `localhost:8000`.
+| Dependency | Requirement |
+| --- | --- |
+| Node.js | 24+, selected version 24.21.0 |
+| pnpm | 10.12.1, pinned by browser.js and CI |
+| Rust | nightly; wasm32-unknown-unknown target and rust-src component |
+| wasm-bindgen CLI | **0.2.105**, exact match |
+| wasm-snip | r58playz fork, setup selects revision e9c9e133 |
+| Binaryen | wasm-opt; version 120 used in this environment |
+| Java | 11+ for v86 Closure compiler |
+| Native tools | make, clang, gcc, gcc-multilib, jq, uuidgen, curl, wget, Git |
+| Linux disk generation only | Docker, sudo, loop devices, i686-unknown-linux-gnu Rust target |
 
-## App Development
+Upstream uses an undated Rust nightly and does not pin Java/clang/gcc or Binaryen versions. Selected setup versions above are distinct from upstream requirements.
 
-App development is highly encouraged! Good apps can even be added to the official app repositories after review by an AnuraOS maintainer. Apps are stored in .app files which are read by AnuraOS to provide you, well, an app!
+Install Node 24.21.0 through your preferred installer, then on Ubuntu/Debian:
 
-For more information about developing an AnuraOS app please visit [this page](./documentation/appdevt.md) and for using Anura API's in your code, please visit [this page](./documentation/Anura-API.md).
+```sh
+sudo apt-get update
+sudo apt-get install -y build-essential clang lld default-jre gcc-multilib jq uuid-runtime curl wget git binaryen
+npm install -g pnpm@10.12.1
+bash scripts/netlify-build.sh
+```
 
-## Documentation
+The setup script installs missing Rust/wasm tools and runs the production build. With dependencies installed, use `npm run build`. This runs upstream **`make static`**, packages deployment metadata, and validates the result. **Output: `static/`.** Deploy that directory, not the source tree.
 
-See the current index of documentation [here](./documentation/README.md).
+Main dependencies use `npm ci`; browser.js retains its lockfile. `make lint` remains available but no longer mutates the source as a side effect of production builds.
 
-## Security
+## Local testing
 
-See [SECURITY.md](./SECURITY.md) for reporting instructions.
+```sh
+npm run preview
+# http://localhost:8000
+npm run check
+npm test
+npx playwright install chromium
+npm run test:browser
+# Optional online checks (Linux downloads about 1 GiB):
+NEBULA_ONLINE_TESTS=1 npx playwright test tests/browser/online.spec.mjs
+NEBULA_LINUX_TESTS=1 npx playwright test tests/browser/linux.spec.mjs
+```
 
-## Credits
+The production preview applies the generated Netlify headers, supplies a local Wisp relay, and proxies Linux images. HTTPS or localhost is required. Browser tests cover the real desktop, app windows, game metadata, persistence, PWA and WASM. See [validation results](documentation/VALIDATION.md) for actual results and online compatibility checks.
 
-AnuraOS is created by [Mercury Workshop](https://mercurywork.shop). Linux emulation is based off of the [v86](https://github.com/copy/v86) project. For more credits, see [CREDITS.MD](./CREDITS.md).
+Files/settings live in browser storage. Refresh preserves them; clearing site data deletes the installation. Different origins have separate installations. Export important files through Files.
 
-(p.s. for hackers: the entrypoint to anura is [src/Boot.tsx](./src/Boot.tsx))
+## Netlify
+
+Connect this repository and select `nebula/rebrand-and-games` in Netlify (or your default branch after merging the change). `netlify.toml` selects `bash scripts/netlify-build.sh` and publishes `static/`. Use a Linux image with the native tools above. A cold compiler build can exceed restrictive build-time allowances.
+
+Alternatively, build locally or download the `nebulahub-static` GitHub Actions artifact and upload with the Netlify CLI:
+
+```sh
+npx netlify-cli login
+npx netlify-cli deploy --dir=static --no-build
+# Review the draft, then publish the same output:
+npx netlify-cli deploy --dir=static --no-build --prod
+```
+
+The operator supplies Netlify credentials/site selection. CI builds/tests/uploads artifacts only; it does not publish upstream npm packages or replace releases.
+
+`static/_headers` applies COOP `same-origin` and COEP `require-corp` to the OS documents/workers, with CORP `same-origin`. WASM uses `application/wasm`. The worker retains scope `/` and is revalidated. Mutable bundles are not marked immutable. No SPA catch-all is used: missing JS/WASM must return 404.
+
+`/Games/` and `/play/` documents deliberately omit COEP and bypass the OS worker route, allowing third-party game downloads. Do not replace this with blanket COEP headers. The desktop's isolation remains enabled.
+
+### External infrastructure
+
+- **Wisp relay:** Netlify cannot run Anura's long-lived WebSocket service. The Netlify configuration uses the owner's existing `wss://nebulahub-browser.onrender.com/wisp/` service. Set build environment `NEBULA_WISP_URL=wss://your-relay.example/` for manual builds, or Custom Wisp URL in Settings, to change it. Local builds without that variable retain the local preview relay. Existing Netlify installations migrate the old broken same-origin default while preserving custom relays. Free Render services can sleep, require a cold start, and have bandwidth limits.
+- **Linux image host:** default redirects proxy `https://anura.pro/x86images/alpine-*` on demand, avoiding upstream's absent browser CORS headers. This keeps the **1 GiB** disk out of every deployment, but installation still consumes about 1 GiB of bandwidth and browser storage. Availability depends on upstream. To self-host matching kernel/initrd/chunks with CORS, set `NEBULA_X86_BASE_URL=https://images.example/x86images/` with a trailing slash. A separate static image host can serve the split chunks; check its current free storage/file/bandwidth allowances.
+- **Games:** launchers fetch code/assets from their original external providers. They are not offline game binaries. Remote removal, URL changes, embedding restrictions and provider failures can break individual titles.
+
+### Large assets
+
+Each build writes `static/nebula/build-report.json`: total size, largest files and assets over 10/50 MiB. Packaging rejects files over a conservative 50 MiB review threshold; this is a project guardrail, not a universal Netlify limit. Use the CLI for large uploads, following [Netlify's guidance](https://answers.netlify.com/t/support-guide-my-drag-and-drop-deploy-is-stuck-in-uploading-status/112).
+
+v86, libcurl, Scramjet WASM, BIOS and resize support remain in the site. Linux disks remain optional. To generate your own disk:
+
+```sh
+rustup target add i686-unknown-linux-gnu
+make rootfs-alpine
+```
+
+The upstream Docker workflow produces `build/x86images/alpine-boot/` and 50 MiB disk chunks in `build/x86images/alpine-rootfs/`. It requires sudo/loop devices and is separate from the desktop build. Do not upload intermediate `alpine-rootfs.bin` or tar files to Netlify.
+
+## Nebula architecture
+
+- `public/nebula/`: wallpaper, icons, desktop styling, catalog, source/credits page.
+- `apps/nebula-games.app/`: native Anura iframe app. Catalog loads when opened; search, sorting, favorites and recent history use the OS settings filesystem.
+- `public/Games/`: 46 original launchers with stable filenames. Migration reads exact Git blobs, records source commit and SHA-256 hashes, and avoids platform newline conversion.
+- `public/play/`: compatibility player. Play opens a separate browser tab; Chromium credentialless frames also allow managed OS windows. Their game storage is temporary; use a tab for persistent saves or incompatible embeds.
+- `scripts/migrate-games.mjs`: repeatable migration from a local NebulaHub-2 checkout. The original library has no curated covers/categories/tags; initials are explicit fallback artwork.
+- `scripts/package-nebula.mjs`: headers, offline inventory, license files, image routes and asset audit.
+- `public/nebula/widgets.js`, `music.js`, `music-data.js`, and `music-player.*`: persistent widget layout, shared music library/discovery and credentialless YouTube player bridge.
+- `server/relay.mjs` and `render.yaml`: an optional standalone relay deployment, with web-only ports, private-address blocking and an origin allowlist. The current live site reuses the existing `nebulahub-browser` service; this optional service was not created. Origin checks are not authentication against non-browser clients.
+
+The old Ps5 app was a game selector, not an emulator. Its library is migrated. Launcher entries for missing Cine, Spotify, Discord, Android and other app files are not presented as functioning apps. The old Web wrapper is superseded by Anura's browser.
+
+Wallpaper, accent, theme, blur, window clamping, taskbar pins, offline support, filesystem preferences and Linux controls stay in Anura's existing settings. Fresh installs boot directly to the desktop with Linux and blur disabled. Existing saved preferences take precedence.
+
+## PWA and offline
+
+Use your browser's install control to install NebulaHub. Enable **Allow offline use** in Settings to populate Anura's filesystem cache. Its inventory includes the browser bundle and Nebula app. Offline mode does not make external games/pages, relay networking or uninstalled Linux images available offline. Favorites and recents remain local.
+
+## Upstream updates
+
+```sh
+git remote add upstream https://github.com/MercuryWorkshop/anuraOS
+git fetch upstream
+git merge upstream/main
+git submodule update --init --recursive
+npm run build
+npm run test:browser
+```
+
+Review conflicts in Boot, Settings/OOBE, worker routes, PWA metadata, Makefile and CI. Keep package IDs/storage keys stable. [Original README](documentation/UPSTREAM-README.md), upstream API docs and [migration notes](documentation/NEBULA-WORKLOG.md) are retained.
+
+## License
+
+This OS is an AGPL-3.0-only derivative. [LICENSE](LICENSE), [CREDITS.md](CREDITS.md), third-party notices and Mercury Workshop attribution are preserved. About NebulaHub links to credits and this fork's source. Publish the complete corresponding source, changes and build scripts for the version you serve over a network. Keep the visible source link pointed at that version when moving or modifying the project.
+
+Games and remote assets retain their own licenses/ownership. The OS license does not relicense them or grant game redistribution rights. Original launcher notices remain intact. Review individual game rights before public distribution. See the [GNU AGPLv3 text](https://www.gnu.org/licenses/agpl-3.0.html).
+
+
+
+
+
+Nebula AI provides free-only general, thinking, coding and fast chat models. See [setup and privacy](documentation/NEBULA-AI.md). NebulaCraft now offers all eleven builds from the Minecraft repository.
+
+Flow supports importing compatible Hyprland dotfiles. See [the importer guide](documentation/HYPRLAND-IMPORT.md) for supported settings and limitations.
+
+Google sign-in, portable profile references, shared announcements and optional usage
+statistics are documented in [Google accounts and the Developer Panel](documentation/COMMUNITY.md).
+Google OAuth credentials must be configured on Netlify before sign-in is available.

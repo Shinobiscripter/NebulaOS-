@@ -1,0 +1,192 @@
+.nebula-theme-switch {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	width: 100%;
+	padding: 16px !important;
+	margin: 15px 0;
+	text-align: left;
+}
+.nebula-theme-switch::before {
+	content: "";
+	flex: none;
+	width: 44px;
+	height: 24px;
+	border-radius: 16px;
+	background: #535a70;
+	box-shadow: inset 0 0 0 1px #ffffff22;
+	transition: background 0.3s ease;
+}
+.nebula-theme-switch::after {
+	content: "";
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	margin-left: 3px;
+	border-radius: 50%;
+	background: white;
+	transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+	box-shadow: 0 2px 7px #0005;
+}
+.nebula-theme-switch[aria-checked="true"]::before {
+	background: var(--import-accent, #9cbbfa);
+}
+.nebula-theme-switch[aria-checked="true"]::after {
+	transform: translateX(20px);
+}
+.nebula-theme-switch:focus-visible {
+	outline: 2px solid var(--import-accent, #9cbbfa);
+	outline-offset: 3px;
+}
+html.nebula-import-theme {
+	--theme-bg: var(--import-background) !important;
+	--theme-fg: var(--import-foreground) !important;
+	--theme-secondary-bg: var(--import-surface) !important;
+	--theme-accent: var(--import-accent) !important;
+	--bg: var(--import-background);
+	--fg: var(--import-foreground);
+	--surface: var(--import-surface);
+	--accent: var(--import-accent);
+	--muted: var(--import-muted);
+	--line: color-mix(
+		in srgb,
+		var(--import-accent) 30%,
+		var(--import-background)
+	);
+	color-scheme: dark;
+}
+html.nebula-import-theme body {
+	color: var(--import-foreground);
+}
+html.nebula-import-theme
+	:is(
+		.aliceWMwin,
+		.aliceWMwin .title,
+		.nebula-menubar,
+		footer,
+		.nebula-widgets > *,
+		.nebula-preferences,
+		.nebula-flow-dashboard,
+		.nebula-flow-notes,
+		.nebula-spotlight,
+		.nebula-overview,
+		.nebula-account-center,
+		.nebula-ai,
+		.nebula-music,
+		.ng-mode,
+		.nebula-craft-chrome
+	) {
+	background: var(--import-background) !important;
+	color: var(--import-foreground) !important;
+	border-color: var(--import-accent) !important;
+	transition:
+		background-color 0.35s ease,
+		color 0.35s ease,
+		border-color 0.35s ease;
+}
+html.nebula-import-theme .aliceWMwin:not(.nebula-maximized) {
+	border-radius: var(--import-rounding) !important;
+}
+html.nebula-import-theme
+	:is(
+		.nebula-ai,
+		.nebula-music,
+		.nebula-account-center,
+		.ng-mode,
+		.nebula-preferences
+	)
+	:is(aside, nav, header, section, article, input, textarea, select, button) {
+	background-color: var(--import-surface) !important;
+	color: var(--import-foreground) !important;
+	border-color: color-mix(
+		in srgb,
+		var(--import-accent) 35%,
+		transparent
+	) !important;
+}
+html.nebula-import-theme
+	:is(.nebula-ai, .nebula-music, .nebula-account-center, .ng-mode)
+	:is(h1, h2, h3, a) {
+	color: var(--import-accent) !important;
+}
+html.nebula-import-theme .nebula-music {
+	--nm-bg: var(--import-background);
+	--nm-panel: var(--import-surface);
+	--nm-text: var(--import-foreground);
+	--nm-muted: var(--import-muted);
+	--nm-accent: var(--import-accent);
+}
+html.nebula-import-theme :is(.ng-mode, .nebula-env-flow) {
+	--accent: var(--import-accent);
+	--flow-accent: var(--import-accent);
+}
+html.nebula-import-theme
+	:is(
+		.nm-main,
+		.nm-sidebar,
+		.nm-player,
+		.nm-stage,
+		.nm-hero,
+		.nm-shell,
+		.nm-bottom-player,
+		.nac-list,
+		.nac-editor,
+		.nac-account,
+		.nac-transfer
+	) {
+	background: var(--import-surface) !important;
+	color: var(--import-foreground) !important;
+}
+html.nebula-import-theme body.nebula-owned-app {
+	background: var(--import-background) !important;
+	color: var(--import-foreground) !important;
+}
+html.nebula-import-theme
+	body.nebula-owned-app
+	:is(nav, header, .game, .art, input, select, button, .sidebar) {
+	background: var(--import-surface) !important;
+	color: var(--import-foreground) !important;
+	border-color: var(--import-accent) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+	.nebula-theme-switch::before,
+	.nebula-theme-switch::after,
+	html.nebula-import-theme * {
+		transition: none !important;
+	}
+}
+
+html.nebula-import-theme .ng-mode {
+	background-image: none !important;
+	--accent: var(--import-accent) !important;
+}
+html.nebula-import-theme
+	.ng-mode
+	:is(.ng-scene, .ng-drawer, .ng-nav, .ng-hero) {
+	background: var(--import-background) !important;
+	color: var(--import-foreground) !important;
+}
+
+.nebula-motion-reduced .nebula-theme-switch::before,
+.nebula-motion-reduced .nebula-theme-switch::after,
+html.nebula-import-theme .nebula-motion-reduced * {
+	transition: none !important;
+}
+
+:is(
+	.nebula-ai,
+	.nebula-music,
+	.nebula-account-center,
+	.nebula-menubar,
+	.nebula-widgets > *
+) {
+	transition:
+		background-color 0.35s ease,
+		color 0.35s ease,
+		border-color 0.35s ease;
+}
+html.nebula-import-theme
+	:is(.nebula-ai, .nebula-account-center)
+	:is(p, small, span) {
+	color: var(--import-foreground) !important;
+}

@@ -149,7 +149,7 @@ class OobeView {
 		{
 			elm: (
 				<div class="screen" id="welcome">
-					<h1>Welcome to AnuraOS</h1>
+					<h1>Welcome to NebulaHub</h1>
 					<div id="subtitle">Effortless. Modern. Powerful.</div>
 					<div id="gridContent">
 						<img id="animation" src="assets/oobe/welcome.gif" />
@@ -167,7 +167,7 @@ class OobeView {
 			elm: (
 				<div class="screen" id="features">
 					<h1>Choose your experience</h1>
-					<div id="subtitle">What kind of Anura user are you?</div>
+					<div id="subtitle">What kind of NebulaHub user are you?</div>
 					<label class="matter-checkbox">
 						<input
 							type="checkbox"
@@ -177,7 +177,8 @@ class OobeView {
 					</label>
 					<div class="sub">
 						<span class="material-symbols-outlined">info</span>
-						&nbsp;This allows you to use AnuraOS without an internet connection.
+						&nbsp;This allows you to use NebulaHub without an internet
+						connection.
 					</div>
 					<br></br>
 					<label class="matter-checkbox">
@@ -186,7 +187,7 @@ class OobeView {
 					</label>
 					<div class="sub">
 						<span class="material-symbols-outlined">info</span>
-						&nbsp;This allows you to run Linux applications on AnuraOS.
+						&nbsp;This allows you to run Linux applications on NebulaHub.
 					</div>
 					<br></br>
 					<label class="matter-checkbox">
@@ -268,7 +269,8 @@ class OobeView {
 					<div id="assetsDiv" style="display:none;"></div>
 					<h1>Downloading assets</h1>
 					<div id="subtitle" style="color: white;">
-						For the best experience, AnuraOS needs to download required assets.
+						For the best experience, NebulaHub needs to download required
+						assets.
 					</div>
 					<img src="/assets/oobe/spinner.gif" />
 					<br />
@@ -330,131 +332,68 @@ class OobeView {
 }
 
 async function installx86(tracker = document.getElementById("tracker")) {
-	console.debug("installing x86");
-	await anura.fs.mkdir("/boot");
-	const x86image = anura.settings.get("x86-image");
-	tracker!.innerText = "Downloading x86 kernel";
-	const bzimage = await fetch(anura.config.x86[x86image].bzimage);
-	anura.fs.writeFile(
-		"/boot/bzimage",
-		Filer.Buffer(await bzimage.arrayBuffer()),
-	);
-	tracker!.innerText = "Downloading x86 initrd";
-	const initrd = await fetch(anura.config.x86[x86image].initrd);
-	anura.fs.writeFile(
-		"/boot/initrd.img",
-		Filer.Buffer(await initrd.arrayBuffer()),
-	);
-
-	if (typeof anura.config.x86[x86image].rootfs === "string") {
-		const rootfs = await fetch(anura.config.x86[x86image].rootfs);
-		const blob = await rootfs.blob();
-		//@ts-ignore
-		await anura.x86hdd.loadfile(blob);
-	} else if (anura.config.x86[x86image].rootfs) {
-		// TODO: add batching, this will bottleneck and OOM if the rootfs is too large
-
-		console.debug("fetching");
-		// const files = await Promise.all(
-		//     anura.config.x86[x86image].rootfs.map((part: string) => fetch(part)),
-		// );
-
-		const files: Blob[] = [];
-		let limit = 4;
-		let i = 0;
-		let done = false;
-		let doneSoFar = 0;
-		const doWhenAvail = function () {
-			if (limit === 0) return;
-			limit--;
-			const assigned = i;
-			i++;
-
-			fetch(anura.config.x86[x86image].rootfs[assigned])
-				.then(async (response) => {
-					if (response.status !== 200) {
-						console.error("Status code bad on chunk " + assigned);
-						console.error(anura.config.x86[x86image].rootfs[assigned]);
-						console.error("Finished " + doneSoFar + " chunks before error");
-						anura.notifications.add({
-							title: "bad chunk on x86 download",
-							description: `Chunk ${assigned} gave status code ${response.status}\nClick me to reload`,
-							timeout: 50000,
-							callback: () => {
-								location.reload();
-							},
-						});
-						return;
-					}
-					files[assigned] = await response.blob();
-					limit++;
-					doneSoFar++;
-					tracker!.innerHTML = `Downloading x86 rootfs. Chunk ${doneSoFar}/${anura.config.x86[x86image].rootfs.length} done`;
-					if (i < anura.config.x86[x86image].rootfs.length) {
-						doWhenAvail();
-					}
-					if (doneSoFar === anura.config.x86[x86image].rootfs.length) {
-						done = true;
-					}
-					console.debug(
-						anura.config.x86[x86image].rootfs.length -
-							doneSoFar +
-							" chunks to go",
-					);
-				})
-
-				.catch((e) => {
-					console.error("Error on chunk " + assigned);
-					anura.notifications.add({
-						title: "bad chunk on x86 download",
-						description: `Chunk ${assigned} had a download error ${e}\nClick me to reload`,
-						timeout: 50000,
-						callback: () => {
-							location.reload();
-						},
-					});
-				}); // Peak error handling right there
-		};
-		doWhenAvail();
-		doWhenAvail();
-		doWhenAvail();
-		doWhenAvail();
-		while (!done) {
-			await sleep(200);
-		}
-
-		console.debug("constructing blobs...");
-		tracker!.innerText = "Concatenating and installing x86 rootfs";
-		//@ts-ignore
-		await anura.x86hdd.loadfile(new Blob(files));
+	const report = (message: string) => {
+		if (tracker) tracker.textContent = message;
+	};
+	if (!window.crossOriginIsolated)
+		throw new Error(
+			"Linux requires cross-origin isolation. Check the deployment headers.",
+		);
+	const image = anura.config.x86[anura.settings.get("x86-image")];
+	if (!image)
+		throw new Error("No Linux image is configured for this deployment.");
+	const download = async (url: string) => {
+		const response = await fetch(url);
+		if (!response.ok)
+			throw new Error(
+				`Linux image download failed: HTTP ${response.status} (${url})`,
+			);
+		if (response.headers.get("content-type")?.includes("text/html"))
+			throw new Error(`Linux image endpoint returned HTML: ${url}`);
+		return response;
+	};
+	report("Downloading Linux kernel...");
+	const kernel = await (await download(image.bzimage)).arrayBuffer();
+	report("Downloading Linux initrd...");
+	const initrd = await (await download(image.initrd)).arrayBuffer();
+	const parts: string[] =
+		typeof image.rootfs === "string" ? [image.rootfs] : image.rootfs;
+	if (!parts?.length)
+		throw new Error("The Linux image has no disk chunks configured.");
+	const blobs: Blob[] = [];
+	// Sequential downloads limit temporary buffers and fail promptly on HTTP errors.
+	for (let i = 0; i < parts.length; i++) {
+		report(
+			`Downloading Linux disk ${i + 1}/${parts.length}. This optional image is about 1 GiB.`,
+		);
+		blobs.push(await (await download(parts[i]!)).blob());
 	}
-
-	console.debug("done");
+	report("Installing Linux disk...");
+	await new anura.fs.Shell().promises.mkdirp("/boot");
+	await anura.fs.promises.writeFile("/boot/bzimage", Filer.Buffer(kernel));
+	await anura.fs.promises.writeFile("/boot/initrd.img", Filer.Buffer(initrd));
+	// Upstream's disk store expects a Blob and writes it to browser storage.
+	await anura.x86hdd.loadfile(new Blob(blobs));
+	report("Linux installed. Reload to start the subsystem.");
 }
 
 async function preloadFiles(tracker = document.getElementById("tracker")) {
-	try {
-		const list = await (await fetch("cache-load.json")).json();
-		/*
-		 * The list has a few items that aren't exactly real
-		 * as a result of the developers schizophrenia.
-		 * Because of this, there will be a few errors on the fetch.
-		 * These can safely be ignored, just like the voices in
-		 * the developers head.
-		 */
-		const chunkSize = 10;
-		const promises = [];
-		let i = 0;
-		for (const item in list) {
-			promises.push(fetch(list[item]));
-			if (Number(item) % chunkSize === chunkSize - 1) {
-				await Promise.all(promises);
-			}
-			tracker!.innerText = `Downloading anura system files, chunk ${i}/${list.length}`;
-			i++;
-		}
-		await Promise.all(promises);
-	} catch (e) {
-		console.warn("error durring oobe preload", e);
+	const response = await fetch("/cache-load.json");
+	if (!response.ok)
+		throw new Error(`Offline inventory returned HTTP ${response.status}`);
+	const list: string[] = await response.json();
+	for (let i = 0; i < list.length; i += 8) {
+		await Promise.all(
+			list.slice(i, i + 8).map(async (path) => {
+				const file = await fetch(`/${path.replace(/^\//, "")}`);
+				if (!file.ok)
+					throw new Error(
+						`Offline download failed: ${path} (HTTP ${file.status})`,
+					);
+				await file.arrayBuffer();
+			}),
+		);
+		if (tracker)
+			tracker.textContent = `Saving NebulaHub for offline use: ${Math.min(i + 8, list.length)}/${list.length}`;
 	}
 }

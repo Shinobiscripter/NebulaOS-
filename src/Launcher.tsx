@@ -230,7 +230,7 @@ class Launcher {
 				]}
 			>
 				<div class="topSearchBar">
-					<img src="/icon.png"></img>
+					<img src="/nebula/icon.svg" alt="NebulaHub"></img>
 					<input
 						placeholder="Search your tabs, files, apps, and more..."
 						style="outline: none; color: var(--theme-fg);"
@@ -367,6 +367,7 @@ const LauncherShortcut: Component<
 				class="app-shortcut-image showDialog"
 				style="width: 40px; height: 40px"
 				type="image"
+				alt={this.app.name}
 				src={this.app.icon}
 			/>
 			<div class="app-shortcut-name">{this.app.name}</div>

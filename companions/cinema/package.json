@@ -1,0 +1,17 @@
+{
+ "name": "nebula-cinema-companion",
+ "version": "1.0.0",
+ "private": true,
+ "type": "module",
+ "license": "AGPL-3.0-only",
+ "scripts": {
+  "start": "node server.mjs",
+  "test": "node --test server.test.mjs"
+ },
+ "dependencies": {
+  "webtorrent": "3.0.21"
+ },
+ "engines": {
+  "node": ">=22"
+ }
+}

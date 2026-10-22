@@ -29,3 +29,8 @@ x86_image_wizard/alpine/xfrog.sh
 x86_image_wizard/alpine/xsetrandr.sh
 x86_image_wizard/alpine/anuramouse
 x86_image_wizard/alpine/epoxy-server
+.cache/
+.netlify/
+test-results/
+playwright-report/
+/test-results-*/
